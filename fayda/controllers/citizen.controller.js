@@ -2,7 +2,7 @@ import pool from "../config/pool.js";
 
 const getCitizenByFaydaId = async (req, res) => {
   try {
-    const { faydaId } = req.params;
+    const { faydaId } = req.params || {};
 
     // Validate faydaId
     if (!faydaId) {
