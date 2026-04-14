@@ -6,6 +6,8 @@ export type CorrectionThread = {
   id: string;
   student: string;
   nationalId: string;
+
+  
   level: AcademicLevel | "";
   subject: string;
   description: string;
