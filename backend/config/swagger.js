@@ -10,12 +10,11 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000",
         description: "Development server",
       },
     ],
 
-    // 🔐 Prepare for future auth 
+    // 🔐 Prepare for future auth
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -33,8 +32,8 @@ const options = {
     ],
   },
 
-  // Scan ALL routes 
-  apis: ["./routes/*.js"],
+  // Scan swagger docs files
+  apis: ["./docs/*.swagger.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

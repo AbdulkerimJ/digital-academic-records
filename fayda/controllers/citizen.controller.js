@@ -1,4 +1,5 @@
 import pool from "../config/pool.js";
+import { sendError, sendSuccess } from "../utils/response.js";
 
 const getCitizenByFaydaId = async (req, res) => {
   try {
@@ -6,10 +7,7 @@ const getCitizenByFaydaId = async (req, res) => {
 
     // Validate faydaId
     if (!faydaId) {
-      return res.status(400).json({
-        status: false,
-        message: "Fayda ID is required",
-      });
+      return sendError(res, "Fayda ID is required", 400);
     }
 
     const citizenResult = await pool.query(
@@ -18,23 +16,18 @@ const getCitizenByFaydaId = async (req, res) => {
     );
 
     if (citizenResult.rows.length === 0) {
-      return res.status(404).json({
-        status: false,
-        message: "Citizen not found",
-      });
+      return sendError(res, "Citizen not found", 404);
     }
 
-    res.json({
-      status: true,
-      data: citizenResult.rows[0],
-    });
+    return sendSuccess(
+      res,
+      "Citizen fetched successfully",
+      citizenResult.rows[0],
+    );
   } catch (err) {
     console.error("Error fetching citizen:", err.message);
 
-    res.status(500).json({
-      status: false,
-      message: "Server error",
-    });
+    return sendError(res, "Server error", 500);
   }
 };
 

@@ -31,7 +31,7 @@ export const verifyOtp = async (faydaId, otp) => {
   );
 
   if (result.rows.length === 0) {
-    return { status: false, message: "OTP not found" };
+    return { success: false, message: "OTP not found" };
   }
 
   const record = result.rows[0];
@@ -39,16 +39,16 @@ export const verifyOtp = async (faydaId, otp) => {
   // Check expiry
   if (Date.now() > record.expires_at) {
     await pool.query("DELETE FROM otp_codes WHERE fayda_id = $1", [faydaId]);
-    return { status: false, message: "OTP expired" };
+    return { success: false, message: "OTP expired" };
   }
 
   // Check match
   if (record.otp !== otp) {
-    return { status: false, message: "Invalid OTP" };
+    return { success: false, message: "Invalid OTP" };
   }
 
   // Delete after success (one-time use)
   await pool.query("DELETE FROM otp_codes WHERE fayda_id = $1", [faydaId]);
 
-  return { status: true, message: "OTP verified successfully" };
+  return { success: true, message: "OTP verified successfully" };
 };

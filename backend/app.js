@@ -7,23 +7,19 @@ import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/error.controller.js";
 
 import authRoutes from "./routes/auth.routes.js";
+import getCitizenRoutes from "./routes/citizen.routes.js";
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Digital Academic Records backend is running",
-  });
-});
 
 // swagger-ui setup
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // routes
 app.use("/api/auth", authRoutes);
+app.use("/api/citizens", getCitizenRoutes);
 
 app.use((req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl} on this server!`, 404));

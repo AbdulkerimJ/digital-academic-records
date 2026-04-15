@@ -1,5 +1,6 @@
 import pool from "../config/pool.js";
 import { generateOtp, verifyOtp } from "../services/otp.service.js";
+import { sendError, sendSuccess } from "../utils/response.js";
 
 // ======================
 // SEND OTP CONTROLLER
@@ -9,17 +10,11 @@ export const sendOtp = async (req, res) => {
     const { faydaId } = req.body || {};
 
     if (!faydaId) {
-      return res.status(400).json({
-        status: false,
-        message: "Fayda ID is required",
-      });
+      return sendError(res, "Fayda ID is required", 400);
     }
 
     if (typeof faydaId !== "string") {
-      return res.status(400).json({
-        status: false,
-        message: "Invalid Fayda ID",
-      });
+      return sendError(res, "Invalid Fayda ID", 400);
     }
 
     // Check if citizen exists
@@ -29,25 +24,16 @@ export const sendOtp = async (req, res) => {
     );
 
     if (citizen.rows.length === 0) {
-      return res.status(404).json({
-        status: false,
-        message: "Citizen not found",
-      });
+      return sendError(res, "Citizen not found", 404);
     }
 
     await generateOtp(faydaId);
 
-    return res.json({
-      status: true,
-      message: "OTP sent successfully",
-    });
+    return sendSuccess(res, "OTP sent successfully");
   } catch (error) {
     console.error("Send OTP error:", error.message);
 
-    return res.status(500).json({
-      status: false,
-      message: "Server error",
-    });
+    return sendError(res, "Server error", 500);
   }
 };
 
@@ -64,31 +50,19 @@ export const verifyOtpController = async (req, res) => {
       !otp ||
       typeof otp !== "string"
     ) {
-      return res.status(400).json({
-        status: false,
-        message: "Valid Fayda ID and OTP are required",
-      });
+      return sendError(res, "Valid Fayda ID and OTP are required", 400);
     }
 
     const result = await verifyOtp(faydaId, otp);
 
-    if (!result.valid) {
-      return res.status(401).json({
-        status: false,
-        message: result.message,
-      });
+    if (!result.success) {
+      return sendError(res, result.message, 401);
     }
 
-    return res.json({
-      status: true,
-      message: "OTP verified successfully",
-    });
+    return sendSuccess(res, "OTP verified successfully");
   } catch (error) {
     console.error("Verify OTP error:", error.message);
 
-    return res.status(500).json({
-      status: false,
-      message: "Server error",
-    });
+    return sendError(res, "Server error", 500);
   }
 };
