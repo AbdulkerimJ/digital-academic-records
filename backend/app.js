@@ -18,12 +18,20 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // routes
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "Welcome to the Fayda API",
+  });
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/citizens", getCitizenRoutes);
 
+// unmatched routes
 app.use((req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);
+
 export default app;
