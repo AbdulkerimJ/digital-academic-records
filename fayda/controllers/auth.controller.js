@@ -33,7 +33,11 @@ export const sendOtp = async (req, res) => {
   } catch (error) {
     console.error("Send OTP error:", error.message);
 
-    return sendError(res, "Server error", 500);
+    return sendError(
+      res,
+      error.message || "Server error",
+      error.statusCode || 500,
+    );
   }
 };
 
@@ -56,13 +60,17 @@ export const verifyOtpController = async (req, res) => {
     const result = await verifyOtp(faydaId, otp);
 
     if (!result.success) {
-      return sendError(res, result.message, 401);
+      return sendError(res, result.message || "OTP verification failed", 401);
     }
 
     return sendSuccess(res, "OTP verified successfully");
   } catch (error) {
     console.error("Verify OTP error:", error.message);
 
-    return sendError(res, "Server error", 500);
+    return sendError(
+      res,
+      error.message || "Server error",
+      error.statusCode || 500,
+    );
   }
 };

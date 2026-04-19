@@ -10,7 +10,7 @@ const getCitizenByFaydaId = catchAsync(async (req, res) => {
   }
   
   const citizen = await getCitizen(faydaId);
-  sendSuccess(res, citizen);
+  sendSuccess(res, "Citizen fetched successfully", citizen);
 });
 
 export default getCitizenByFaydaId;

@@ -1,27 +1,70 @@
 import AppError from "../utils/appError.js";
 
-const handleCastErrorDB = (err) => {
-  const message = `Invalid ${err.path}: ${err.value}`;
+// ================= DB ERROR HANDLERS =================
+
+// Invalid input (e.g. wrong UUID, wrong type)
+const handleInvalidInputDB = (err) => {
+  const message = `Invalid input: ${err.detail || err.message}`;
   return new AppError(message, 400);
 };
 
+// Duplicate value (UNIQUE constraint)
 const handleDuplicateFieldsDB = (err) => {
-  const match = err.errorResponse.errmsg.match(/"([^"]+)"/);
-  const message = `Duplicate field value: ${match?.[1]}. Please use another value!`;
+  const field = err.detail?.match(/\((.*?)\)/)?.[1];
+  const message = `Duplicate field value: ${field}. Please use another value!`;
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
-  const message = `Invalid input data: ${errors.join(". ")}.`;
+// Not null violation
+const handleNotNullViolationDB = (err) => {
+  const message = `Missing required field: ${err.column}`;
   return new AppError(message, 400);
 };
+
+// Foreign key violation
+const handleForeignKeyViolationDB = (err) => {
+  const message = `Invalid reference: ${err.detail}`;
+  return new AppError(message, 400);
+};
+
+// ================= JWT =================
 
 const handleJWTError = () =>
   new AppError("Invalid token. Please log in again!", 401);
 
-const handleJWTExpriedError = () =>
+const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
+
+// ================= AXIOS / EXTERNAL API =================
+
+const handleAxiosError = (err) => {
+  // Service unreachable (like ECONNREFUSED)
+  if (err.code === "ECONNREFUSED") {
+    return new AppError(
+      "Fayda service is unavailable. Please try again later.",
+      503,
+    );
+  }
+
+  // Server responded with error (4xx, 5xx)
+  if (err.response) {
+    const message = err.response.data?.message || "Error from external service";
+    return new AppError(message, err.response.status || 500);
+  }
+
+  // Request made but no response (timeout, network issue)
+  if (err.request) {
+    return new AppError(
+      "No response from external service. Please try again later.",
+      504,
+    );
+  }
+
+  // Unknown Axios error
+  return new AppError("External service request failed", 500);
+};
+
+// ================= OTHER =================
 
 const handlePayloadTooLargeError = () =>
   new AppError(
@@ -29,9 +72,11 @@ const handlePayloadTooLargeError = () =>
     413,
   );
 
+// ================= RESPONSE =================
+
 const sendErrorDev = (err, req, res) => {
   res.status(err.statusCode).json({
-    status: err.status,
+    success: false,
     error: err,
     message: err.message,
     stack: err.stack,
@@ -39,21 +84,22 @@ const sendErrorDev = (err, req, res) => {
 };
 
 const sendErrorProd = (err, req, res) => {
-    // Operational or trusted error
-    if (err.isOperational) {
-      res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-      });
-      // Programming or unknown error
-    } else {
-      console.error("ERROR 💥", err);
-      res.status(500).json({
-        status: "error",
-        message: "Something went wrong.",
-      });
-    }
-  };
+  if (err.isOperational) {
+    res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  } else {
+    console.error("ERROR 💥", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+};
+
+// ================= GLOBAL HANDLER =================
 
 const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -65,14 +111,22 @@ const globalErrorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
 
-    if (error.name === "CastError" || error.kind === "ObjectId")
-      error = handleCastErrorDB(error);
-    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (err.name === "ValidationError") error = handleValidationErrorDB(error);
+    // PostgreSQL error codes
+    if (error.code === "22P02") error = handleInvalidInputDB(error);
+    if (error.code === "23505") error = handleDuplicateFieldsDB(error);
+    if (error.code === "23502") error = handleNotNullViolationDB(error);
+    if (error.code === "23503") error = handleForeignKeyViolationDB(error);
 
+    // JWT
     if (error.name === "JsonWebTokenError") error = handleJWTError();
-    if (error.name === "TokenExpiredError") error = handleJWTExpriedError();
+    if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+
+    // Payload
     if (error.type === "entity.too.large") error = handlePayloadTooLargeError();
+
+    // Axios / External API
+    if (error.isAxiosError) error = handleAxiosError(error);
+
     sendErrorProd(error, req, res);
   }
 };

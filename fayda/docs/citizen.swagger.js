@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /api/citizens/{faydaId}:
+ * /fayda/api/citizens/{faydaId}:
  *   get:
  *     summary: Get citizen details by Fayda ID
  *     tags:
@@ -14,9 +14,27 @@
  *         description: Citizen Fayda ID
  *     responses:
  *       200:
- *         description: Citizen record found
+ *         description: Citizen fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Citizen fetched successfully
+ *                 data:
+ *                   type: object
+ *                   additionalProperties: true
+ *       400:
+ *         description: Fayda ID is required
  *       404:
  *         description: Citizen not found
+ *       500:
+ *         description: Server error
  */
 
 export {};

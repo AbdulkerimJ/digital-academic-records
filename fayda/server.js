@@ -11,8 +11,8 @@ const app = express();
 app.use(express.json());
 
 // Routes
-app.use("/api/citizens", citizenRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/fayda/api/citizens", citizenRoutes);
+app.use("/fayda/api/auth", authRoutes);
 
 // Swagger docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -20,10 +20,11 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
-    status: false,
+    success: false,
     message: `Route ${req.originalUrl} not found`,
   });
 });
+
 // Start server
 const PORT = process.env.PORT || 5000;
 

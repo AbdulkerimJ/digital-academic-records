@@ -5,13 +5,13 @@ async function seed() {
 
     // ================= ROLES =================
     await pool.query(`
-      INSERT INTO roles (name)
+      INSERT INTO roles (role_name)
       VALUES 
         ('SUPER_ADMIN'),
         ('INSTITUTION_ADMIN'),
         ('REGISTRAR'),
         ('STAFF')
-      ON CONFLICT (name) DO NOTHING;
+      ON CONFLICT (role_name) DO NOTHING;
     `);
 
     // ================= ACADEMIC LEVELS =================

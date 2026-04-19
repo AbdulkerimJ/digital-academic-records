@@ -15,7 +15,8 @@ export const generateOtp = async (faydaId) => {
     [faydaId, otp, expiresAt],
   );
 
-  console.log(`OTP for ${faydaId}: ${otp}`); // simulate SMS ( Bontu will implement this later )
+  // Simulate sending OTP via SMS (Bontu will implement actual SMS sending later)
+  console.log(`OTP for ${faydaId}: ${otp}`);
 
   return otp;
 };
@@ -29,9 +30,9 @@ export const verifyOtp = async (faydaId, otp) => {
      LIMIT 1`,
     [faydaId],
   );
-
+  
   if (result.rows.length === 0) {
-    return { success: false, message: "OTP not found" };
+    return { success: false, message: "No OTP found for this Fayda ID" };
   }
 
   const record = result.rows[0];

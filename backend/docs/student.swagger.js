@@ -1,10 +1,10 @@
 /**
  * @swagger
- * /fayda/api/auth/send-otp:
+ * /app/api/students/login:
  *   post:
- *     summary: Send OTP to a Fayda ID
+ *     summary: Start login by validating Fayda ID and sending OTP
  *     tags:
- *       - Auth
+ *       - Students
  *     requestBody:
  *       required: true
  *       content:
@@ -34,20 +34,17 @@
  *                   nullable: true
  *                   example: null
  *       400:
- *         description: Fayda ID is required or invalid
+ *         description: faydaId is required
  *       404:
  *         description: Citizen not found
  *       500:
  *         description: Server error
- */
-
-/**
- * @swagger
- * /fayda/api/auth/verify-otp:
+ *
+ * /app/api/students/verify:
  *   post:
- *     summary: Verify OTP for a Fayda ID
+ *     summary: Verify OTP and issue login token
  *     tags:
- *       - Auth
+ *       - Students
  *     requestBody:
  *       required: true
  *       content:
@@ -64,7 +61,7 @@
  *               - otp
  *     responses:
  *       200:
- *         description: OTP verified successfully
+ *         description: Login successful
  *         content:
  *           application/json:
  *             schema:
@@ -75,16 +72,55 @@
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: OTP verified successfully
+ *                   example: Login successful
  *                 data:
- *                   nullable: true
- *                   example: null
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       additionalProperties: true
  *       400:
- *         description: Valid Fayda ID and OTP are required
+ *         description: faydaId and otp are required
  *       401:
- *         description: OTP verification failed
+ *         description: Invalid OTP
+ *       404:
+ *         description: Citizen not found
  *       500:
  *         description: Server error
+ *
+ * /app/api/students/me:
+ *   get:
+ *     summary: Get current authenticated user from token
+ *     tags:
+ *       - Students
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user payload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Current user fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                         national_id:
+ *                           type: string
+ *       401:
+ *         description: Not logged in
  */
 
 export {};

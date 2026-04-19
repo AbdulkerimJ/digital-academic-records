@@ -11,7 +11,18 @@ const getCitizenByFaydaId = async (req, res) => {
     }
 
     const citizenResult = await pool.query(
-      "SELECT * FROM citizen WHERE fayda_id = $1",
+      `SELECT fayda_id AS "faydaId",
+              first_name AS "firstName",
+              father_name AS "fatherName",
+              grand_father_name AS "grandFatherName",
+              phone_number AS "phoneNumber",
+              date_of_birth AS "dateOfBirth",
+              gender,
+              nationality,
+              created_at AS "createdAt",
+              updated_at AS "updatedAt"
+       FROM citizen
+       WHERE fayda_id = $1`,
       [faydaId],
     );
 
@@ -27,7 +38,7 @@ const getCitizenByFaydaId = async (req, res) => {
   } catch (err) {
     console.error("Error fetching citizen:", err.message);
 
-    return sendError(res, "Server error", 500);
+    return sendError(res, err.message || "Server error", err.statusCode || 500);
   }
 };
 

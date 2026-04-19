@@ -10,6 +10,7 @@ const options = {
     },
     servers: [
       {
+        url: "/",
         description: "Development server",
       },
     ],
@@ -22,14 +23,13 @@ const options = {
           scheme: "bearer",
           bearerFormat: "JWT",
         },
+        cookieAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "token",
+        },
       },
     },
-
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
   },
 
   // Scan swagger docs files

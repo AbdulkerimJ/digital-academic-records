@@ -11,7 +11,7 @@ async function migrate() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS roles (
         id SERIAL PRIMARY KEY,
-        name TEXT UNIQUE NOT NULL
+        role_name TEXT UNIQUE NOT NULL
       );
     `);
 
@@ -55,8 +55,14 @@ async function migrate() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS app_user (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+
+        email_otp TEXT,
+        email_otp_expires TIMESTAMP,
+        is_verified BOOLEAN DEFAULT FALSE,
 
         role_id INT NOT NULL,
         institution_id UUID,
@@ -70,7 +76,6 @@ async function migrate() {
           ON DELETE SET NULL
       );
     `);
-
     // ===================== ACADEMIC LEVELS =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS academic_levels (
