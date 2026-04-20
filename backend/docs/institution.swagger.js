@@ -17,6 +17,9 @@
  *             properties:
  *               name:
  *                 type: string
+ *               code:
+ *                 type: string
+ *                 example: MOE
  *               type:
  *                 type: string
  *                 enum:
@@ -31,12 +34,13 @@
  *                 default: true
  *             required:
  *               - name
+ *               - code
  *               - type
  *     responses:
  *       201:
  *         description: Institution created successfully
  *       400:
- *         description: Validation failed or duplicate institution name
+ *         description: Validation failed or duplicate institution name/code
  *       401:
  *         description: Not logged in
  *       403:

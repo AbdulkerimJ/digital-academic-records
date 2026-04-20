@@ -3,8 +3,8 @@ import AppError from "../utils/appError.js";
 // ================= DB ERROR HANDLERS =================
 
 // Invalid input (e.g. wrong UUID, wrong type)
-const handleInvalidInputDB = (err) => {
-  const message = `Invalid input: ${err.detail || err.message}`;
+const handleInvalidInputDB = () => {
+  let message = "Invalid input format. Please check your data.";
   return new AppError(message, 400);
 };
 
@@ -23,7 +23,8 @@ const handleNotNullViolationDB = (err) => {
 
 // Foreign key violation
 const handleForeignKeyViolationDB = (err) => {
-  const message = `Invalid reference: ${err.detail}`;
+  let message = "Invalid reference to related data";
+
   return new AppError(message, 400);
 };
 

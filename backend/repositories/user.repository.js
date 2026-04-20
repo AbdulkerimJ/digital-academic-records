@@ -1,5 +1,17 @@
 import pool from "../config/pool.js";
 
+export const getRoleById = async (roleId) => {
+  const result = await pool.query(
+    `SELECT 1
+     FROM roles
+     WHERE id = $1
+     LIMIT 1`,
+    [roleId],
+  );
+
+  return result.rowCount > 0;
+};
+
 export const findUserByEmail = async (email) => {
   const result = await pool.query(
     `SELECT id,
@@ -76,7 +88,7 @@ export const createUserRecord = async ({
   email,
   passwordHash,
   roleId,
-  institutionId = null,
+  institutionId,
   emailOtp,
   emailOtpExpires,
 }) => {
@@ -155,7 +167,6 @@ export const verifyUserEmailById = async (id) => {
                role_id AS "roleId",
                institution_id AS "institutionId",
                is_verified AS "isVerified",
-               created_at AS "createdAt",
                updated_at AS "updatedAt"`,
     [id],
   );

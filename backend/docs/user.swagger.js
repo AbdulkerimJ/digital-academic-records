@@ -33,11 +33,12 @@
  *               - email
  *               - password
  *               - roleId
+ *               - institutionId
  *     responses:
  *       201:
  *         description: User created successfully
  *       400:
- *         description: Validation failed or duplicate email
+ *         description: Validation failed, invalid role/institution, or duplicate email
  *       500:
  *         description: Server error
  *

@@ -15,7 +15,8 @@ const getCookieOptions = () => {
 };
 
 export const createAndSendStudentToken = (student, res) => {
-  const token = signToken({ id: student.id, nationalId: student.nationalId });
+  const { id, nationalId, firstName, lastName } = student;
+  const token = signToken({ id, nationalId });
 
   res.cookie("token", token, getCookieOptions());
 
@@ -24,20 +25,21 @@ export const createAndSendStudentToken = (student, res) => {
     message: "Login successful",
     data: {
       user: {
-        id: student.id,
-        firstName: student.firstName,
-        lastName: student.lastName,
-        nationalId: student.nationalId,
+        id,
+        firstName,
+        lastName,
+        nationalId,
       },
     },
   });
 };
 
 export const createAndSendUserToken = (user, res) => {
+  const { id, email, firstName, lastName, roleName, institutionId } = user;
   const token = signToken({
-    id: user.id,
-    roleName: user.roleName,
-    email: user.email,
+    id,
+    roleName,
+    email,
   });
 
   res.cookie("token", token, getCookieOptions());
@@ -47,12 +49,12 @@ export const createAndSendUserToken = (user, res) => {
     message: "Login successful",
     data: {
       user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        roleName: user.roleName,
-        institutionId: user.institutionId,
+        id,
+        firstName,
+        lastName,
+        email,
+        roleName,
+        institutionId,
       },
     },
   });

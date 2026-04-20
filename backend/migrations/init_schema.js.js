@@ -20,6 +20,7 @@ async function migrate() {
       CREATE TABLE IF NOT EXISTS institution (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
+        code TEXT UNIQUE NOT NULL,
 
         type TEXT NOT NULL CHECK (
           type IN (
@@ -65,7 +66,7 @@ async function migrate() {
         is_verified BOOLEAN DEFAULT FALSE,
 
         role_id INT NOT NULL,
-        institution_id UUID,
+        institution_id UUID NOT NULL,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,7 +74,7 @@ async function migrate() {
         FOREIGN KEY (role_id) REFERENCES roles(id),
         FOREIGN KEY (institution_id)
           REFERENCES institution(id)
-          ON DELETE SET NULL
+          ON DELETE RESTRICT
       );
     `);
     // ===================== ACADEMIC LEVELS =====================

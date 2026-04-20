@@ -7,9 +7,11 @@ import {
   createUserRecord,
   findUserByEmail,
   findUserByEmailWithRole,
+  getRoleById,
   verifyUserEmailById,
 } from "../repositories/user.repository.js";
 import generateOtp from "../utils/generateOtp.js";
+import { comparePassword, hashPassword } from "../utils/password.js";
 
 export const create = catchAsync(async (req, res) => {
   const { firstName, lastName, email, password, roleId, institutionId } =
@@ -22,10 +24,13 @@ export const create = catchAsync(async (req, res) => {
     !password ||
     roleId === undefined ||
     roleId === null ||
-    roleId === ""
+    roleId === "" ||
+    institutionId === undefined ||
+    institutionId === null ||
+    institutionId === ""
   ) {
     throw new AppError(
-      "firstName, lastName, email, password and roleId are required",
+      "firstName, lastName, email, password, roleId and institutionId are required",
       400,
     );
   }
@@ -35,6 +40,11 @@ export const create = catchAsync(async (req, res) => {
 
   if (!Number.isInteger(numericRoleId) || numericRoleId <= 0) {
     throw new AppError("roleId must be a positive integer", 400);
+  }
+
+  const isRoleExists = await getRoleById(numericRoleId);
+  if (!isRoleExists) {
+    throw new AppError("role does not exist", 400);
   }
 
   if (password.length < 8) {
@@ -48,14 +58,14 @@ export const create = catchAsync(async (req, res) => {
 
   const otp = generateOtp();
   const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-  const passwordHash = await bcrypt.hash(password, 12);
+  const passwordHash = await hashPassword(password);
   const user = await createUserRecord({
     firstName: firstName.trim(),
     lastName: lastName.trim(),
     email: normalizedEmail,
     passwordHash,
     roleId: numericRoleId,
-    institutionId: institutionId || null,
+    institutionId,
     emailOtp: otp,
     emailOtpExpires: otpExpiresAt,
   });
@@ -111,7 +121,7 @@ export const verifyEmail = catchAsync(async (req, res) => {
     throw new AppError("Invalid OTP", 400);
   }
 
-  if (new Date(user.emailOtpExpires).getTime() < Date.now()) {
+  if (user.emailOtpExpires < new Date()) {
     throw new AppError("OTP has expired", 400);
   }
 
@@ -136,9 +146,9 @@ export const login = catchAsync(async (req, res) => {
     throw new AppError("Invalid email or password", 401);
   }
 
-  const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+  const isMatch = await comparePassword(password, user.passwordHash);
 
-  if (!passwordMatch) {
+  if (!isMatch) {
     throw new AppError("Invalid email or password", 401);
   }
 

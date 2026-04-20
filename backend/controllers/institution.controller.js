@@ -3,6 +3,7 @@ import AppError from "../utils/appError.js";
 import { sendSuccess } from "../utils/response.js";
 import {
   createInstitutionRecord,
+  findInstitutionByCode,
   findInstitutionByName,
 } from "../repositories/institution.repository.js";
 
@@ -29,17 +30,22 @@ const parseBoolean = (value) => {
 };
 
 export const createInstitution = catchAsync(async (req, res) => {
-  const { name, type, isActive } = req.body || {};
+  const { name, code, type, isActive } = req.body || {};
 
-  if (!name || !type) {
-    throw new AppError("name and type are required", 400);
+  if (!name || !code || !type) {
+    throw new AppError("name, code and type are required", 400);
   }
 
   const normalizedName = String(name).trim();
+  const normalizedCode = String(code).trim().toUpperCase();
   const normalizedType = String(type).trim().toUpperCase();
 
   if (!normalizedName) {
     throw new AppError("name is required", 400);
+  }
+
+  if (!normalizedCode) {
+    throw new AppError("code is required", 400);
   }
 
   if (!INSTITUTION_TYPES.has(normalizedType)) {
@@ -61,8 +67,15 @@ export const createInstitution = catchAsync(async (req, res) => {
     throw new AppError("Institution already exists with this name", 400);
   }
 
+  const existingInstitutionByCode = await findInstitutionByCode(normalizedCode);
+
+  if (existingInstitutionByCode) {
+    throw new AppError("Institution already exists with this code", 400);
+  }
+
   const institution = await createInstitutionRecord({
     name: normalizedName,
+    code: normalizedCode,
     type: normalizedType,
     isActive: parsedIsActive,
   });

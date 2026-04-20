@@ -26,11 +26,11 @@ async function seed() {
 
     // ================= INSTITUTION =================
     await pool.query(`
-      INSERT INTO institution (name, type)
+      INSERT INTO institution (name, code, type)
       VALUES 
-        ('Ministry of Education', 'GOVERNMENT_BODY'),
-        ('Regional Exam Board', 'EXAM_BOARD')
-      ON CONFLICT DO NOTHING;
+        ('Ministry of Education', 'MOE', 'GOVERNMENT_BODY'),
+        ('Regional Exam Board', 'REB', 'EXAM_BOARD')
+      ON CONFLICT (code) DO NOTHING;
     `);
 
     console.log("Seeding completed!");
