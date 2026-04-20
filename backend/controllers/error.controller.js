@@ -23,7 +23,15 @@ const handleNotNullViolationDB = (err) => {
 
 // Foreign key violation
 const handleForeignKeyViolationDB = (err) => {
-  let message = "Invalid reference to related data";
+  let message = "Invalid reference to related data.";
+
+  if (err.constraint === "app_user_role_id_fkey") {
+    message = "Invalid roleId. Referenced role does not exist.";
+  }
+
+  if (err.constraint === "app_user_institution_id_fkey") {
+    message = "Invalid institutionId. Referenced institution does not exist.";
+  }
 
   return new AppError(message, 400);
 };

@@ -1,4 +1,9 @@
 import swaggerJSDoc from "swagger-jsdoc";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const options = {
   definition: {
@@ -15,7 +20,7 @@ const options = {
       },
     ],
 
-    // 🔐 Prepare for future auth
+    // Prepare for future auth
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -33,7 +38,7 @@ const options = {
   },
 
   // Scan swagger docs files
-  apis: ["./docs/*.swagger.js"],
+  apis: [path.join(__dirname, "../docs/*.swagger.js")],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -15,7 +15,7 @@ app.use("/fayda/api/citizens", citizenRoutes);
 app.use("/fayda/api/auth", authRoutes);
 
 // Swagger docs
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/fayda/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 404 Handler
 app.use((req, res) => {
@@ -30,5 +30,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Fayda Server running on port ${PORT}`);
-  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`Swagger docs available at http://localhost:${PORT}/fayda/api-docs`);
 });

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   create,
+  changePassword,
   login,
   verifyEmail,
   getMe,
@@ -13,5 +14,6 @@ router.post("/login", login);
 router.post("/", create);
 router.post("/verify-email", verifyEmail);
 router.get("/me", protectUser, getMe);
+router.patch("/change-password", protectUser, changePassword);
 
 export default router;

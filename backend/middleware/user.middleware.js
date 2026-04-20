@@ -29,6 +29,19 @@ export const protectUser = catchAsync(async (req, res, next) => {
     );
   }
 
+  // Check if user changed password after the token was issued
+  if (currentUser.passwordChangedAt && decoded.iat) {
+    const passwordChangedTimestamp =
+      new Date(currentUser.passwordChangedAt).getTime() / 1000;
+
+    if (decoded.iat < passwordChangedTimestamp) {
+      throw new AppError(
+        "User recently changed password. Please log in again.",
+        401,
+      );
+    }
+  }
+
   req.user = {
     id: currentUser.id,
     firstName: currentUser.firstName,
@@ -37,6 +50,7 @@ export const protectUser = catchAsync(async (req, res, next) => {
     role: currentUser.roleName,
     roleId: currentUser.roleId,
     institutionId: currentUser.institutionId,
+    passwordChangedAt: currentUser.passwordChangedAt,
   };
 
   next();

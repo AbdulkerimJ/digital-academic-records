@@ -34,7 +34,11 @@ export const createAndSendStudentToken = (student, res) => {
   });
 };
 
-export const createAndSendUserToken = (user, res) => {
+export const createAndSendUserToken = (
+  user,
+  res,
+  message = "Login successful",
+) => {
   const { id, email, firstName, lastName, roleName, institutionId } = user;
   const token = signToken({
     id,
@@ -46,7 +50,7 @@ export const createAndSendUserToken = (user, res) => {
 
   res.status(200).json({
     success: true,
-    message: "Login successful",
+    message,
     data: {
       user: {
         id,

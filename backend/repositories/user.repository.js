@@ -24,6 +24,7 @@ export const findUserByEmail = async (email) => {
             email_otp AS "emailOtp",
             email_otp_expires AS "emailOtpExpires",
             is_verified AS "isVerified",
+              password_changed_at AS "passwordChangedAt",
             created_at AS "createdAt",
             updated_at AS "updatedAt"
      FROM app_user
@@ -48,6 +49,7 @@ export const findUserByEmailWithRole = async (email) => {
             app_user.is_verified AS "isVerified",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
+             app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
@@ -72,6 +74,7 @@ export const findUserByIdWithRole = async (id) => {
             app_user.is_verified AS "isVerified",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
+             app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
@@ -134,6 +137,10 @@ export const updateUserById = async ({
          last_name = COALESCE($3, last_name),
          email = COALESCE($4, email),
          password_hash = COALESCE($5, password_hash),
+         password_changed_at = CASE
+           WHEN $5 IS NOT NULL THEN CURRENT_TIMESTAMP
+           ELSE password_changed_at
+         END,
          role_id = COALESCE($6, role_id),
          institution_id = COALESCE($7, institution_id),
          updated_at = CURRENT_TIMESTAMP

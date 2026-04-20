@@ -64,6 +64,7 @@ async function migrate() {
         email_otp TEXT,
         email_otp_expires TIMESTAMP,
         is_verified BOOLEAN DEFAULT FALSE,
+        password_changed_at TIMESTAMP,
 
         role_id INT NOT NULL,
         institution_id UUID NOT NULL,

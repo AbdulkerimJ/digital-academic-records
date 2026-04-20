@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { sendSuccess } from "../utils/response.js";
@@ -7,7 +6,9 @@ import {
   createUserRecord,
   findUserByEmail,
   findUserByEmailWithRole,
+  findUserByIdWithRole,
   getRoleById,
+  updateUserById,
   verifyUserEmailById,
 } from "../repositories/user.repository.js";
 import generateOtp from "../utils/generateOtp.js";
@@ -160,3 +161,56 @@ export const getMe = (req, res) => {
     user: req.user,
   });
 };
+
+export const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+
+  if (!currentPassword || !newPassword) {
+    throw new AppError("Current password and new password are required", 400);
+  }
+
+  if (newPassword.length < 8) {
+    throw new AppError("New password must be at least 8 characters long", 400);
+  }
+
+  if (currentPassword === newPassword) {
+    throw new AppError(
+      "New password must be different from current password",
+      400,
+    );
+  }
+
+  const currentUser = await findUserByIdWithRole(req.user.id);
+
+  if (!currentUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  const isCurrentPasswordValid = await comparePassword(
+    currentPassword,
+    currentUser.passwordHash,
+  );
+
+  if (!isCurrentPasswordValid) {
+    throw new AppError("Current password is incorrect", 401);
+  }
+
+  const newPasswordHash = await hashPassword(newPassword);
+
+  await updateUserById({
+    id: req.user.id,
+    passwordHash: newPasswordHash,
+  });
+
+  const refreshedUser = await findUserByIdWithRole(req.user.id);
+
+  if (!refreshedUser) {
+    throw new AppError("User not found after password change", 404);
+  }
+
+  return createAndSendUserToken(
+    refreshedUser,
+    res,
+    "Password changed successfully.",
+  );
+});
