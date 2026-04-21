@@ -1,6 +1,6 @@
 import express from "express";
-import { createInstitution } from "../controllers/institution.controller.js";
-import { protectUser, restrictTo } from "../middleware/user.middleware.js";
+import { createInstitution } from "./institution.controller.js";
+import { protectUser, restrictTo } from "../user/user.middleware.js";
 
 const router = express.Router();
 

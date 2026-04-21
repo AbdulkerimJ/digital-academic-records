@@ -1,10 +1,6 @@
 import express from "express";
-import {
-  login,
-  getMe,
-  verifyLogin,
-} from "../controllers/student.controller.js";
-import { protectStudent } from "../middleware/student.middleware.js";
+import { login, getMe, verifyLogin } from "./student.controller.js";
+import { protectStudent } from "./student.middleware.js";
 
 const router = express.Router();
 

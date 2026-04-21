@@ -1,4 +1,4 @@
-import pool from "../config/pool.js";
+import pool from "../../common/config/pool.js";
 
 export const getRoleById = async (roleId) => {
   const result = await pool.query(

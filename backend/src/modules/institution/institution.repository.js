@@ -1,4 +1,4 @@
-import pool from "../config/pool.js";
+import pool from "../../common/config/pool.js";
 
 export const findInstitutionByName = async (name) => {
   const result = await pool.query(

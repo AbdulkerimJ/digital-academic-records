@@ -1,4 +1,4 @@
-import { authClient, citizenClient } from "../config/faydaAxios.js";
+import { authClient, citizenClient } from "../../common/config/faydaAxios.js";
 
 export const getCitizen = async (faydaId) => {
   const res = await citizenClient.get(`/${faydaId}`);

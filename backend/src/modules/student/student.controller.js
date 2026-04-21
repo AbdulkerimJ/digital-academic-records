@@ -1,12 +1,12 @@
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
-import { sendSuccess } from "../utils/response.js";
-import { createAndSendStudentToken } from "../utils/createAndSendToken.js";
-import { getCitizen, sendOtp, verifyOtp } from "../services/fayda.client.js";
+import catchAsync from "../../common/utils/catchAsync.js";
+import AppError from "../../common/utils/appError.js";
+import { sendSuccess } from "../../common/utils/response.js";
+import { createAndSendStudentToken } from "../../common/utils/createAndSendToken.js";
+import { getCitizen, sendOtp, verifyOtp } from "../citizen/fayda.client.js";
 import {
   createStudentFromCitizen,
   findStudentByNationalId,
-} from "../repositories/student.repository.js";
+} from "./student.repository.js";
 
 export const login = catchAsync(async (req, res) => {
   const { faydaId } = req.body || {};

@@ -1,4 +1,4 @@
-import pool from "../config/pool.js";
+import pool from "../src/common/config/pool.js";
 
 async function migrate() {
   try {

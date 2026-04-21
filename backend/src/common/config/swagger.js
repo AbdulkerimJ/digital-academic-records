@@ -38,7 +38,7 @@ const options = {
   },
 
   // Scan swagger docs files
-  apis: [path.join(__dirname, "../docs/*.swagger.js")],
+  apis: [path.join(__dirname, "../../docs/*.swagger.js")],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

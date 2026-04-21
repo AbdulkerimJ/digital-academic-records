@@ -1,5 +1,5 @@
 import express from "express";
-import getCitizenByFaydaId from "../controllers/citizen.controller.js";
+import getCitizenByFaydaId from "./citizen.controller.js";
 const router = express.Router();
 
 router.get("/:faydaId", getCitizenByFaydaId);

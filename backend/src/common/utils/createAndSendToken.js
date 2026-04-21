@@ -14,6 +14,13 @@ const getCookieOptions = () => {
   };
 };
 
+export const clearUserAuthCookie = (res) => {
+  res.clearCookie("token", {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  });
+};
+
 export const createAndSendStudentToken = (student, res) => {
   const { id, nationalId, firstName, lastName } = student;
   const token = signToken({ id, nationalId });

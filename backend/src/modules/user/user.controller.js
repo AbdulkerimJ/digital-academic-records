@@ -1,7 +1,10 @@
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
-import { sendSuccess } from "../utils/response.js";
-import { createAndSendUserToken } from "../utils/createAndSendToken.js";
+import catchAsync from "../../common/utils/catchAsync.js";
+import AppError from "../../common/utils/appError.js";
+import { sendSuccess } from "../../common/utils/response.js";
+import {
+  clearUserAuthCookie,
+  createAndSendUserToken,
+} from "../../common/utils/createAndSendToken.js";
 import {
   createUserRecord,
   findUserByEmail,
@@ -10,9 +13,9 @@ import {
   getRoleById,
   updateUserById,
   verifyUserEmailById,
-} from "../repositories/user.repository.js";
-import generateOtp from "../utils/generateOtp.js";
-import { comparePassword, hashPassword } from "../utils/password.js";
+} from "./user.repository.js";
+import generateOtp from "../../common/utils/generateOtp.js";
+import { comparePassword, hashPassword } from "../../common/utils/password.js";
 
 export const create = catchAsync(async (req, res) => {
   const { firstName, lastName, email, password, roleId, institutionId } =
@@ -155,6 +158,12 @@ export const login = catchAsync(async (req, res) => {
 
   return createAndSendUserToken(user, res);
 });
+
+export const logout = (req, res) => {
+  clearUserAuthCookie(res);
+
+  return sendSuccess(res, "Logged out successfully");
+};
 
 export const getMe = (req, res) => {
   return sendSuccess(res, "Current user fetched successfully", {

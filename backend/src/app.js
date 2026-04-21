@@ -3,14 +3,14 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 
-import swaggerSpec from "./config/swagger.js";
-import AppError from "./utils/appError.js";
-import globalErrorHandler from "./controllers/error.controller.js";
+import swaggerSpec from "./common/config/swagger.js";
+import AppError from "./common/utils/appError.js";
+import globalErrorHandler from "./common/controllers/error.controller.js";
 
-import studentRoutes from "./routes/student.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import getCitizenRoutes from "./routes/citizen.routes.js";
-import institutionRoutes from "./routes/institution.routes.js";
+import studentRoutes from "./modules/student/student.routes.js";
+import userRoutes from "./modules/user/user.routes.js";
+import getCitizenRoutes from "./modules/citizen/citizen.routes.js";
+import institutionRoutes from "./modules/institution/institution.routes.js";
 
 const app = express();
 

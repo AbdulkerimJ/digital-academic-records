@@ -1,11 +1,11 @@
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
-import { sendSuccess } from "../utils/response.js";
+import catchAsync from "../../common/utils/catchAsync.js";
+import AppError from "../../common/utils/appError.js";
+import { sendSuccess } from "../../common/utils/response.js";
 import {
   createInstitutionRecord,
   findInstitutionByCode,
   findInstitutionByName,
-} from "../repositories/institution.repository.js";
+} from "./institution.repository.js";
 
 const INSTITUTION_TYPES = new Set([
   "GOVERNMENT_BODY",

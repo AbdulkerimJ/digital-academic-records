@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import AppError from "../utils/appError.js";
-import catchAsync from "../utils/catchAsync.js";
-import getTokenFromRequest from "../utils/getTokenFromRequest.js";
-import { findUserByIdWithRole } from "../repositories/user.repository.js";
+import AppError from "../../common/utils/appError.js";
+import catchAsync from "../../common/utils/catchAsync.js";
+import getTokenFromRequest from "../../common/utils/getTokenFromRequest.js";
+import { findUserByIdWithRole } from "./user.repository.js";
 
 export const protectUser = catchAsync(async (req, res, next) => {
   const token = getTokenFromRequest(req);

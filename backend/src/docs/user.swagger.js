@@ -300,6 +300,42 @@
  *                   type: string
  *                   example: Something went wrong.
  *
+ * /app/api/users/logout:
+ *   post:
+ *     summary: Log out current user by clearing auth cookie
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
+ *                 data:
+ *                   nullable: true
+ *                   example: null
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong.
+ *
  * /app/api/users/me:
  *   get:
  *     summary: Get current authenticated user from token
