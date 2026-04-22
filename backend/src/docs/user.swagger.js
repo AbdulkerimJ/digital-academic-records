@@ -1,10 +1,26 @@
 /**
  * @swagger
  * /app/api/users:
- *   post:
- *     summary: Create an application user and send email verification OTP
+ *   get:
+ *     summary: List all application users
  *     tags:
  *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users fetched successfully
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *
+ *   post:
+ *     summary: Invite an application user and send activation link
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -19,9 +35,6 @@
  *               email:
  *                 type: string
  *                 format: email
- *               password:
- *                 type: string
- *                 minLength: 8
  *               roleId:
  *                 type: integer
  *               institutionId:
@@ -31,12 +44,11 @@
  *               - firstName
  *               - lastName
  *               - email
- *               - password
  *               - roleId
  *               - institutionId
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: User invited successfully
  *         content:
  *           application/json:
  *             schema:
@@ -47,7 +59,7 @@
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: User created successfully. Verification OTP sent to email.
+ *                   example: User invited successfully. Invitation link sent to email.
  *                 data:
  *                   type: object
  *                   properties:
@@ -69,8 +81,11 @@
  *                         institutionId:
  *                           type: string
  *                           format: uuid
- *                         isVerified:
+ *                         isActive:
  *                           type: boolean
+ *                         invitationExpires:
+ *                           type: string
+ *                           format: date-time
  *                         createdAt:
  *                           type: string
  *                           format: date-time
@@ -90,6 +105,10 @@
  *                 message:
  *                   type: string
  *                   example: "Duplicate field value: email. Please use another value!"
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
  *       500:
  *         description: Server error
  *         content:
@@ -104,9 +123,9 @@
  *                   type: string
  *                   example: Something went wrong.
  *
- * /app/api/users/verify-email:
+ * /app/api/users/activate-invite:
  *   post:
- *     summary: Verify user email using a 6-digit OTP
+ *     summary: Activate invited account by token and set password
  *     tags:
  *       - Users
  *     requestBody:
@@ -116,18 +135,17 @@
  *           schema:
  *             type: object
  *             properties:
- *               email:
+ *               token:
  *                 type: string
- *                 format: email
- *               otp:
+ *               password:
  *                 type: string
- *                 example: "123456"
+ *                 minLength: 8
  *             required:
- *               - email
- *               - otp
+ *               - token
+ *               - password
  *     responses:
  *       200:
- *         description: Email verified successfully
+ *         description: Account activated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -138,7 +156,7 @@
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Email verified successfully
+ *                   example: Account activated successfully
  *                 data:
  *                   type: object
  *                   properties:
@@ -160,13 +178,13 @@
  *                         institutionId:
  *                           type: string
  *                           format: uuid
- *                         isVerified:
+ *                         isActive:
  *                           type: boolean
  *                         updatedAt:
  *                           type: string
  *                           format: date-time
  *       400:
- *         description: Invalid or expired OTP
+ *         description: Invalid/expired token or weak password
  *         content:
  *           application/json:
  *             schema:
@@ -177,20 +195,7 @@
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: Invalid OTP
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: User not found
+ *                   example: Invitation link has expired
  *       500:
  *         description: Server error
  *         content:
@@ -275,6 +280,8 @@
  *                   example: email and password are required
  *       401:
  *         description: Invalid email or password
+ *       403:
+ *         description: Account is not active
  *         content:
  *           application/json:
  *             schema:
@@ -365,6 +372,104 @@
  *                       additionalProperties: true
  *       401:
  *         description: Not logged in
+
+ * /app/api/users/{userId}/resend-invite:
+ *   post:
+ *     summary: Resend activation invite for an inactive user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Invitation resent successfully
+ *       400:
+ *         description: User is active or request invalid
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+
+ * /app/api/users/{userId}/revoke-invite:
+ *   patch:
+ *     summary: Revoke activation invite for an inactive user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Invitation revoked successfully
+ *       400:
+ *         description: User is active or request invalid
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *
+ * /app/api/users/{userId}:
+ *   patch:
+ *     summary: Update an application user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *   delete:
+ *     summary: Delete an application user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
  *
  * /app/api/users/change-password:
  *   patch:

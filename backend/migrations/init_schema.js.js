@@ -55,29 +55,40 @@ async function migrate() {
     // ===================== USER =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS app_user (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-        email_otp TEXT,
-        email_otp_expires TIMESTAMP,
-        is_verified BOOLEAN DEFAULT FALSE,
-        password_changed_at TIMESTAMP,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
 
-        role_id INT NOT NULL,
-        institution_id UUID NOT NULL,
+    -- ACCOUNT LIFECYCLE
+    is_active BOOLEAN DEFAULT FALSE,
 
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- INVITE FLOW (admin → user activation)
+    invitation_token TEXT,
+    invitation_expires TIMESTAMP,
 
-        FOREIGN KEY (role_id) REFERENCES roles(id),
-        FOREIGN KEY (institution_id)
-          REFERENCES institution(id)
-          ON DELETE RESTRICT
-      );
+    -- PASSWORD RESET FLOW
+    reset_token TEXT,
+    reset_expires TIMESTAMP,
+
+    -- SECURITY
+    password_changed_at TIMESTAMP,
+
+    role_id INT NOT NULL,
+    institution_id UUID NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (institution_id)
+        REFERENCES institution(id)
+        ON DELETE RESTRICT
+);
     `);
+
     // ===================== ACADEMIC LEVELS =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS academic_levels (

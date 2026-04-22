@@ -29,6 +29,10 @@ export const protectUser = catchAsync(async (req, res, next) => {
     );
   }
 
+  if (!currentUser.isActive) {
+    throw new AppError("Account is not active", 403);
+  }
+
   // Check if user changed password after the token was issued
   if (currentUser.passwordChangedAt && decoded.iat) {
     const passwordChangedTimestamp =

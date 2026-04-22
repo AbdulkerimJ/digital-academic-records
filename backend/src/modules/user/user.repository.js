@@ -19,12 +19,14 @@ export const findUserByEmail = async (email) => {
             last_name AS "lastName",
             email,
             password_hash AS "passwordHash",
+            is_active AS "isActive",
+            invitation_token AS "invitationToken",
+            invitation_expires AS "invitationExpires",
+            reset_token AS "resetToken",
+            reset_expires AS "resetExpires",
             role_id AS "roleId",
             institution_id AS "institutionId",
-            email_otp AS "emailOtp",
-            email_otp_expires AS "emailOtpExpires",
-            is_verified AS "isVerified",
-              password_changed_at AS "passwordChangedAt",
+            password_changed_at AS "passwordChangedAt",
             created_at AS "createdAt",
             updated_at AS "updatedAt"
      FROM app_user
@@ -42,14 +44,16 @@ export const findUserByEmailWithRole = async (email) => {
             app_user.last_name AS "lastName",
             app_user.email,
             app_user.password_hash AS "passwordHash",
+            app_user.is_active AS "isActive",
+            app_user.invitation_token AS "invitationToken",
+            app_user.invitation_expires AS "invitationExpires",
+            app_user.reset_token AS "resetToken",
+            app_user.reset_expires AS "resetExpires",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
-            app_user.email_otp AS "emailOtp",
-            app_user.email_otp_expires AS "emailOtpExpires",
-            app_user.is_verified AS "isVerified",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
-             app_user.password_changed_at AS "passwordChangedAt",
+            app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
@@ -67,14 +71,16 @@ export const findUserByIdWithRole = async (id) => {
             app_user.last_name AS "lastName",
             app_user.email,
             app_user.password_hash AS "passwordHash",
+            app_user.is_active AS "isActive",
+            app_user.invitation_token AS "invitationToken",
+            app_user.invitation_expires AS "invitationExpires",
+            app_user.reset_token AS "resetToken",
+            app_user.reset_expires AS "resetExpires",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
-            app_user.email_otp AS "emailOtp",
-            app_user.email_otp_expires AS "emailOtpExpires",
-            app_user.is_verified AS "isVerified",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
-             app_user.password_changed_at AS "passwordChangedAt",
+            app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
@@ -85,41 +91,158 @@ export const findUserByIdWithRole = async (id) => {
   return result.rows[0] || null;
 };
 
+export const findUsersWithRole = async () => {
+  const result = await pool.query(
+    `SELECT app_user.id,
+            app_user.first_name AS "firstName",
+            app_user.last_name AS "lastName",
+            app_user.email,
+            app_user.is_active AS "isActive",
+            app_user.invitation_token AS "invitationToken",
+            app_user.invitation_expires AS "invitationExpires",
+            app_user.reset_token AS "resetToken",
+            app_user.reset_expires AS "resetExpires",
+            app_user.role_id AS "roleId",
+            app_user.institution_id AS "institutionId",
+            app_user.created_at AS "createdAt",
+            app_user.updated_at AS "updatedAt",
+            app_user.password_changed_at AS "passwordChangedAt",
+            roles.role_name AS "roleName"
+     FROM app_user
+     INNER JOIN roles ON roles.id = app_user.role_id
+     ORDER BY app_user.created_at DESC`,
+  );
+
+  return result.rows;
+};
+
 export const createUserRecord = async ({
   firstName,
   lastName,
   email,
-  passwordHash,
   roleId,
   institutionId,
-  emailOtp,
-  emailOtpExpires,
+  invitationToken,
+  invitationExpires,
 }) => {
   const result = await pool.query(
-    `INSERT INTO app_user (first_name, last_name, email, password_hash, role_id, institution_id, email_otp, email_otp_expires, is_verified)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE)
+    `INSERT INTO app_user (first_name, last_name, email, password_hash, is_active, invitation_token, invitation_expires, role_id, institution_id)
+     VALUES ($1, $2, $3, NULL, FALSE, $4, $5, $6, $7)
       RETURNING id,
           first_name AS "firstName",
           last_name AS "lastName",
           email,
+          is_active AS "isActive",
+          invitation_expires AS "invitationExpires",
           role_id AS "roleId",
           institution_id AS "institutionId",
-          is_verified AS "isVerified",
           created_at AS "createdAt",
           updated_at AS "updatedAt"`,
     [
       firstName,
       lastName,
       email,
-      passwordHash,
+      invitationToken,
+      invitationExpires,
       roleId,
       institutionId,
-      emailOtp,
-      emailOtpExpires,
     ],
   );
 
   return result.rows[0];
+};
+
+export const findUserByInvitationToken = async (invitationToken) => {
+  const result = await pool.query(
+    `SELECT id,
+            first_name AS "firstName",
+            last_name AS "lastName",
+            email,
+            password_hash AS "passwordHash",
+            is_active AS "isActive",
+            invitation_token AS "invitationToken",
+            invitation_expires AS "invitationExpires",
+            role_id AS "roleId",
+            institution_id AS "institutionId",
+            created_at AS "createdAt",
+            updated_at AS "updatedAt"
+     FROM app_user
+     WHERE invitation_token = $1`,
+    [invitationToken],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const activateUserByInvitationToken = async ({
+  invitationToken,
+  passwordHash,
+}) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET password_hash = $2,
+         is_active = TRUE,
+         invitation_token = NULL,
+         invitation_expires = NULL,
+         password_changed_at = CURRENT_TIMESTAMP,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE invitation_token = $1
+     RETURNING id,
+               first_name AS "firstName",
+               last_name AS "lastName",
+               email,
+               is_active AS "isActive",
+               role_id AS "roleId",
+               institution_id AS "institutionId",
+               updated_at AS "updatedAt"`,
+    [invitationToken, passwordHash],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const revokeInvitationByUserId = async (id) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET invitation_token = NULL,
+         invitation_expires = NULL,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING id,
+               first_name AS "firstName",
+               last_name AS "lastName",
+               email,
+               is_active AS "isActive",
+               invitation_expires AS "invitationExpires",
+               updated_at AS "updatedAt"`,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const replaceInvitationByUserId = async ({
+  id,
+  invitationToken,
+  invitationExpires,
+}) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET invitation_token = $2,
+         invitation_expires = $3,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING id,
+               first_name AS "firstName",
+               last_name AS "lastName",
+               email,
+               is_active AS "isActive",
+               invitation_expires AS "invitationExpires",
+               updated_at AS "updatedAt"`,
+    [id, invitationToken, invitationExpires],
+  );
+
+  return result.rows[0] || null;
 };
 
 export const updateUserById = async ({
@@ -159,22 +282,14 @@ export const updateUserById = async ({
   return result.rows[0] || null;
 };
 
-export const verifyUserEmailById = async (id) => {
+export const deleteUserById = async (id) => {
   const result = await pool.query(
-    `UPDATE app_user
-     SET is_verified = TRUE,
-         email_otp = NULL,
-         email_otp_expires = NULL,
-         updated_at = CURRENT_TIMESTAMP
+    `DELETE FROM app_user
      WHERE id = $1
      RETURNING id,
                first_name AS "firstName",
                last_name AS "lastName",
-               email,
-               role_id AS "roleId",
-               institution_id AS "institutionId",
-               is_verified AS "isVerified",
-               updated_at AS "updatedAt"`,
+               email`,
     [id],
   );
 

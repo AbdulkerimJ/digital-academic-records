@@ -1,20 +1,42 @@
 import express from "express";
 import {
-  create,
+  activateInvite,
   changePassword,
   login,
   logout,
-  verifyEmail,
   getMe,
+} from "./auth.controller.js";
+import {
+  create,
+  list,
+  remove,
+  resendInvite,
+  revokeInvite,
+  update,
 } from "./user.controller.js";
-import { protectUser } from "./user.middleware.js";
+import { protectUser, restrictTo } from "./user.middleware.js";
 
 const router = express.Router();
 
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/", create);
-router.post("/verify-email", verifyEmail);
+router.post("/activate-invite", activateInvite);
+router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
+router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);
+router.post(
+  "/:userId/resend-invite",
+  protectUser,
+  restrictTo("SUPER_ADMIN"),
+  resendInvite,
+);
+router.patch(
+  "/:userId/revoke-invite",
+  protectUser,
+  restrictTo("SUPER_ADMIN"),
+  revokeInvite,
+);
+router.patch("/:userId", protectUser, restrictTo("SUPER_ADMIN"), update);
+router.delete("/:userId", protectUser, restrictTo("SUPER_ADMIN"), remove);
 router.get("/me", protectUser, getMe);
 router.patch("/change-password", protectUser, changePassword);
 

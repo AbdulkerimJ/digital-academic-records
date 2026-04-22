@@ -1,15 +1,9 @@
 import catchAsync from "../../common/utils/catchAsync.js";
-import { getCitizen } from "./fayda.client.js";
-import { sendError, sendSuccess } from "../../common/utils/response.js";
+import { sendSuccess } from "../../common/utils/response.js";
+import { getCitizenProfileByFaydaId } from "./citizen.service.js";
 
 const getCitizenByFaydaId = catchAsync(async (req, res) => {
-  const { faydaId } = req.params || {};
-
-  if (!faydaId) {
-    return sendError(res, "Fayda ID is required", 400);
-  }
-
-  const citizen = await getCitizen(faydaId);
+  const citizen = await getCitizenProfileByFaydaId(req.params || {});
   sendSuccess(res, "Citizen fetched successfully", citizen);
 });
 
