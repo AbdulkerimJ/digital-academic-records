@@ -77,7 +77,7 @@ async function migrate() {
     password_changed_at TIMESTAMP,
 
     role_id INT NOT NULL,
-    institution_id UUID NOT NULL,
+    institution_id UUID,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -85,7 +85,13 @@ async function migrate() {
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (institution_id)
         REFERENCES institution(id)
-        ON DELETE RESTRICT
+        ON DELETE RESTRICT,
+
+    CONSTRAINT check_institution_for_non_super_admin
+    CHECK (
+        (role_id = 1 AND institution_id IS NULL) OR
+        (role_id != 1 AND institution_id IS NOT NULL)
+    )
 );
     `);
 

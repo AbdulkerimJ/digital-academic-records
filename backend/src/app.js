@@ -25,7 +25,7 @@ app.use("/app/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/", (req, res) => {
   res.json({
     status: "success",
-    message: "Welcome to the Fayda API",
+    message: "Welcome to the Digital Academic Records API",
   });
 });
 app.use("/app/api/students", studentRoutes);
