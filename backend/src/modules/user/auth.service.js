@@ -8,7 +8,7 @@ import {
   updateUserById,
 } from "./user.repository.js";
 
-export const activateInvite = async ({ token, password }) => {
+export const activateInviteService = async ({ token, password }) => {
   if (!token || !password) {
     throw new AppError("token and password are required", 400);
   }
@@ -49,7 +49,7 @@ export const activateInvite = async ({ token, password }) => {
   return activatedUser;
 };
 
-export const loginUser = async ({ email, password }) => {
+export const loginUserService = async ({ email, password }) => {
   if (!email || !password) {
     throw new AppError("email and password are required", 400);
   }
@@ -77,7 +77,7 @@ export const loginUser = async ({ email, password }) => {
   return user;
 };
 
-export const changeUserPassword = async ({
+export const changeUserPasswordService = async ({
   userId,
   currentPassword,
   newPassword,

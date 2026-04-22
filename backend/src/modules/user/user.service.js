@@ -29,7 +29,7 @@ const getInviteLink = (token) => {
   return `${appBaseUrl}/activate-account?token=${token}`;
 };
 
-export const inviteUser = async ({
+export const inviteUserService = async ({
   firstName,
   lastName,
   email,
@@ -91,11 +91,25 @@ export const inviteUser = async ({
   };
 };
 
-export const listUsers = async () => {
+export const listUsersService = async () => {
   return findUsersWithRole();
 };
 
-export const updateUser = async ({
+export const getUserByIdService = async ({ userId }) => {
+  if (!userId) {
+    throw new AppError("userId is required", 400);
+  }
+
+  const user = await findUserByIdWithRole(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  return user;
+};
+
+export const updateUserService = async ({
   userId,
   firstName,
   lastName,
@@ -176,7 +190,7 @@ export const updateUser = async ({
   return updatedUser;
 };
 
-export const deleteUser = async ({ userId }) => {
+export const deleteUserService = async ({ userId }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -194,7 +208,7 @@ export const deleteUser = async ({ userId }) => {
   return deletedUser;
 };
 
-export const revokeInvite = async ({ userId }) => {
+export const revokeInviteService = async ({ userId }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -212,7 +226,7 @@ export const revokeInvite = async ({ userId }) => {
   return revokeInvitationByUserId(userId);
 };
 
-export const resendInvite = async ({ userId }) => {
+export const resendInviteService = async ({ userId }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }

@@ -8,6 +8,7 @@ import {
 } from "./auth.controller.js";
 import {
   create,
+  getUserById,
   list,
   remove,
   resendInvite,
@@ -23,6 +24,8 @@ router.post("/logout", logout);
 router.post("/activate-invite", activateInvite);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);
+router.get("/me", protectUser, getMe);
+router.get("/:userId", protectUser, restrictTo("SUPER_ADMIN"), getUserById);
 router.post(
   "/:userId/resend-invite",
   protectUser,
@@ -37,7 +40,6 @@ router.patch(
 );
 router.patch("/:userId", protectUser, restrictTo("SUPER_ADMIN"), update);
 router.delete("/:userId", protectUser, restrictTo("SUPER_ADMIN"), remove);
-router.get("/me", protectUser, getMe);
 router.patch("/change-password", protectUser, changePassword);
 
 export default router;

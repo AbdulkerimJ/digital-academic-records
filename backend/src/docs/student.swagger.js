@@ -167,14 +167,15 @@
  *
  * /app/api/students/me:
  *   get:
- *     summary: Get current authenticated user from token
+ *     summary: Get current authenticated student from token
  *     tags:
  *       - Students
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Current user payload
+ *         description: Current user fetched successfully
  *         content:
  *           application/json:
  *             schema:
@@ -193,11 +194,18 @@
  *                       type: object
  *                       properties:
  *                         id:
- *                           type: integer
- *                         national_id:
+ *                           type: string
+ *                           format: uuid
+ *                         firstName:
+ *                           type: string
+ *                         lastName:
+ *                           type: string
+ *                         nationalId:
  *                           type: string
  *       401:
  *         description: Not logged in
+ *       500:
+ *         description: Server error
  */
 
 export {};

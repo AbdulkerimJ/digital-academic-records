@@ -5,7 +5,7 @@ import {
   findStudentByNationalId,
 } from "./student.repository.js";
 
-export const requestStudentLogin = async ({ faydaId }) => {
+export const requestStudentLoginService = async ({ faydaId }) => {
   if (!faydaId) {
     throw new AppError("faydaId is required", 400);
   }
@@ -25,7 +25,7 @@ export const requestStudentLogin = async ({ faydaId }) => {
   return { message: "OTP sent successfully" };
 };
 
-export const verifyStudentLogin = async ({ faydaId, otp }) => {
+export const verifyStudentLoginService = async ({ faydaId, otp }) => {
   if (!faydaId || !otp) {
     throw new AppError("faydaId and otp are required", 400);
   }
@@ -51,4 +51,4 @@ export const verifyStudentLogin = async ({ faydaId, otp }) => {
   return user;
 };
 
-export const getStudentProfile = (user) => ({ user });
+export const getStudentProfileService = (user) => ({ user });

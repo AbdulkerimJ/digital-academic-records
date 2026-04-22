@@ -5,9 +5,9 @@ import {
   createAndSendUserToken,
 } from "../../common/utils/createAndSendToken.js";
 import {
-  activateInvite as activateInviteService,
-  changeUserPassword,
-  loginUser,
+  activateInviteService,
+  changeUserPasswordService,
+  loginUserService,
 } from "./auth.service.js";
 
 export const activateInvite = catchAsync(async (req, res) => {
@@ -19,7 +19,7 @@ export const activateInvite = catchAsync(async (req, res) => {
 });
 
 export const login = catchAsync(async (req, res) => {
-  const user = await loginUser(req.body || {});
+  const user = await loginUserService(req.body || {});
 
   return createAndSendUserToken(user, res);
 });
@@ -37,7 +37,7 @@ export const getMe = (req, res) => {
 };
 
 export const changePassword = catchAsync(async (req, res) => {
-  const refreshedUser = await changeUserPassword({
+  const refreshedUser = await changeUserPasswordService({
     userId: req.user.id,
     ...(req.body || {}),
   });

@@ -11,9 +11,59 @@
  *     responses:
  *       200:
  *         description: Users fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Users fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           firstName:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                             format: email
+ *                           roleName:
+ *                             type: string
+ *                           roleId:
+ *                             type: integer
+ *                           institutionId:
+ *                             type: string
+ *                             format: uuid
+ *                           isActive:
+ *                             type: boolean
+ *                           invitationExpires:
+ *                             type: string
+ *                             format: date-time
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *       401:
+ *         description: Not logged in
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
- *
+ *       500:
+ *         description: Server error
  *   post:
  *     summary: Invite an application user and send activation link
  *     tags:
@@ -27,6 +77,12 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - roleId
+ *               - institutionId
  *             properties:
  *               firstName:
  *                 type: string
@@ -40,12 +96,6 @@
  *               institutionId:
  *                 type: string
  *                 format: uuid
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - roleId
- *               - institutionId
  *     responses:
  *       201:
  *         description: User invited successfully
@@ -93,35 +143,56 @@
  *                           type: string
  *                           format: date-time
  *       400:
- *         description: Validation failed, duplicate email, or invalid roleId/institutionId reference
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Duplicate field value: email. Please use another value!"
+ *         description: Validation failed, duplicate email, or invalid role reference
  *       401:
  *         description: Not logged in
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Something went wrong.
+ *
+ * /app/api/users/login:
+ *   post:
+ *     summary: Log in an application user
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User login successful
+ *       400:
+ *         description: email and password are required
+ *       401:
+ *         description: Invalid email or password
+ *       403:
+ *         description: Account is not active
+ *       500:
+ *         description: Server error
+ *
+ * /app/api/users/logout:
+ *   post:
+ *     summary: Log out current user by clearing auth cookie
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *       500:
+ *         description: Server error
  *
  * /app/api/users/activate-invite:
  *   post:
@@ -134,225 +205,34 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - token
+ *               - password
  *             properties:
  *               token:
  *                 type: string
  *               password:
  *                 type: string
  *                 minLength: 8
- *             required:
- *               - token
- *               - password
  *     responses:
  *       200:
  *         description: Account activated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Account activated successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         firstName:
- *                           type: string
- *                         lastName:
- *                           type: string
- *                         email:
- *                           type: string
- *                           format: email
- *                         roleId:
- *                           type: integer
- *                         institutionId:
- *                           type: string
- *                           format: uuid
- *                         isActive:
- *                           type: boolean
- *                         updatedAt:
- *                           type: string
- *                           format: date-time
  *       400:
- *         description: Invalid/expired token or weak password
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invitation link has expired
+ *         description: Invalid token, expired invite, or weak password
  *       500:
  *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Something went wrong.
- *
- * /app/api/users/login:
- *   post:
- *     summary: Log in an application user and receive a user token
- *     tags:
- *       - Users
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *             required:
- *               - email
- *               - password
- *     responses:
- *       200:
- *         description: User login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Login successful
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         firstName:
- *                           type: string
- *                         lastName:
- *                           type: string
- *                         email:
- *                           type: string
- *                           format: email
- *                         roleName:
- *                           type: string
- *                         institutionId:
- *                           type: string
- *                           format: uuid
- *       400:
- *         description: email and password are required
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: email and password are required
- *       401:
- *         description: Invalid email or password
- *       403:
- *         description: Account is not active
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid email or password
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Something went wrong.
- *
- * /app/api/users/logout:
- *   post:
- *     summary: Log out current user by clearing auth cookie
- *     tags:
- *       - Users
- *     responses:
- *       200:
- *         description: Logged out successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Logged out successfully
- *                 data:
- *                   nullable: true
- *                   example: null
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Something went wrong.
  *
  * /app/api/users/me:
  *   get:
- *     summary: Get current authenticated user from token
+ *     summary: Get currently authenticated user profile
  *     tags:
  *       - Users
  *     security:
  *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Current user payload
+ *         description: Current user fetched successfully
  *         content:
  *           application/json:
  *             schema:
@@ -369,10 +249,165 @@
  *                   properties:
  *                     user:
  *                       type: object
- *                       additionalProperties: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         firstName:
+ *                           type: string
+ *                         lastName:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                         role:
+ *                           type: string
+ *                         roleId:
+ *                           type: integer
+ *                         institutionId:
+ *                           type: string
+ *                           format: uuid
+ *                         passwordChangedAt:
+ *                           type: string
+ *                           format: date-time
  *       401:
  *         description: Not logged in
-
+ *       403:
+ *         description: Account is not active
+ *
+ * /app/api/users/change-password:
+ *   patch:
+ *     summary: Change current user's password
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Invalid request body or weak password
+ *       401:
+ *         description: Not logged in or current password is incorrect
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ *
+ * /app/api/users/{userId}:
+ *   get:
+ *     summary: Get an application user by ID
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User fetched successfully
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ *   patch:
+ *     summary: Update an application user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               roleId:
+ *                 type: integer
+ *               institutionId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       400:
+ *         description: Validation failed
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ *   delete:
+ *     summary: Delete an application user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ *
  * /app/api/users/{userId}/resend-invite:
  *   post:
  *     summary: Resend activation invite for an inactive user
@@ -399,7 +434,9 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
-
+ *       500:
+ *         description: Server error
+ *
  * /app/api/users/{userId}/revoke-invite:
  *   patch:
  *     summary: Revoke activation invite for an inactive user
@@ -426,148 +463,8 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *
- * /app/api/users/{userId}:
- *   patch:
- *     summary: Update an application user
- *     tags:
- *       - Users
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: User updated successfully
- *       403:
- *         description: Forbidden (requires SUPER_ADMIN)
- *       404:
- *         description: User not found
- *   delete:
- *     summary: Delete an application user
- *     tags:
- *       - Users
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: User deleted successfully
- *       403:
- *         description: Forbidden (requires SUPER_ADMIN)
- *       404:
- *         description: User not found
- *
- * /app/api/users/change-password:
- *   patch:
- *     summary: Change current user's password
- *     tags:
- *       - Users
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               currentPassword:
- *                 type: string
- *               newPassword:
- *                 type: string
- *                 minLength: 8
- *             required:
- *               - currentPassword
- *               - newPassword
- *     responses:
- *       200:
- *         description: Password changed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Password changed successfully.
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         firstName:
- *                           type: string
- *                         lastName:
- *                           type: string
- *                         email:
- *                           type: string
- *                           format: email
- *                         roleName:
- *                           type: string
- *                         institutionId:
- *                           type: string
- *                           format: uuid
- *       400:
- *         description: Invalid request body or weak password
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: newPassword must be at least 8 characters long
- *       401:
- *         description: Not logged in or current password is incorrect
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Current password is incorrect
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: User not found
+ *       500:
+ *         description: Server error
  */
 
 export {};

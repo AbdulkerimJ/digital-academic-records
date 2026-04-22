@@ -1,16 +1,17 @@
 import catchAsync from "../../common/utils/catchAsync.js";
 import { sendSuccess } from "../../common/utils/response.js";
 import {
-  deleteUser,
-  inviteUser,
-  listUsers,
-  resendInvite as resendInviteService,
-  revokeInvite as revokeInviteService,
-  updateUser,
+  deleteUserService,
+  getUserByIdService,
+  inviteUserService,
+  listUsersService,
+  resendInviteService,
+  revokeInviteService,
+  updateUserService,
 } from "./user.service.js";
 
 export const create = catchAsync(async (req, res) => {
-  const result = await inviteUser(req.body || {});
+  const result = await inviteUserService(req.body || {});
 
   console.log(
     `[Invitation Link - simulated] email=${result.user.email} inviteLink=${result.inviteLink} expiresAt=${result.invitationExpires.toISOString()}`,
@@ -25,13 +26,19 @@ export const create = catchAsync(async (req, res) => {
 });
 
 export const list = catchAsync(async (req, res) => {
-  const users = await listUsers();
+  const users = await listUsersService();
 
   return sendSuccess(res, "Users fetched successfully", { users });
 });
 
+export const getUserById = catchAsync(async (req, res) => {
+  const user = await getUserByIdService({ userId: req.params.userId });
+
+  return sendSuccess(res, "User fetched successfully", { user });
+});
+
 export const update = catchAsync(async (req, res) => {
-  const user = await updateUser({
+  const user = await updateUserService({
     userId: req.params.userId,
     ...(req.body || {}),
   });
@@ -40,7 +47,7 @@ export const update = catchAsync(async (req, res) => {
 });
 
 export const remove = catchAsync(async (req, res) => {
-  const user = await deleteUser({ userId: req.params.userId });
+  const user = await deleteUserService({ userId: req.params.userId });
 
   return sendSuccess(res, "User deleted successfully", { user });
 });

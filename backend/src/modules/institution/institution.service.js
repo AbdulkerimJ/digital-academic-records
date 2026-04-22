@@ -27,7 +27,12 @@ const parseBoolean = (value) => {
   return null;
 };
 
-export const createInstitution = async ({ name, code, type, isActive }) => {
+export const createInstitutionService = async ({
+  name,
+  code,
+  type,
+  isActive,
+}) => {
   if (!name || !code || !type) {
     throw new AppError("name, code and type are required", 400);
   }

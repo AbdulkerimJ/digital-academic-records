@@ -8,6 +8,17 @@
  *     responses:
  *       200:
  *         description: API is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Welcome to the Fayda API
  */
 
 export {};

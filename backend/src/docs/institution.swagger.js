@@ -95,9 +95,9 @@
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: You are not logged in! Please log in to get access.
+ *                   example: You are not logged in. Please log in to get access.
  *       403:
- *         description: Forbidden
+ *         description: Forbidden (requires SUPER_ADMIN)
  *         content:
  *           application/json:
  *             schema:
