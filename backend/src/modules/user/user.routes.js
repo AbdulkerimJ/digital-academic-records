@@ -5,6 +5,7 @@ import {
   login,
   logout,
   getMe,
+  refresh,
 } from "./auth.controller.js";
 import {
   create,
@@ -20,7 +21,8 @@ import { protectUser, restrictTo } from "./user.middleware.js";
 const router = express.Router();
 
 router.post("/login", login);
-router.post("/logout", logout);
+router.post("/refresh", refresh);
+router.post("/logout", protectUser, logout);
 router.post("/activate-invite", activateInvite);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);

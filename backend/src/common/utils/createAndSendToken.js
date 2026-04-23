@@ -1,36 +1,61 @@
 import jwt from "jsonwebtoken";
 
-const signToken = (payload) => {
+const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
+const REFRESH_COOKIE_MAX_AGE_MS = Number(
+  process.env.REFRESH_COOKIE_MAX_AGE_MS || 7 * 24 * 60 * 60 * 1000,
+);
+const REFRESH_COOKIE_SAME_SITE =
+  process.env.REFRESH_COOKIE_SAME_SITE || "Strict";
+const REFRESH_COOKIE_PATH = process.env.REFRESH_COOKIE_PATH || "/";
+export const REFRESH_COOKIE_NAME =
+  process.env.REFRESH_COOKIE_NAME || "refreshToken";
+
+export const signAccessToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
   });
 };
 
-const getCookieOptions = () => {
-  return {
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-  };
+export const signRefreshToken = (payload) => {
+  return jwt.sign(payload, process.env.REFRESH_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+  });
+};
+
+export const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: REFRESH_COOKIE_SAME_SITE,
+  path: REFRESH_COOKIE_PATH,
+  maxAge: REFRESH_COOKIE_MAX_AGE_MS,
+};
+
+const clearRefreshCookieOptions = {
+  ...refreshCookieOptions,
+  maxAge: 0,
 };
 
 export const clearUserAuthCookie = (res) => {
-  res.clearCookie("token", {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-  });
+  res.clearCookie(REFRESH_COOKIE_NAME, clearRefreshCookieOptions);
+};
+
+export const clearStudentAuthCookie = (res) => {
+  res.clearCookie(REFRESH_COOKIE_NAME, clearRefreshCookieOptions);
 };
 
 export const createAndSendStudentToken = (student, res) => {
-  const { id, nationalId, firstName, lastName } = student;
-  const token = signToken({ id, nationalId });
+  const { id, nationalId, firstName, lastName, tokenVersion = 0 } = student;
+  const accessToken = signAccessToken({ id, nationalId, tokenVersion });
+  const refreshToken = signRefreshToken({ id, nationalId, tokenVersion });
 
-  res.cookie("token", token, getCookieOptions());
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions);
 
   res.status(200).json({
     success: true,
     message: "Login successful",
     data: {
+      accessToken,
       user: {
         id,
         firstName,
@@ -46,19 +71,31 @@ export const createAndSendUserToken = (
   res,
   message = "Login successful",
 ) => {
-  const { id, email, firstName, lastName, roleName, institutionId } = user;
-  const token = signToken({
+  const {
+    id,
+    email,
+    firstName,
+    lastName,
+    roleName,
+    institutionId,
+    tokenVersion = 0,
+  } = user;
+  const payload = {
     id,
     roleName,
     email,
-  });
+    tokenVersion,
+  };
+  const accessToken = signAccessToken(payload);
+  const refreshToken = signRefreshToken(payload);
 
-  res.cookie("token", token, getCookieOptions());
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions);
 
   res.status(200).json({
     success: true,
     message,
     data: {
+      accessToken,
       user: {
         id,
         firstName,

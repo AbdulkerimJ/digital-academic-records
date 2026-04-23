@@ -30,11 +30,16 @@ export const protectStudent = catchAsync(async (req, res, next) => {
     );
   }
 
+  if (decoded.tokenVersion !== currentStudent.tokenVersion) {
+    throw new AppError("Session is no longer valid. Please log in again.", 401);
+  }
+
   req.user = {
     id: currentStudent.id,
     firstName: currentStudent.firstName,
     lastName: currentStudent.lastName,
     nationalId: currentStudent.nationalId,
+    tokenVersion: currentStudent.tokenVersion,
   };
 
   next();

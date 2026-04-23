@@ -47,6 +47,7 @@ async function migrate() {
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
         date_of_birth DATE NOT NULL,
+        token_version INT NOT NULL DEFAULT 0,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -75,6 +76,7 @@ async function migrate() {
 
     -- SECURITY
     password_changed_at TIMESTAMP,
+    token_version INT NOT NULL DEFAULT 0,
 
     role_id INT NOT NULL,
     institution_id UUID,

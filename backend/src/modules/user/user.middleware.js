@@ -33,6 +33,10 @@ export const protectUser = catchAsync(async (req, res, next) => {
     throw new AppError("Account is not active", 403);
   }
 
+  if (decoded.tokenVersion !== currentUser.tokenVersion) {
+    throw new AppError("Session is no longer valid. Please log in again.", 401);
+  }
+
   // Check if user changed password after the token was issued
   if (currentUser.passwordChangedAt && decoded.iat) {
     const passwordChangedTimestamp =
@@ -54,6 +58,7 @@ export const protectUser = catchAsync(async (req, res, next) => {
     role: currentUser.roleName,
     roleId: currentUser.roleId,
     institutionId: currentUser.institutionId,
+    tokenVersion: currentUser.tokenVersion,
     passwordChangedAt: currentUser.passwordChangedAt,
   };
 

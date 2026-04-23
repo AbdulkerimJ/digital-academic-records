@@ -1,10 +1,12 @@
 import AppError from "../../common/utils/appError.js";
+import jwt from "jsonwebtoken";
 import { hashPassword, comparePassword } from "../../common/utils/password.js";
 import {
   activateUserByInvitationToken,
   findUserByEmailWithRole,
   findUserByInvitationToken,
   findUserByIdWithRole,
+  incrementUserTokenVersionById,
   updateUserById,
 } from "./user.repository.js";
 
@@ -75,6 +77,56 @@ export const loginUserService = async ({ email, password }) => {
   }
 
   return user;
+};
+
+export const refreshUserSessionService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new AppError("Refresh token is required", 401);
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+  } catch {
+    throw new AppError("Invalid or expired refresh token", 401);
+  }
+
+  if (decoded.nationalId) {
+    throw new AppError("Invalid refresh token payload", 401);
+  }
+
+  const user = await findUserByIdWithRole(decoded.id);
+
+  if (!user) {
+    throw new AppError(
+      "The user belonging to this token no longer exists.",
+      401,
+    );
+  }
+
+  if (!user.isActive) {
+    throw new AppError("Account is not active", 403);
+  }
+
+  if (decoded.tokenVersion !== user.tokenVersion) {
+    throw new AppError("Session is no longer valid. Please log in again.", 401);
+  }
+
+  return user;
+};
+
+export const revokeUserSessionService = async (userId) => {
+  if (!userId) {
+    throw new AppError("userId is required", 400);
+  }
+
+  const updated = await incrementUserTokenVersionById(userId);
+
+  if (!updated) {
+    throw new AppError("User not found", 404);
+  }
+
+  return updated;
 };
 
 export const changeUserPasswordService = async ({

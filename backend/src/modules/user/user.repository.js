@@ -24,6 +24,7 @@ export const findUserByEmail = async (email) => {
             invitation_expires AS "invitationExpires",
             reset_token AS "resetToken",
             reset_expires AS "resetExpires",
+            token_version AS "tokenVersion",
             role_id AS "roleId",
             institution_id AS "institutionId",
             password_changed_at AS "passwordChangedAt",
@@ -49,6 +50,7 @@ export const findUserByEmailWithRole = async (email) => {
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
             app_user.reset_expires AS "resetExpires",
+            app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
             app_user.created_at AS "createdAt",
@@ -76,6 +78,7 @@ export const findUserByIdWithRole = async (id) => {
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
             app_user.reset_expires AS "resetExpires",
+            app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
             app_user.created_at AS "createdAt",
@@ -102,6 +105,7 @@ export const findUsersWithRole = async () => {
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
             app_user.reset_expires AS "resetExpires",
+            app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
             app_user.created_at AS "createdAt",
@@ -290,6 +294,20 @@ export const deleteUserById = async (id) => {
                first_name AS "firstName",
                last_name AS "lastName",
                email`,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const incrementUserTokenVersionById = async (id) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET token_version = token_version + 1,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING id,
+               token_version AS "tokenVersion"`,
     [id],
   );
 

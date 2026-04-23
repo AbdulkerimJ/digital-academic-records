@@ -7,6 +7,7 @@ export const findStudentByNationalId = async (faydaId) => {
             first_name AS "firstName",
             last_name AS "lastName",
             date_of_birth AS "dateOfBirth",
+                 token_version AS "tokenVersion",
             created_at AS "createdAt"
      FROM student
      WHERE national_id = $1`,
@@ -27,9 +28,23 @@ export const createStudentFromCitizen = async (faydaId, citizen) => {
      first_name AS "firstName",
      last_name AS "lastName",
      date_of_birth AS "dateOfBirth",
+     token_version AS "tokenVersion",
      created_at AS "createdAt"`,
     [faydaId, firstName, lastName, dateOfBirth],
   );
 
   return result.rows[0];
+};
+
+export const incrementStudentTokenVersionById = async (id) => {
+  const result = await pool.query(
+    `UPDATE student
+     SET token_version = token_version + 1
+     WHERE id = $1
+     RETURNING id,
+               token_version AS "tokenVersion"`,
+    [id],
+  );
+
+  return result.rows[0] || null;
 };
