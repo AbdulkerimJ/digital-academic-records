@@ -79,6 +79,43 @@ export const loginUserService = async ({ email, password }) => {
   return user;
 };
 
+export const getUserAuthContextService = async (decoded) => {
+  if (!decoded?.id) {
+    throw new AppError("Invalid token payload", 401);
+  }
+
+  const user = await findUserByIdWithRole(decoded.id);
+
+  if (!user) {
+    throw new AppError(
+      "The user belonging to this token no longer exists.",
+      401,
+    );
+  }
+
+  if (!user.isActive) {
+    throw new AppError("Account is not active. Please contact support.", 403);
+  }
+
+  if (decoded.tokenVersion !== user.tokenVersion) {
+    throw new AppError("Session is no longer valid. Please log in again.", 401);
+  }
+
+  if (user.passwordChangedAt && decoded.iat) {
+    const passwordChangedTimestamp =
+      new Date(user.passwordChangedAt).getTime() / 1000;
+
+    if (decoded.iat < passwordChangedTimestamp) {
+      throw new AppError(
+        "User recently changed password. Please log in again.",
+        401,
+      );
+    }
+  }
+
+  return user;
+};
+
 export const refreshUserSessionService = async (refreshToken) => {
   if (!refreshToken) {
     throw new AppError("Refresh token is required", 401);

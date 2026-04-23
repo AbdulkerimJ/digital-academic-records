@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import AppError from "../../common/utils/appError.js";
 import catchAsync from "../../common/utils/catchAsync.js";
 import getTokenFromRequest from "../../common/utils/getTokenFromRequest.js";
-import { findStudentByNationalId } from "./student.repository.js";
+import { getStudentAuthContextService } from "./auth.service.js";
 
 export const protectStudent = catchAsync(async (req, res, next) => {
   const token = getTokenFromRequest(req);
@@ -15,24 +15,7 @@ export const protectStudent = catchAsync(async (req, res, next) => {
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const tokenNationalId = decoded.nationalId;
-
-  if (!tokenNationalId) {
-    throw new AppError("Invalid token payload", 401);
-  }
-
-  const currentStudent = await findStudentByNationalId(tokenNationalId);
-
-  if (!currentStudent) {
-    throw new AppError(
-      "The user belonging to this token no longer exists.",
-      401,
-    );
-  }
-
-  if (decoded.tokenVersion !== currentStudent.tokenVersion) {
-    throw new AppError("Session is no longer valid. Please log in again.", 401);
-  }
+  const currentStudent = await getStudentAuthContextService(decoded);
 
   req.user = {
     id: currentStudent.id,

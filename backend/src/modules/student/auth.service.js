@@ -53,20 +53,9 @@ export const verifyStudentLoginService = async ({ faydaId, otp }) => {
   return user;
 };
 
-export const refreshStudentSessionService = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new AppError("Refresh token is required", 401);
-  }
-
-  let decoded;
-  try {
-    decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
-  } catch {
-    throw new AppError("Invalid or expired refresh token", 401);
-  }
-
-  if (!decoded.nationalId) {
-    throw new AppError("Invalid refresh token payload", 401);
+export const getStudentAuthContextService = async (decoded) => {
+  if (!decoded?.nationalId) {
+    throw new AppError("Invalid token payload", 401);
   }
 
   const currentStudent = await findStudentByNationalId(decoded.nationalId);
@@ -83,6 +72,25 @@ export const refreshStudentSessionService = async (refreshToken) => {
   }
 
   return currentStudent;
+};
+
+export const refreshStudentSessionService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new AppError("Refresh token is required", 401);
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+  } catch {
+    throw new AppError("Invalid or expired refresh token", 401);
+  }
+
+  if (!decoded.nationalId) {
+    throw new AppError("Invalid refresh token payload", 401);
+  }
+
+  return getStudentAuthContextService(decoded);
 };
 
 export const revokeStudentSessionService = async (studentId) => {
