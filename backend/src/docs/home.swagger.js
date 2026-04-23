@@ -18,7 +18,7 @@
  *                   example: success
  *                 message:
  *                   type: string
- *                   example: Welcome to the Fayda API
+ *                   example: Welcome to the Digital Academic Records API
  */
 
 export {};

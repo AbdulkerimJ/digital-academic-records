@@ -9,5 +9,5 @@ app.listen(PORT, () => {
   console.log(
     `Server running on http://localhost:${PORT} in ${process.env.NODE_ENV} mode`,
   );
-  console.log(`Swagger docs on http://localhost:${PORT}/app/api-docs`);
+  console.log(`Swagger docs on http://localhost:${PORT}/api-docs`);
 });

@@ -1,157 +1,6 @@
 /**
  * @swagger
- * /app/api/users:
- *   get:
- *     summary: List all application users
- *     tags:
- *       - Users
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Users fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Users fetched successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     users:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             format: uuid
- *                           firstName:
- *                             type: string
- *                           lastName:
- *                             type: string
- *                           email:
- *                             type: string
- *                             format: email
- *                           roleName:
- *                             type: string
- *                           roleId:
- *                             type: integer
- *                           institutionId:
- *                             type: string
- *                             format: uuid
- *                           isActive:
- *                             type: boolean
- *                           invitationExpires:
- *                             type: string
- *                             format: date-time
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *       401:
- *         description: Not logged in
- *       403:
- *         description: Forbidden (requires SUPER_ADMIN)
- *       500:
- *         description: Server error
- *   post:
- *     summary: Invite an application user and send activation link
- *     tags:
- *       - Users
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - roleId
- *               - institutionId
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               roleId:
- *                 type: integer
- *               institutionId:
- *                 type: string
- *                 format: uuid
- *     responses:
- *       201:
- *         description: User invited successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: User invited successfully. Invitation link sent to email.
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         firstName:
- *                           type: string
- *                         lastName:
- *                           type: string
- *                         email:
- *                           type: string
- *                           format: email
- *                         roleId:
- *                           type: integer
- *                         institutionId:
- *                           type: string
- *                           format: uuid
- *                         isActive:
- *                           type: boolean
- *                         invitationExpires:
- *                           type: string
- *                           format: date-time
- *                         createdAt:
- *                           type: string
- *                           format: date-time
- *                         updatedAt:
- *                           type: string
- *                           format: date-time
- *       400:
- *         description: Validation failed, duplicate email, or invalid role reference
- *       401:
- *         description: Not logged in
- *       403:
- *         description: Forbidden (requires SUPER_ADMIN)
- *       500:
- *         description: Server error
- *
- * /app/api/users/login:
+ * /api/users/login:
  *   post:
  *     summary: Log in an application user
  *     tags:
@@ -180,21 +29,32 @@
  *         description: Invalid email or password
  *       403:
  *         description: Account is not active
- *       500:
- *         description: Server error
  *
- * /app/api/users/logout:
+ * /api/users/refresh:
  *   post:
- *     summary: Log out current user by clearing auth cookie
+ *     summary: Refresh user access token
  *     tags:
  *       - Users
  *     responses:
  *       200:
- *         description: Logged out successfully
- *       500:
- *         description: Server error
+ *         description: Token refreshed successfully
+ *       401:
+ *         description: Missing, invalid, or expired refresh token
  *
- * /app/api/users/activate-invite:
+ * /api/users/logout:
+ *   post:
+ *     summary: Log out current user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *       401:
+ *         description: Not logged in
+ *
+ * /api/users/activate-invite:
  *   post:
  *     summary: Activate invited account by token and set password
  *     tags:
@@ -219,69 +79,26 @@
  *         description: Account activated successfully
  *       400:
  *         description: Invalid token, expired invite, or weak password
- *       500:
- *         description: Server error
  *
- * /app/api/users/me:
+ * /api/users/me:
  *   get:
  *     summary: Get currently authenticated user profile
  *     tags:
  *       - Users
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Current user fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Current user fetched successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: string
- *                           format: uuid
- *                         firstName:
- *                           type: string
- *                         lastName:
- *                           type: string
- *                         email:
- *                           type: string
- *                           format: email
- *                         role:
- *                           type: string
- *                         roleId:
- *                           type: integer
- *                         institutionId:
- *                           type: string
- *                           format: uuid
- *                         passwordChangedAt:
- *                           type: string
- *                           format: date-time
  *       401:
  *         description: Not logged in
- *       403:
- *         description: Account is not active
  *
- * /app/api/users/change-password:
+ * /api/users/change-password:
  *   patch:
  *     summary: Change current user's password
  *     tags:
  *       - Users
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -307,16 +124,70 @@
  *         description: Not logged in or current password is incorrect
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  *
- * /app/api/users/{userId}:
+ * /api/users:
  *   get:
- *     summary: Get an application user by ID
+ *     summary: List all application users (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Users
+ *       - Admin
  *     security:
- *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users fetched successfully
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *   post:
+ *     summary: Invite an application user (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - roleId
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               roleId:
+ *                 type: integer
+ *               institutionId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       201:
+ *         description: User invited successfully
+ *       400:
+ *         description: Validation failed, duplicate email, or invalid role reference
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *
+ * /api/users/{userId}:
+ *   get:
+ *     summary: Get an application user by ID (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
+ *     tags:
+ *       - Admin
+ *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -334,14 +205,12 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  *   patch:
- *     summary: Update an application user
+ *     summary: Update an application user (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Users
+ *       - Admin
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -380,14 +249,12 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  *   delete:
- *     summary: Delete an application user
+ *     summary: Delete an application user (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Users
+ *       - Admin
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -405,16 +272,14 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  *
- * /app/api/users/{userId}/resend-invite:
+ * /api/users/{userId}/resend-invite:
  *   post:
- *     summary: Resend activation invite for an inactive user
+ *     summary: Resend activation invite for an inactive user (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Users
+ *       - Admin
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -434,16 +299,14 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  *
- * /app/api/users/{userId}/revoke-invite:
+ * /api/users/{userId}/revoke-invite:
  *   patch:
- *     summary: Revoke activation invite for an inactive user
+ *     summary: Revoke activation invite for an inactive user (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Users
+ *       - Admin
  *     security:
- *       - cookieAuth: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -463,8 +326,6 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
- *       500:
- *         description: Server error
  */
 
 export {};

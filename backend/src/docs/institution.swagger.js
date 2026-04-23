@@ -1,10 +1,11 @@
 /**
  * @swagger
- * /app/api/institutions:
+ * /api/institutions:
  *   post:
- *     summary: Create a new institution
+ *     summary: Create a new institution (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Institutions
+ *       - Admin
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []

@@ -19,6 +19,32 @@ const options = {
         description: "Development server",
       },
     ],
+    tags: [
+      {
+        name: "Admin",
+        description: "Endpoints accessible only to SUPER_ADMIN users",
+      },
+      {
+        name: "Users",
+        description: "Application user authentication and profile endpoints",
+      },
+      {
+        name: "Students",
+        description: "Student authentication and profile endpoints",
+      },
+      {
+        name: "Institutions",
+        description: "Institution management endpoints",
+      },
+      {
+        name: "Citizens",
+        description: "Citizen lookup endpoints",
+      },
+      {
+        name: "Health",
+        description: "Service health check endpoint",
+      },
+    ],
 
     // Prepare for future auth
     components: {

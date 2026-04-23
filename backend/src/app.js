@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // swagger-ui setup
-app.use("/app/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // routes
 app.get("/", (req, res) => {
@@ -28,10 +28,10 @@ app.get("/", (req, res) => {
     message: "Welcome to the Digital Academic Records API",
   });
 });
-app.use("/app/api/students", studentRoutes);
-app.use("/app/api/users", userRoutes);
-app.use("/app/api/citizens", getCitizenRoutes);
-app.use("/app/api/institutions", institutionRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/citizens", getCitizenRoutes);
+app.use("/api/institutions", institutionRoutes);
 
 // unmatched routes
 app.use((req, res, next) => {

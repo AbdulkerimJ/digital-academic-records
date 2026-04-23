@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /app/api/citizens/{faydaId}:
+ * /api/citizens/{faydaId}:
  *   get:
  *     summary: Fetch citizen profile by Fayda ID from Fayda service
  *     tags:
