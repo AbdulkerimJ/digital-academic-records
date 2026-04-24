@@ -1,8 +1,11 @@
 import AppError from "../../common/utils/appError.js";
 import {
   createInstitutionRecord,
+  findInstitutionById,
   findInstitutionByCode,
   findInstitutionByName,
+  findInstitutions,
+  updateInstitutionById,
 } from "./institution.repository.js";
 
 const INSTITUTION_TYPES = new Set([
@@ -82,4 +85,118 @@ export const createInstitutionService = async ({
   });
 
   return institution;
+};
+
+export const getInstitutionByIdService = async ({ institutionId }) => {
+  if (!institutionId) {
+    throw new AppError("institutionId is required", 400);
+  }
+
+  const institution = await findInstitutionById(institutionId);
+
+  if (!institution) {
+    throw new AppError("Institution not found", 404);
+  }
+
+  return institution;
+};
+
+export const listInstitutionsService = async () => {
+  return findInstitutions();
+};
+
+export const updateInstitutionService = async ({
+  institutionId,
+  name,
+  code,
+  type,
+  isActive,
+}) => {
+  if (!institutionId) {
+    throw new AppError("institutionId is required", 400);
+  }
+
+  const currentInstitution = await findInstitutionById(institutionId);
+  if (!currentInstitution) {
+    throw new AppError("Institution not found", 404);
+  }
+
+  const normalizedName =
+    name === undefined || name === null ? null : String(name).trim();
+  const normalizedCode =
+    code === undefined || code === null
+      ? null
+      : String(code).trim().toUpperCase();
+  const normalizedType =
+    type === undefined || type === null
+      ? null
+      : String(type).trim().toUpperCase();
+  const parsedIsActive = isActive === undefined ? null : parseBoolean(isActive);
+
+  if (normalizedName !== null && !normalizedName) {
+    throw new AppError("name cannot be empty", 400);
+  }
+
+  if (normalizedCode !== null && !normalizedCode) {
+    throw new AppError("code cannot be empty", 400);
+  }
+
+  if (normalizedType !== null && !INSTITUTION_TYPES.has(normalizedType)) {
+    throw new AppError(
+      "This type is not found.",
+      400,
+    );
+  }
+
+  if (isActive !== undefined && parsedIsActive === null) {
+    throw new AppError("isActive must be a boolean", 400);
+  }
+
+  if (
+    normalizedName === null &&
+    normalizedCode === null &&
+    normalizedType === null &&
+    parsedIsActive === null
+  ) {
+    throw new AppError(
+      "At least one field is required",
+      400,
+    );
+  }
+
+  if (normalizedName !== null) {
+    const existingInstitutionByName =
+      await findInstitutionByName(normalizedName);
+    if (
+      existingInstitutionByName &&
+      existingInstitutionByName.id !== institutionId
+    ) {
+      throw new AppError("Institution already exists with this name", 400);
+    }
+  }
+
+  if (normalizedCode !== null) {
+    const existingInstitutionByCode =
+      await findInstitutionByCode(normalizedCode);
+    if (
+      existingInstitutionByCode &&
+      existingInstitutionByCode.id !== institutionId
+    ) {
+      throw new AppError("Institution already exists with this code", 400);
+    }
+  }
+
+  const updatedInstitution = await updateInstitutionById({
+    id: institutionId,
+    name: normalizedName,
+    code: normalizedCode,
+    type: normalizedType,
+    isActive: parsedIsActive,
+  });
+
+  if (!updatedInstitution) {
+    throw new AppError("Failed to update institution", 500);
+  }
+
+  return updatedInstitution;
 };

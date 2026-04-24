@@ -107,7 +107,19 @@ export const getUserByIdService = async ({ userId }) => {
     throw new AppError("User not found", 404);
   }
 
-  return user;
+  const {id, firstName, lastName, email, isActive, roleId, roleName, institutionId, createdAt, updatedAt} = user;
+  return {
+    id,
+    firstName,
+    lastName,
+    email,
+    isActive,
+    roleId,
+    roleName,
+    institutionId,
+    createdAt,
+    updatedAt,
+  };
 };
 
 export const updateUserService = async ({
@@ -127,9 +139,9 @@ export const updateUserService = async ({
     throw new AppError("User not found", 404);
   }
 
-  const trimmedFirstName = firstName?.trim() || null;
-  const trimmedLastName = lastName?.trim() || null;
-  const normalizedEmail = email?.trim().toLowerCase() || null;
+  const trimmedFirstName = firstName?.trim();
+  const trimmedLastName = lastName?.trim();
+  const normalizedEmail = email?.trim().toLowerCase();
   const numericRoleId =
     roleId === undefined || roleId === null || roleId === ""
       ? null
@@ -250,10 +262,11 @@ export const resendInviteService = async ({ userId }) => {
     invitationToken,
     invitationExpires,
   });
+  const inviteLink = getInviteLink(invitationToken);
 
   return {
     user: updatedUser,
-    inviteLink: getInviteLink(invitationToken),
+    inviteLink,
     invitationExpires,
   };
 };
