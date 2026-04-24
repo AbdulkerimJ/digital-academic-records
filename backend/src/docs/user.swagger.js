@@ -128,14 +128,14 @@
  * /api/users:
  *   get:
  *     summary: List all application users (Admin only)
- *     description: Accessible only to SUPER_ADMIN users.
+ *     description: Accessible only to SUPER_ADMIN users. The currently authenticated requester is excluded from the returned list.
  *     tags:
  *       - Admin
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Users fetched successfully
+ *         description: Users fetched successfully (includes count and users list)
  *       401:
  *         description: Not logged in
  *       403:

@@ -94,7 +94,7 @@ export const findUserByIdWithRole = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findUsersWithRole = async () => {
+export const findUsersWithRole = async ({ excludeUserId } = {}) => {
   const result = await pool.query(
     `SELECT app_user.id,
             app_user.first_name AS "firstName",
@@ -114,7 +114,9 @@ export const findUsersWithRole = async () => {
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
+    WHERE app_user.id != $1
      ORDER BY app_user.created_at DESC`,
+    [excludeUserId || null],
   );
 
   return result.rows;

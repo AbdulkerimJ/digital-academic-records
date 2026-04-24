@@ -12,7 +12,7 @@ export const REFRESH_COOKIE_NAME =
   process.env.REFRESH_COOKIE_NAME || "refreshToken";
 
 export const signAccessToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, {
+  return jwt.sign(payload, process.env.ACCESS_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
   });
 };

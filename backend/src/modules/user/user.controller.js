@@ -26,9 +26,12 @@ export const create = catchAsync(async (req, res) => {
 });
 
 export const list = catchAsync(async (req, res) => {
-  const users = await listUsersService();
+  const users = await listUsersService({ requesterUserId: req.user.id });
 
-  return sendSuccess(res, "Users fetched successfully", { users });
+  return sendSuccess(res, "Users fetched successfully", {
+    count: users.length,
+    users,
+  });
 });
 
 export const getUserById = catchAsync(async (req, res) => {

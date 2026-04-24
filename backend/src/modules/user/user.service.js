@@ -23,7 +23,7 @@ const buildInvitation = () => {
 
 const getInviteLink = (token) => {
   const appBaseUrl = (
-    process.env.APP_BASE_URL || "http://localhost:3000"
+    process.env.APP_BASE_URL || "http://localhost:4000"
   ).replace(/\/$/, "");
 
   return `${appBaseUrl}/activate-account?token=${token}`;
@@ -72,6 +72,7 @@ export const inviteUserService = async ({
 
   const { token: invitationToken, expiresAt: invitationExpires } =
     buildInvitation();
+  const inviteLink = getInviteLink(invitationToken);
 
   const user = await createUserRecord({
     firstName: firstName.trim(),
@@ -87,12 +88,12 @@ export const inviteUserService = async ({
     user,
     invitationToken,
     invitationExpires,
-    inviteLink: getInviteLink(invitationToken),
+    inviteLink,
   };
 };
 
-export const listUsersService = async () => {
-  return findUsersWithRole();
+export const listUsersService = async ({ requesterUserId } = {}) => {
+  return findUsersWithRole({ excludeUserId: requesterUserId });
 };
 
 export const getUserByIdService = async ({ userId }) => {
