@@ -1,11 +1,14 @@
 /**
  * @swagger
+ *
+ * # Admin - Institution Endpoints
+ *
  * /api/institutions:
  *   get:
  *     summary: List institutions (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Institutions
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -20,7 +23,7 @@
  *     summary: Create a new institution (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Institutions
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -144,7 +147,7 @@
  *     summary: Get institution by ID (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Institutions
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -168,7 +171,7 @@
  *     summary: Update institution by ID (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Institutions
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []

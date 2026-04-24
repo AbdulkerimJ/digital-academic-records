@@ -130,7 +130,7 @@
  *     summary: List all application users (Admin only)
  *     description: Accessible only to SUPER_ADMIN users. The currently authenticated requester is excluded from the returned list.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -144,7 +144,7 @@
  *     summary: Invite an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -186,7 +186,7 @@
  *     summary: Get an application user by ID (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -209,7 +209,7 @@
  *     summary: Update an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -253,7 +253,7 @@
  *     summary: Delete an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -278,7 +278,7 @@
  *     summary: Resend activation invite for an inactive user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -305,7 +305,7 @@
  *     summary: Revoke activation invite for an inactive user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
- *       - Admin
+ *       - Admin - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
