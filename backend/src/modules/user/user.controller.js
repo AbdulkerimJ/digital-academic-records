@@ -9,6 +9,7 @@ import {
   revokeInviteService,
   suspendUserService,
   unsuspendUserService,
+  updateMyProfileService,
   updateUserService,
 } from "./user.service.js";
 
@@ -49,6 +50,18 @@ export const update = catchAsync(async (req, res) => {
   });
 
   return sendSuccess(res, "User updated successfully", { user });
+});
+
+export const updateMe = catchAsync(async (req, res) => {
+  const { firstName, lastName } = req.body || {};
+
+  const user = await updateMyProfileService({
+    userId: req.user.id,
+    firstName,
+    lastName,
+  });
+
+  return sendSuccess(res, "Profile updated successfully", { user });
 });
 
 export const remove = catchAsync(async (req, res) => {

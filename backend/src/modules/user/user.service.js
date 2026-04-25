@@ -234,6 +234,54 @@ export const updateUserService = async ({
   return updatedUser;
 };
 
+export const updateMyProfileService = async ({
+  userId,
+  firstName,
+  lastName,
+}) => {
+  if (!userId) {
+    throw new AppError("userId is required", 400);
+  }
+
+  const currentUser = await findUserByIdWithRole(userId);
+  if (!currentUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  const hasFirstName = firstName !== undefined;
+  const hasLastName = lastName !== undefined;
+
+  if (!hasFirstName && !hasLastName) {
+    throw new AppError(
+      "At least one field is required to update your profile",
+      400,
+    );
+  }
+
+  const nextFirstName = hasFirstName ? String(firstName).trim() : null;
+  const nextLastName = hasLastName ? String(lastName).trim() : null;
+
+  if (hasFirstName && !nextFirstName) {
+    throw new AppError("firstName cannot be empty", 400);
+  }
+
+  if (hasLastName && !nextLastName) {
+    throw new AppError("lastName cannot be empty", 400);
+  }
+
+  const updatedUser = await updateUserById({
+    id: userId,
+    firstName: nextFirstName,
+    lastName: nextLastName,
+  });
+
+  if (!updatedUser) {
+    throw new AppError("Failed to update profile", 500);
+  }
+
+  return updatedUser;
+};
+
 export const deleteUserService = async ({ userId }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);

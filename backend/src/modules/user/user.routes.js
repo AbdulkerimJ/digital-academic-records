@@ -16,6 +16,7 @@ import {
   revokeInvite,
   suspend,
   unsuspend,
+  updateMe,
   update,
 } from "./user.controller.js";
 import { protectUser, restrictTo } from "./user.middleware.js";
@@ -29,6 +30,8 @@ router.post("/activate-invite", activateInvite);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);
 router.get("/me", protectUser, getMe);
+router.patch("/me", protectUser, updateMe);
+router.patch("/change-password", protectUser, changePassword);
 router.get("/:userId", protectUser, restrictTo("SUPER_ADMIN"), getUserById);
 router.post(
   "/:userId/resend-invite",
@@ -56,6 +59,5 @@ router.patch(
 );
 router.patch("/:userId", protectUser, restrictTo("SUPER_ADMIN"), update);
 router.delete("/:userId", protectUser, restrictTo("SUPER_ADMIN"), remove);
-router.patch("/change-password", protectUser, changePassword);
 
 export default router;

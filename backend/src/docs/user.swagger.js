@@ -92,6 +92,32 @@
  *         description: Current user fetched successfully
  *       401:
  *         description: Not logged in
+ *   patch:
+ *     summary: Update currently authenticated user profile
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Not logged in
+ *       404:
+ *         description: User not found
  *
  * /api/users/change-password:
  *   patch:
