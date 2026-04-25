@@ -96,9 +96,14 @@ export const findUserByIdWithRole = async (id) => {
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
-            roles.role_name AS "roleName"
+                 roles.role_name AS "roleName",
+                 suspender.id AS "suspenderId",
+                 suspender.first_name AS "suspenderFirstName",
+                 suspender.last_name AS "suspenderLastName",
+                 suspender.email AS "suspenderEmail"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
+               LEFT JOIN app_user AS suspender ON suspender.id = app_user.suspended_by
      WHERE app_user.id = $1`,
     [id],
   );
