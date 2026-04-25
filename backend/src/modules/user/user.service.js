@@ -6,6 +6,7 @@ import {
   deleteUserById,
   findUserByEmail,
   findUserByIdWithRole,
+  findRoles,
   findUsersWithRole,
   getRoleById,
   replaceInvitationByUserId,
@@ -96,6 +97,10 @@ export const inviteUserService = async ({
 
 export const listUsersService = async ({ requesterUserId } = {}) => {
   return findUsersWithRole({ excludeUserId: requesterUserId });
+};
+
+export const listRolesService = async () => {
+  return findRoles();
 };
 
 export const getUserByIdService = async ({ userId }) => {

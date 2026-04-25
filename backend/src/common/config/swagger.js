@@ -37,6 +37,10 @@ const options = {
         description: "Institution management endpoints",
       },
       {
+        name: "Roles",
+        description: "Role lookup endpoints",
+      },
+      {
         name: "Citizens",
         description: "Citizen lookup endpoints",
       },

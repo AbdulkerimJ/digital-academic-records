@@ -80,6 +80,22 @@
  *       400:
  *         description: Invalid token, expired invite, or weak password
  *
+ * /api/users/roles:
+ *   get:
+ *     summary: List roles (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Roles fetched successfully
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *
  * /api/users/me:
  *   get:
  *     summary: Get currently authenticated user profile

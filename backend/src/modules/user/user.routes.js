@@ -11,6 +11,7 @@ import {
   create,
   getUserById,
   list,
+  listRoles,
   remove,
   resendInvite,
   revokeInvite,
@@ -27,6 +28,7 @@ router.post("/login", login);
 router.post("/refresh", refresh);
 router.post("/logout", protectUser, logout);
 router.post("/activate-invite", activateInvite);
+router.get("/roles", protectUser, restrictTo("SUPER_ADMIN"), listRoles);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);
 router.get("/me", protectUser, getMe);

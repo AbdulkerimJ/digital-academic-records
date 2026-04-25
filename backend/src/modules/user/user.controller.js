@@ -4,6 +4,7 @@ import {
   deleteUserService,
   getUserByIdService,
   inviteUserService,
+  listRolesService,
   listUsersService,
   resendInviteService,
   revokeInviteService,
@@ -34,6 +35,15 @@ export const list = catchAsync(async (req, res) => {
   return sendSuccess(res, "Users fetched successfully", {
     count: users.length,
     users,
+  });
+});
+
+export const listRoles = catchAsync(async (req, res) => {
+  const roles = await listRolesService();
+
+  return sendSuccess(res, "Roles fetched successfully", {
+    count: roles.length,
+    roles,
   });
 });
 

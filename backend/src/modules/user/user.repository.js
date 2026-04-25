@@ -1,5 +1,16 @@
 import pool from "../../common/config/pool.js";
 
+export const findRoles = async () => {
+  const result = await pool.query(
+    `SELECT id,
+            role_name
+     FROM roles
+     ORDER BY id ASC`,
+  );
+
+  return result.rows;
+};
+
 export const getRoleById = async (roleId) => {
   const result = await pool.query(
     `SELECT 1
