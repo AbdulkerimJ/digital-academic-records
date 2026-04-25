@@ -20,6 +20,10 @@ export const findUserByEmail = async (email) => {
             email,
             password_hash AS "passwordHash",
             is_active AS "isActive",
+            is_suspended AS "isSuspended",
+            suspended_at AS "suspendedAt",
+            suspended_by AS "suspendedBy",
+            suspension_reason AS "suspensionReason",
             invitation_token AS "invitationToken",
             invitation_expires AS "invitationExpires",
             reset_token AS "resetToken",
@@ -46,6 +50,10 @@ export const findUserByEmailWithRole = async (email) => {
             app_user.email,
             app_user.password_hash AS "passwordHash",
             app_user.is_active AS "isActive",
+            app_user.is_suspended AS "isSuspended",
+            app_user.suspended_at AS "suspendedAt",
+            app_user.suspended_by AS "suspendedBy",
+            app_user.suspension_reason AS "suspensionReason",
             app_user.invitation_token AS "invitationToken",
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
@@ -74,6 +82,10 @@ export const findUserByIdWithRole = async (id) => {
             app_user.email,
             app_user.password_hash AS "passwordHash",
             app_user.is_active AS "isActive",
+            app_user.is_suspended AS "isSuspended",
+            app_user.suspended_at AS "suspendedAt",
+            app_user.suspended_by AS "suspendedBy",
+            app_user.suspension_reason AS "suspensionReason",
             app_user.invitation_token AS "invitationToken",
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
@@ -101,6 +113,9 @@ export const findUsersWithRole = async ({ excludeUserId } = {}) => {
             app_user.last_name AS "lastName",
             app_user.email,
             app_user.is_active AS "isActive",
+            app_user.is_suspended AS "isSuspended",
+            app_user.suspended_at AS "suspendedAt",
+            app_user.suspension_reason AS "suspensionReason",
             app_user.invitation_token AS "invitationToken",
             app_user.invitation_expires AS "invitationExpires",
             app_user.reset_token AS "resetToken",
@@ -310,6 +325,64 @@ export const incrementUserTokenVersionById = async (id) => {
      WHERE id = $1
      RETURNING id,
                token_version AS "tokenVersion"`,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const suspendUserById = async ({
+  id,
+  suspendedBy,
+  suspensionReason,
+}) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET is_suspended = TRUE,
+         suspended_at = CURRENT_TIMESTAMP,
+         suspended_by = $2,
+         suspension_reason = $3,
+         token_version = token_version + 1,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING id,
+               first_name AS "firstName",
+               last_name AS "lastName",
+               email,
+               is_active AS "isActive",
+               is_suspended AS "isSuspended",
+               suspended_at AS "suspendedAt",
+               suspended_by AS "suspendedBy",
+               suspension_reason AS "suspensionReason",
+               token_version AS "tokenVersion",
+               updated_at AS "updatedAt"`,
+    [id, suspendedBy, suspensionReason || null],
+  );
+
+  return result.rows[0] || null;
+};
+
+export const unsuspendUserById = async ({ id }) => {
+  const result = await pool.query(
+    `UPDATE app_user
+     SET is_suspended = FALSE,
+         suspended_at = NULL,
+         suspended_by = NULL,
+         suspension_reason = NULL,
+         token_version = token_version + 1,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+     RETURNING id,
+               first_name AS "firstName",
+               last_name AS "lastName",
+               email,
+               is_active AS "isActive",
+               is_suspended AS "isSuspended",
+               suspended_at AS "suspendedAt",
+               suspended_by AS "suspendedBy",
+               suspension_reason AS "suspensionReason",
+               token_version AS "tokenVersion",
+               updated_at AS "updatedAt"`,
     [id],
   );
 

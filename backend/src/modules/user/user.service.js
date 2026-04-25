@@ -10,6 +10,8 @@ import {
   getRoleById,
   replaceInvitationByUserId,
   revokeInvitationByUserId,
+  suspendUserById,
+  unsuspendUserById,
   updateUserById,
 } from "./user.repository.js";
 
@@ -107,13 +109,32 @@ export const getUserByIdService = async ({ userId }) => {
     throw new AppError("User not found", 404);
   }
 
-  const {id, firstName, lastName, email, isActive, roleId, roleName, institutionId, createdAt, updatedAt} = user;
+  const {
+    id,
+    firstName,
+    lastName,
+    email,
+    isActive,
+    isSuspended,
+    suspendedAt,
+    suspendedBy,
+    suspensionReason,
+    roleId,
+    roleName,
+    institutionId,
+    createdAt,
+    updatedAt,
+  } = user;
   return {
     id,
     firstName,
     lastName,
     email,
     isActive,
+    isSuspended,
+    suspendedAt,
+    suspendedBy,
+    suspensionReason,
     roleId,
     roleName,
     institutionId,
@@ -269,4 +290,67 @@ export const resendInviteService = async ({ userId }) => {
     inviteLink,
     invitationExpires,
   };
+};
+
+export const suspendUserService = async ({
+  userId,
+  requesterUserId,
+  reason,
+}) => {
+  if (!userId) {
+    throw new AppError("userId is required", 400);
+  }
+
+  if (!requesterUserId) {
+    throw new AppError("requesterUserId is required", 400);
+  }
+
+  if (userId === requesterUserId) {
+    throw new AppError("You cannot suspend your own account", 400);
+  }
+
+  const user = await findUserByIdWithRole(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.roleName === "SUPER_ADMIN") {
+    throw new AppError("Suspending SUPER_ADMIN is not allowed", 403);
+  }
+
+  if (user.isSuspended) {
+    throw new AppError("User is already suspended", 400);
+  }
+
+  const suspensionReason =
+    reason === undefined || reason === null ? null : String(reason).trim();
+
+  return suspendUserById({
+    id: userId,
+    suspendedBy: requesterUserId,
+    suspensionReason,
+  });
+};
+
+export const unsuspendUserService = async ({ userId, requesterUserId }) => {
+  if (!userId) {
+    throw new AppError("userId is required", 400);
+  }
+
+  if (!requesterUserId) {
+    throw new AppError("requesterUserId is required", 400);
+  }
+
+  const user = await findUserByIdWithRole(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (!user.isSuspended) {
+    throw new AppError("User is not suspended", 400);
+  }
+
+  return unsuspendUserById({ id: userId });
 };

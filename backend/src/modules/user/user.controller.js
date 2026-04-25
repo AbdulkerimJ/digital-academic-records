@@ -7,6 +7,8 @@ import {
   listUsersService,
   resendInviteService,
   revokeInviteService,
+  suspendUserService,
+  unsuspendUserService,
   updateUserService,
 } from "./user.service.js";
 
@@ -73,4 +75,23 @@ export const resendInvite = catchAsync(async (req, res) => {
   return sendSuccess(res, "Invitation resent successfully", {
     user: result.user,
   });
+});
+
+export const suspend = catchAsync(async (req, res) => {
+  const user = await suspendUserService({
+    userId: req.params.userId,
+    requesterUserId: req.user.id,
+    reason: req.body?.reason,
+  });
+
+  return sendSuccess(res, "User suspended successfully", { user });
+});
+
+export const unsuspend = catchAsync(async (req, res) => {
+  const user = await unsuspendUserService({
+    userId: req.params.userId,
+    requesterUserId: req.user.id,
+  });
+
+  return sendSuccess(res, "User unsuspended successfully", { user });
 });

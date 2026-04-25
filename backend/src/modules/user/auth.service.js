@@ -70,6 +70,10 @@ export const loginUserService = async ({ email, password }) => {
     );
   }
 
+  if (user.isSuspended) {
+    throw new AppError("Account is suspended. Please contact support.", 403);
+  }
+
   const isMatch = await comparePassword(password, user.passwordHash);
 
   if (!isMatch) {
@@ -95,6 +99,10 @@ export const getUserAuthContextService = async (decoded) => {
 
   if (!user.isActive) {
     throw new AppError("Account is not active. Please contact support.", 403);
+  }
+
+  if (user.isSuspended) {
+    throw new AppError("Account is suspended. Please contact support.", 403);
   }
 
   if (decoded.tokenVersion !== user.tokenVersion) {
@@ -143,6 +151,10 @@ export const refreshUserSessionService = async (refreshToken) => {
 
   if (!user.isActive) {
     throw new AppError("Account is not active", 403);
+  }
+
+  if (user.isSuspended) {
+    throw new AppError("Account is suspended. Please contact support.", 403);
   }
 
   if (decoded.tokenVersion !== user.tokenVersion) {

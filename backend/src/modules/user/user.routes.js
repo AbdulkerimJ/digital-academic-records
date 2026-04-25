@@ -14,6 +14,8 @@ import {
   remove,
   resendInvite,
   revokeInvite,
+  suspend,
+  unsuspend,
   update,
 } from "./user.controller.js";
 import { protectUser, restrictTo } from "./user.middleware.js";
@@ -39,6 +41,18 @@ router.patch(
   protectUser,
   restrictTo("SUPER_ADMIN"),
   revokeInvite,
+);
+router.patch(
+  "/:userId/suspend",
+  protectUser,
+  restrictTo("SUPER_ADMIN"),
+  suspend,
+);
+router.patch(
+  "/:userId/unsuspend",
+  protectUser,
+  restrictTo("SUPER_ADMIN"),
+  unsuspend,
 );
 router.patch("/:userId", protectUser, restrictTo("SUPER_ADMIN"), update);
 router.delete("/:userId", protectUser, restrictTo("SUPER_ADMIN"), remove);

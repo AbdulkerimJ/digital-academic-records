@@ -326,6 +326,69 @@
  *         description: Forbidden (requires SUPER_ADMIN)
  *       404:
  *         description: User not found
+ *
+ * /api/users/{userId}/suspend:
+ *   patch:
+ *     summary: Suspend a user account (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users. Suspended users cannot log in or refresh sessions.
+ *     tags:
+ *       - Admin - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User suspended successfully
+ *       400:
+ *         description: Invalid request or user is already suspended
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
+ *
+ * /api/users/{userId}/unsuspend:
+ *   patch:
+ *     summary: Unsuspend a user account (Admin only)
+ *     description: Accessible only to SUPER_ADMIN users.
+ *     tags:
+ *       - Admin - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User unsuspended successfully
+ *       400:
+ *         description: Invalid request or user is not suspended
+ *       401:
+ *         description: Not logged in
+ *       403:
+ *         description: Forbidden (requires SUPER_ADMIN)
+ *       404:
+ *         description: User not found
  */
 
 export {};

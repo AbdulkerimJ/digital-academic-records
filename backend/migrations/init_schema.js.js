@@ -65,6 +65,10 @@ async function migrate() {
 
     -- ACCOUNT LIFECYCLE
     is_active BOOLEAN DEFAULT FALSE,
+    is_suspended BOOLEAN DEFAULT FALSE,
+    suspended_at TIMESTAMP,
+    suspended_by UUID,
+    suspension_reason TEXT,
 
     -- INVITE FLOW (admin → user activation)
     invitation_token TEXT,
@@ -88,6 +92,9 @@ async function migrate() {
     FOREIGN KEY (institution_id)
         REFERENCES institution(id)
         ON DELETE RESTRICT,
+    FOREIGN KEY (suspended_by)
+      REFERENCES app_user(id)
+      ON DELETE SET NULL,
 
     CONSTRAINT check_institution_for_non_super_admin
     CHECK (
