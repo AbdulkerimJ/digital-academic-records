@@ -92,6 +92,7 @@
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
+ *     description: At least one of totalScore, averageScore or percentile must be provided.
  *     requestBody:
  *       required: true
  *       content:

@@ -1,6 +1,6 @@
 import AppError from "../../common/utils/appError.js";
 import jwt from "jsonwebtoken";
-import { getCitizen, sendOtp, verifyOtp } from "../citizen/fayda.client.js";
+import { getCitizen, sendOtp, verifyOtp } from "../citizens/fayda.client.js";
 import {
   createStudentFromCitizen,
   findStudentByNationalId,

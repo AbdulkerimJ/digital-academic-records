@@ -7,11 +7,11 @@ import swaggerSpec from "./common/config/swagger.js";
 import AppError from "./common/utils/appError.js";
 import globalErrorHandler from "./common/controllers/error.controller.js";
 
-import studentRoutes from "./modules/student/student.routes.js";
-import userRoutes from "./modules/user/user.routes.js";
-import getCitizenRoutes from "./modules/citizen/citizen.routes.js";
-import institutionRoutes from "./modules/institution/institution.routes.js";
-import examRoutes from "./modules/exam/exam.routes.js";
+import studentRoutes from "./modules/students/student.routes.js";
+import userRoutes from "./modules/users/user.routes.js";
+import getCitizenRoutes from "./modules/citizens/citizen.routes.js";
+import institutionRoutes from "./modules/institutions/institution.routes.js";
+import examRoutes from "./modules/exams/exam.routes.js";
 
 const app = express();
 

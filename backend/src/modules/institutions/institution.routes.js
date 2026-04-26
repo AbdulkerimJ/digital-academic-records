@@ -5,7 +5,7 @@ import {
   listInstitutions,
   updateInstitution,
 } from "./institution.controller.js";
-import { protectUser, restrictTo } from "../user/user.middleware.js";
+import { protectUser, restrictTo } from "../users/user.middleware.js";
 
 const router = express.Router();
 

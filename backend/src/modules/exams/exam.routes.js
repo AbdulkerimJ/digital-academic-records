@@ -9,7 +9,7 @@ import {
   updateExamRecord,
   listExamRecordsByType,
 } from "./exam.controller.js";
-import { protectUser, restrictTo } from "../user/user.middleware.js";
+import { protectUser, restrictTo } from "../users/user.middleware.js";
 
 const router = express.Router();
 

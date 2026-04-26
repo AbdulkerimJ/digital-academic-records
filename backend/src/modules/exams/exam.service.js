@@ -103,6 +103,17 @@ export const createExamRecordService = async ({
     throw new AppError("Result status must be PASS or FAIL.", 400);
   }
 
+  if (
+    totalScore === undefined &&
+    averageScore === undefined &&
+    percentile === undefined
+  ) {
+    throw new AppError(
+      "At least one exam score field is required: totalScore, averageScore, or percentile.",
+      400,
+    );
+  }
+
   return createExamRecordRecord({
     studentId,
     examTypeId,

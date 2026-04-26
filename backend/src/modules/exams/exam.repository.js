@@ -79,7 +79,7 @@ export const createExamRecordRecord = async ({
   resultStatus,
 }) => {
   const result = await pool.query(
-    `INSERT INTO exam_records (
+    `INSERT INTO exams (
        student_id,
        exam_type_id,
        institution_id,
@@ -108,22 +108,22 @@ export const createExamRecordRecord = async ({
 
 export const findExamRecordById = async (id) => {
   const result = await pool.query(
-    `SELECT er.id,
-            er.student_id AS "studentId",
-            er.exam_type_id AS "examTypeId",
+    `SELECT e.id,
+            e.student_id AS "studentId",
+            e.exam_type_id AS "examTypeId",
             et.code AS "examTypeCode",
             et.name AS "examTypeName",
-            er.institution_id AS "institutionId",
-            er.year,
-            er.total_score AS "totalScore",
-            er.average_score AS "averageScore",
-            er.percentile,
-            er.result_status AS "resultStatus",
-            er.created_at AS "createdAt",
-            er.updated_at AS "updatedAt"
-     FROM exam_records er
-     JOIN exam_types et ON er.exam_type_id = et.id
-     WHERE er.id = $1
+            e.institution_id AS "institutionId",
+            e.year,
+            e.total_score AS "totalScore",
+            e.average_score AS "averageScore",
+            e.percentile,
+            e.result_status AS "resultStatus",
+            e.created_at AS "createdAt",
+            e.updated_at AS "updatedAt"
+     FROM exams e
+     JOIN exam_types et ON e.exam_type_id = et.id
+     WHERE e.id = $1
      LIMIT 1`,
     [id],
   );
@@ -140,7 +140,7 @@ export const findExamRecords = async ({
 
   if (institutionId !== null) {
     params.push(institutionId);
-    conditions.push(`er.institution_id = $${params.length}`);
+    conditions.push(`e.institution_id = $${params.length}`);
   }
 
   if (examTypeCode !== null) {
@@ -148,21 +148,21 @@ export const findExamRecords = async ({
     conditions.push(`UPPER(TRIM(et.code)) = UPPER(TRIM($${params.length}))`);
   }
 
-  let sql = `SELECT er.id,
-            er.student_id AS "studentId",
-            er.exam_type_id AS "examTypeId",
+  let sql = `SELECT e.id,
+            e.student_id AS "studentId",
+            e.exam_type_id AS "examTypeId",
             et.code AS "examTypeCode",
             et.name AS "examTypeName",
-            er.institution_id AS "institutionId",
-            er.year,
-            er.total_score AS "totalScore",
-            er.average_score AS "averageScore",
-            er.percentile,
-            er.result_status AS "resultStatus",
-            er.created_at AS "createdAt",
-            er.updated_at AS "updatedAt"
-     FROM exam_records er
-     JOIN exam_types et ON er.exam_type_id = et.id`;
+            e.institution_id AS "institutionId",
+            e.year,
+            e.total_score AS "totalScore",
+            e.average_score AS "averageScore",
+            e.percentile,
+            e.result_status AS "resultStatus",
+            e.created_at AS "createdAt",
+            e.updated_at AS "updatedAt"
+     FROM exams e
+     JOIN exam_types et ON e.exam_type_id = et.id`;
 
   if (conditions.length > 0) {
     sql += `\n     WHERE ${conditions.join(" AND ")}`;
@@ -183,7 +183,7 @@ export const updateExamRecordById = async ({
   resultStatus = null,
 }) => {
   const result = await pool.query(
-    `UPDATE exam_records
+    `UPDATE exams
      SET year = COALESCE($2, year),
          total_score = COALESCE($3, total_score),
          average_score = COALESCE($4, average_score),

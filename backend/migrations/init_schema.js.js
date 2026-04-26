@@ -99,7 +99,7 @@ async function migrate() {
     )
 );
     `);
-    // ===================== RECORD TYPES =====================
+    // ===================== CERTIFICATE TYPES =====================
     await pool.query(`
     CREATE TABLE IF NOT EXISTS certificate_types (
     id SERIAL PRIMARY KEY,
