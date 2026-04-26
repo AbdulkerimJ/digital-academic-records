@@ -80,17 +80,17 @@ export const createExamRecordRecord = async ({
 }) => {
   const result = await pool.query(
     `INSERT INTO exams (
-       student_id,
-       exam_type_id,
-       institution_id,
-       year,
-       total_score,
-       average_score,
-       percentile,
-       result_status
-     )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id`,
+      student_id,
+      exam_type_id,
+      institution_id,
+      year,
+      total_score,
+      average_score,
+      percentile,
+      result_status
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id`,
     [
       studentId,
       examTypeId,
@@ -131,44 +131,69 @@ export const findExamRecordById = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findExamRecords = async ({
-  institutionId = null,
-  examTypeCode = null,
-} = {}) => {
+export const findExamRecords = async (query = {}, pagination = {}) => {
+  let sql = `
+    SELECT 
+      e.id,
+      e.student_id AS "studentId",
+      e.exam_type_id AS "examTypeId",
+      et.code AS "examTypeCode",
+      et.name AS "examTypeName",
+      e.institution_id AS "institutionId",
+      e.year,
+      e.total_score AS "totalScore",
+      e.average_score AS "averageScore",
+      e.percentile,
+      e.result_status AS "resultStatus",
+      e.created_at AS "createdAt",
+      e.updated_at AS "updatedAt"
+    FROM exams e
+    JOIN exam_types et ON e.exam_type_id = et.id
+  `;
+
   const conditions = [];
   const params = [];
 
-  if (institutionId !== null) {
+  const { institutionId, examTypeCode, year, studentId } = query;
+  const { page = 1, limit = 10 } = pagination;
+
+  const offset = (page - 1) * limit;
+
+  if (institutionId) {
     params.push(institutionId);
     conditions.push(`e.institution_id = $${params.length}`);
   }
 
-  if (examTypeCode !== null) {
+  if (examTypeCode) {
     params.push(examTypeCode);
-    conditions.push(`UPPER(TRIM(et.code)) = UPPER(TRIM($${params.length}))`);
+    conditions.push(`et.code = $${params.length}`);
   }
 
-  let sql = `SELECT e.id,
-            e.student_id AS "studentId",
-            e.exam_type_id AS "examTypeId",
-            et.code AS "examTypeCode",
-            et.name AS "examTypeName",
-            e.institution_id AS "institutionId",
-            e.year,
-            e.total_score AS "totalScore",
-            e.average_score AS "averageScore",
-            e.percentile,
-            e.result_status AS "resultStatus",
-            e.created_at AS "createdAt",
-            e.updated_at AS "updatedAt"
-     FROM exams e
-     JOIN exam_types et ON e.exam_type_id = et.id`;
+  if (year) {
+    params.push(year);
+    conditions.push(`e.year = $${params.length}`);
+  }
+
+  if (studentId) {
+    params.push(studentId);
+    conditions.push(`e.student_id = $${params.length}`);
+  }
 
   if (conditions.length > 0) {
-    sql += `\n     WHERE ${conditions.join(" AND ")}`;
+    sql += ` WHERE ` + conditions.join(" AND ");
   }
 
-  sql += `\n     ORDER BY er.created_at DESC`;
+  sql += ` ORDER BY e.created_at DESC`;
+
+  // pagination
+  params.push(limit);
+  const limitIndex = params.length;
+
+  params.push(offset);
+  const offsetIndex = params.length;
+
+  sql += ` LIMIT $${limitIndex}`;
+  sql += ` OFFSET $${offsetIndex}`;
 
   const result = await pool.query(sql, params);
   return result.rows;
@@ -196,4 +221,20 @@ export const updateExamRecordById = async ({
   );
 
   return result.rows[0] || null;
+};
+
+export const deleteExamRecordById = async (id, institutionId = null) => {
+  let sql = `DELETE FROM exams WHERE id = $1`;
+  const params = [id];
+
+  // enforce institution scope if provided
+  if (institutionId) {
+    params.push(institutionId);
+    sql += ` AND institution_id = $2`;
+  }
+
+  sql += ` RETURNING id`;
+
+  const result = await pool.query(sql, params);
+  return result.rows[0]; // undefined if not found / not allowed
 };

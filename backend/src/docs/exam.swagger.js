@@ -43,6 +43,22 @@
  *         description: Exam type created successfully
  *
  * /api/exams/types/{examTypeId}:
+ *   get:
+ *     summary: Get exam type by ID
+ *     tags:
+ *       - Exams
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: examTypeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Exam type fetched successfully
  *   patch:
  *     summary: Update an exam type (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
@@ -74,7 +90,7 @@
  *       200:
  *         description: Exam type updated successfully
  *
- * /api/exams/records:
+ * /api/exams:
  *   get:
  *     summary: List exam records
  *     tags:
@@ -82,6 +98,23 @@
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: examTypeCode
+ *         schema:
+ *           type: string
+ *         description: Filter by exam type code
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *         description: Filter by year
+ *       - in: query
+ *         name: studentId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Filter by student ID
  *     responses:
  *       200:
  *         description: Exam records fetched successfully
@@ -131,26 +164,7 @@
  *       201:
  *         description: Exam record created successfully
  *
- * /api/exams/records/type/{examTypeCode}:
- *   get:
- *     summary: List exam records by exam type code
- *     tags:
- *       - Exams
- *     security:
- *       - bearerAuth: []
- *       - cookieAuth: []
- *     parameters:
- *       - in: path
- *         name: examTypeCode
- *         required: true
- *         schema:
- *           type: string
- *         description: Exam type code to filter records by
- *     responses:
- *       200:
- *         description: Exam records fetched successfully
- *
- * /api/exams/records/{recordId}:
+ * /api/exams/{examId}:
  *   get:
  *     summary: Get exam record by ID
  *     tags:
@@ -160,7 +174,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: recordId
+ *         name: examId
  *         required: true
  *         schema:
  *           type: string
@@ -177,7 +191,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: recordId
+ *         name: examId
  *         required: true
  *         schema:
  *           type: string
@@ -202,9 +216,23 @@
  *                 enum:
  *                   - PASS
  *                   - FAIL
+ *   delete:
+ *     summary: Delete an exam record
+ *     tags:
+ *       - Exams
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
  *     responses:
  *       200:
- *         description: Exam record updated successfully
+ *         description: Exam record deleted successfully
  */
 
 export {};
