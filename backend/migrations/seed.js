@@ -18,14 +18,24 @@ async function seed() {
       ON CONFLICT (role_name) DO NOTHING;
     `);
 
-    // ================= ACADEMIC LEVELS =================
+    // ================= RECORD TYPES =================
     await pool.query(`
-      INSERT INTO academic_levels (name)
+      INSERT INTO record_types (name)
       VALUES 
-        ('PRIMARY'),
-        ('SECONDARY'),
-        ('HIGHER')
+        ('EXAM'),
+        ('CERTIFICATE')
       ON CONFLICT (name) DO NOTHING;
+    `);
+
+    // ================= EXAM TYPES =================
+    await pool.query(`
+      INSERT INTO exam_types (code, name)
+      VALUES 
+        ('GRADE_6', 'Grade 6 Exam'),
+        ('GRADE_8', 'Grade 8 Exam'),
+        ('GRADE_12', 'Grade 12 Exam'),
+        ('EXIT', 'Exit Exam')
+      ON CONFLICT (code) DO NOTHING;
     `);
 
     // ================= INSTITUTION =================
@@ -38,30 +48,32 @@ async function seed() {
     `);
 
     // ================= SUPER ADMIN =================
-const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
-const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
 
-if (!superAdminEmail || !superAdminPassword) {
-  throw new Error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD are required");
-}
+    if (!superAdminEmail || !superAdminPassword) {
+      throw new Error(
+        "SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD are required",
+      );
+    }
 
-// 1. Ensure role exists
-const roleResult = await pool.query(
-  `SELECT id FROM roles WHERE role_name = 'SUPER_ADMIN'`
-);
+    // 1. Ensure role exists
+    const roleResult = await pool.query(
+      `SELECT id FROM roles WHERE role_name = 'SUPER_ADMIN'`,
+    );
 
-if (roleResult.rowCount === 0) {
-  throw new Error("SUPER_ADMIN role not found");
-}
+    if (roleResult.rowCount === 0) {
+      throw new Error("SUPER_ADMIN role not found");
+    }
 
-const roleId = roleResult.rows[0].id;
+    const roleId = roleResult.rows[0].id;
 
-// 2. Hash password
-const passwordHash = await bcrypt.hash(superAdminPassword, 10);
+    // 2. Hash password
+    const passwordHash = await bcrypt.hash(superAdminPassword, 10);
 
-// 3. Insert or update super admin
-await pool.query(
-  `
+    // 3. Insert or update super admin
+    await pool.query(
+      `
   INSERT INTO app_user (
     first_name,
     last_name,
@@ -80,8 +92,8 @@ await pool.query(
     institution_id = NULL,
     updated_at = CURRENT_TIMESTAMP;
   `,
-  ["Super", "Admin", superAdminEmail, passwordHash, roleId]
-);
+      ["Super", "Admin", superAdminEmail, passwordHash, roleId],
+    );
 
     console.log("Seeding completed!");
   } catch (err) {

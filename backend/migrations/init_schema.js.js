@@ -24,12 +24,8 @@ async function migrate() {
 
         type TEXT NOT NULL CHECK (
           type IN (
-            'GOVERNMENT_BODY',
             'EXAM_BOARD',
-            'UNIVERSITY',
             'COLLEGE',
-            'REGIONAL_OFFICE',
-            'OTHER'
           )
         ),
 
@@ -103,47 +99,107 @@ async function migrate() {
     )
 );
     `);
-
-    // ===================== ACADEMIC LEVELS =====================
+    // ===================== RECORD TYPES =====================
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS academic_levels (
+    CREATE TABLE IF NOT EXISTS certificate_types (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+    `);
+
+    // ===================== EXAM TYPES =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exam_types (
         id SERIAL PRIMARY KEY,
-        name TEXT UNIQUE NOT NULL
+        code TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // ===================== ACADEMIC RECORD =====================
+    // ===================== EXAM RECORDS =====================
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS academic_record (
+      CREATE TABLE IF NOT EXISTS exams (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
         student_id UUID NOT NULL,
+        exam_type_id INT NOT NULL,
         institution_id UUID NOT NULL,
-        level_id INT NOT NULL,
 
-        field_of_study TEXT,
-        score FLOAT,
-        year INT,
+        year INT NOT NULL,
 
-        status TEXT NOT NULL DEFAULT 'PENDING' CHECK (
-          status IN ('PENDING', 'VERIFIED', 'REJECTED')
-        ),
+        total_score FLOAT,
+        average_score FLOAT,
+        percentile FLOAT,
 
-        qr_hash TEXT UNIQUE,
+        result_status TEXT NOT NULL CHECK (
+          result_status IN ('PASS', 'FAIL')
+      ),
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+        -- Relationships
         FOREIGN KEY (student_id)
           REFERENCES student(id)
-          ON DELETE CASCADE,
+          ON DELETE RESTRICT,
 
-        FOREIGN KEY (institution_id)
-          REFERENCES institution(id),
+      FOREIGN KEY (exam_type_id)
+        REFERENCES exam_types(id)
+        ON DELETE RESTRICT,
 
-        FOREIGN KEY (level_id)
-          REFERENCES academic_levels(id)
-      );
+      FOREIGN KEY (institution_id)
+        REFERENCES institution(id)
+        ON DELETE RESTRICT,
+
+      -- Prevent duplicates
+      UNIQUE (student_id, exam_type_id, year, institution_id),
+
+        -- Ensure at least one score exists
+        CHECK (
+          total_score IS NOT NULL OR
+          average_score IS NOT NULL OR
+          percentile IS NOT NULL
+        )
+          );
+  `);
+
+    // ===================== CERTIFICATE RECORD =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS certificates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  student_id UUID NOT NULL,
+  institution_id UUID NOT NULL,
+  certificate_type_id INT NOT NULL,
+
+  field_of_study TEXT,
+  gpa FLOAT,
+  graduation_year INT NOT NULL,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  -- Relationships
+  FOREIGN KEY (student_id)
+    REFERENCES student(id)
+    ON DELETE RESTRICT,
+
+  FOREIGN KEY (institution_id)
+    REFERENCES institution(id)
+    ON DELETE RESTRICT,
+
+  FOREIGN KEY (certificate_type_id)
+    REFERENCES certificate_types(id)
+    ON DELETE RESTRICT,
+
+  -- Prevent duplicate certificates
+  UNIQUE (student_id, certificate_type_id, institution_id, graduation_year)
+);
     `);
 
     // ===================== CORRECTION REQUEST =====================

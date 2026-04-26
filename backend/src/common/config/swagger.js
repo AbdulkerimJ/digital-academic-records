@@ -25,6 +25,11 @@ const options = {
         description: "Endpoints accessible only to SUPER_ADMIN users",
       },
       {
+        name: "Admin - Exams",
+        description:
+          "Exam administration endpoints accessible only to SUPER_ADMIN users",
+      },
+      {
         name: "Users",
         description: "Application user authentication and profile endpoints",
       },
@@ -43,6 +48,10 @@ const options = {
       {
         name: "Citizens",
         description: "Citizen lookup endpoints",
+      },
+      {
+        name: "Exams",
+        description: "Exam type and exam result endpoints",
       },
       {
         name: "Health",
