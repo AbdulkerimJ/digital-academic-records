@@ -1,5 +1,23 @@
 import pool from "../../common/config/pool.js";
 
+export const findStudentById = async (id) => {
+  const result = await pool.query(
+    `SELECT id,
+            national_id AS "nationalId",
+            first_name AS "firstName",
+            last_name AS "lastName",
+            date_of_birth AS "dateOfBirth",
+            token_version AS "tokenVersion",
+            created_at AS "createdAt"
+     FROM student
+     WHERE id = $1
+     LIMIT 1`,
+    [id],
+  );
+
+  return result.rows[0] || null;
+};
+
 export const findStudentByNationalId = async (faydaId) => {
   const result = await pool.query(
     `SELECT id,

@@ -1,3 +1,5 @@
+import AppError from "./appError.js";
+
 const parseNumber = (value, fieldName) => {
   if (value === undefined) return null;
 

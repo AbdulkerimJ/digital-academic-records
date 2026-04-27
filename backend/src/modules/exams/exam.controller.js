@@ -77,6 +77,7 @@ export const listExamRecords = catchAsync(async (req, res) => {
 
 export const getExamRecordById = catchAsync(async (req, res) => {
   const examRecord = await getExamRecordByIdService({
+    user: req.user,
     examId: req.params.examId,
   });
   return sendSuccess(res, "Exam record fetched successfully", { examRecord });
@@ -84,6 +85,7 @@ export const getExamRecordById = catchAsync(async (req, res) => {
 
 export const updateExamRecord = catchAsync(async (req, res) => {
   const examRecord = await updateExamRecordService({
+    user: req.user,
     examId: req.params.examId,
     ...req.body,
   });

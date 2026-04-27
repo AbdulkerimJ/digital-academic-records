@@ -175,52 +175,59 @@ export const updateUserService = async ({
     throw new AppError("User not found", 404);
   }
 
-  const trimmedFirstName = firstName?.trim();
-  const trimmedLastName = lastName?.trim();
-  const normalizedEmail = email?.trim().toLowerCase();
-  const numericRoleId =
-    roleId === undefined || roleId === null || roleId === ""
-      ? null
-      : Number(roleId);
-  const nextInstitutionId =
-    institutionId === undefined ||
-    institutionId === null ||
-    institutionId === ""
-      ? null
-      : institutionId;
+  // normalize inputs
+  const trimmedFirstName =
+    firstName !== undefined ? String(firstName).trim() : undefined;
 
+  const trimmedLastName =
+    lastName !== undefined ? String(lastName).trim() : undefined;
+
+  const normalizedEmail =
+    email !== undefined ? String(email).trim().toLowerCase() : undefined;
+
+  const numericRoleId =
+    roleId !== undefined && roleId !== null && roleId !== ""
+      ? Number(roleId)
+      : undefined;
+
+  const nextInstitutionId =
+    institutionId !== undefined && institutionId !== null && institutionId !== ""
+      ? institutionId
+      : undefined;
+
+  // validate roleId
   if (
-    numericRoleId !== null &&
+    numericRoleId !== undefined &&
     (!Number.isInteger(numericRoleId) || numericRoleId <= 0)
   ) {
     throw new AppError("roleId must be a positive integer", 400);
   }
 
-  if (numericRoleId !== null) {
-    const isRoleExists = await getRoleById(numericRoleId);
-    if (!isRoleExists) {
+  if (numericRoleId !== undefined) {
+    const roleExists = await getRoleById(numericRoleId);
+    if (!roleExists) {
       throw new AppError("role does not exist", 400);
     }
   }
 
-  if (normalizedEmail) {
+  // email uniqueness check
+  if (normalizedEmail !== undefined) {
     const emailOwner = await findUserByEmail(normalizedEmail);
     if (emailOwner && emailOwner.id !== userId) {
       throw new AppError("User already exists with this email", 400);
     }
   }
 
-  if (
-    trimmedFirstName === null &&
-    trimmedLastName === null &&
-    normalizedEmail === null &&
-    numericRoleId === null &&
-    nextInstitutionId === null
-  ) {
-    throw new AppError(
-      "At least one field is required to update the user",
-      400,
-    );
+  // must update at least one field
+  const hasUpdate =
+    trimmedFirstName !== undefined ||
+    trimmedLastName !== undefined ||
+    normalizedEmail !== undefined ||
+    numericRoleId !== undefined ||
+    nextInstitutionId !== undefined;
+
+  if (!hasUpdate) {
+    throw new AppError("At least one field is required to update the user", 400);
   }
 
   const updatedUser = await updateUserById({
@@ -259,12 +266,17 @@ export const updateMyProfileService = async ({
   if (!hasFirstName && !hasLastName) {
     throw new AppError(
       "At least one field is required to update your profile",
-      400,
+      400
     );
   }
 
-  const nextFirstName = hasFirstName ? String(firstName).trim() : null;
-  const nextLastName = hasLastName ? String(lastName).trim() : null;
+  const nextFirstName = hasFirstName
+    ? String(firstName).trim()
+    : undefined;
+
+  const nextLastName = hasLastName
+    ? String(lastName).trim()
+    : undefined;
 
   if (hasFirstName && !nextFirstName) {
     throw new AppError("firstName cannot be empty", 400);

@@ -100,6 +100,12 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: query
+ *         name: institutionId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Filter by institution ID
+ *       - in: query
  *         name: examTypeCode
  *         schema:
  *           type: string

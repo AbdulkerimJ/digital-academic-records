@@ -25,13 +25,45 @@ async function migrate() {
         type TEXT NOT NULL CHECK (
           type IN (
             'EXAM_BOARD',
-            'COLLEGE',
+            'COLLEGE'
           )
         ),
 
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // ===================== EXAM TYPES =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exam_types (
+        id SERIAL PRIMARY KEY,
+        code TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // ===================== RECORD TYPES =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS record_types (
+        id SERIAL PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // ===================== CERTIFICATE TYPES =====================
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS certificate_types (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
     `);
 
     // ===================== STUDENT =====================
@@ -45,78 +77,6 @@ async function migrate() {
         date_of_birth DATE NOT NULL,
         token_version INT NOT NULL DEFAULT 0,
 
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    // ===================== USER =====================
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS app_user (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT,
-
-    -- ACCOUNT LIFECYCLE
-    is_active BOOLEAN DEFAULT FALSE,
-    is_suspended BOOLEAN DEFAULT FALSE,
-    suspended_at TIMESTAMP,
-    suspended_by UUID,
-    suspension_reason TEXT,
-
-    -- INVITE FLOW (admin → user activation)
-    invitation_token TEXT,
-    invitation_expires TIMESTAMP,
-
-    -- PASSWORD RESET FLOW
-    reset_token TEXT,
-    reset_expires TIMESTAMP,
-
-    -- SECURITY
-    password_changed_at TIMESTAMP,
-    token_version INT NOT NULL DEFAULT 0,
-
-    role_id INT NOT NULL,
-    institution_id UUID,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (role_id) REFERENCES roles(id),
-    FOREIGN KEY (institution_id)
-        REFERENCES institution(id)
-        ON DELETE RESTRICT,
-    FOREIGN KEY (suspended_by)
-      REFERENCES app_user(id)
-      ON DELETE SET NULL,
-
-    CONSTRAINT check_institution_for_non_super_admin
-    CHECK (
-        (role_id = 1 AND institution_id IS NULL) OR
-        (role_id != 1 AND institution_id IS NOT NULL)
-    )
-);
-    `);
-    // ===================== CERTIFICATE TYPES =====================
-    await pool.query(`
-    CREATE TABLE IF NOT EXISTS certificate_types (
-    id SERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-    `);
-
-    // ===================== EXAM TYPES =====================
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS exam_types (
-        id SERIAL PRIMARY KEY,
-        code TEXT UNIQUE NOT NULL,
-        name TEXT NOT NULL,
-        is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -202,13 +162,63 @@ async function migrate() {
 );
     `);
 
+    // ===================== USER =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS app_user (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
+
+    -- ACCOUNT LIFECYCLE
+    is_active BOOLEAN DEFAULT FALSE,
+    is_suspended BOOLEAN DEFAULT FALSE,
+    suspended_at TIMESTAMP,
+    suspended_by UUID,
+    suspension_reason TEXT,
+
+    -- INVITE FLOW (admin → user activation)
+    invitation_token TEXT,
+    invitation_expires TIMESTAMP,
+
+    -- PASSWORD RESET FLOW
+    reset_token TEXT,
+    reset_expires TIMESTAMP,
+
+    -- SECURITY
+    password_changed_at TIMESTAMP,
+    token_version INT NOT NULL DEFAULT 0,
+
+    role_id INT NOT NULL,
+    institution_id UUID,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (institution_id)
+        REFERENCES institution(id)
+        ON DELETE RESTRICT,
+    FOREIGN KEY (suspended_by)
+      REFERENCES app_user(id)
+      ON DELETE SET NULL,
+
+    CONSTRAINT check_institution_for_non_super_admin
+    CHECK (
+        (role_id = 1 AND institution_id IS NULL) OR
+        (role_id != 1 AND institution_id IS NOT NULL)
+    )
+);
+    `);
+
     // ===================== CORRECTION REQUEST =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS correction_request (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
         student_id UUID NOT NULL,
-        academic_record_id UUID NOT NULL,
 
         request_text TEXT NOT NULL,
 
@@ -221,10 +231,6 @@ async function migrate() {
 
         FOREIGN KEY (student_id)
           REFERENCES student(id)
-          ON DELETE CASCADE,
-
-        FOREIGN KEY (academic_record_id)
-          REFERENCES academic_record(id)
           ON DELETE CASCADE
       );
     `);

@@ -12,11 +12,30 @@ async function seed() {
       INSERT INTO roles (role_name)
       VALUES 
         ('SUPER_ADMIN'),
-        ('INSTITUTION_ADMIN'),
-        ('REGISTRAR'),
-        ('STAFF')
+        ('REGISTRAR')
       ON CONFLICT (role_name) DO NOTHING;
     `);
+
+    // ================= INSTITUTION =================
+    await pool.query(`
+      INSERT INTO institution (name, code, type)
+      VALUES 
+      ('Ministry of Education', 'MOE', 'EXAM_BOARD'),
+      ('Regional Exam Board', 'REB', 'EXAM_BOARD'),
+      ('Central College', 'CC', 'COLLEGE')
+      ON CONFLICT (code) DO NOTHING;
+      `);
+
+    // ================= EXAM TYPES =================
+    await pool.query(`
+        INSERT INTO exam_types (code, name)
+        VALUES 
+          ('GRADE_6', 'Grade 6 Exam'),
+          ('GRADE_8', 'Grade 8 Exam'),
+          ('GRADE_12', 'Grade 12 Exam'),
+          ('EXIT', 'Exit Exam')
+        ON CONFLICT (code) DO NOTHING;
+      `);
 
     // ================= RECORD TYPES =================
     await pool.query(`
@@ -27,27 +46,7 @@ async function seed() {
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    // ================= EXAM TYPES =================
-    await pool.query(`
-      INSERT INTO exam_types (code, name)
-      VALUES 
-        ('GRADE_6', 'Grade 6 Exam'),
-        ('GRADE_8', 'Grade 8 Exam'),
-        ('GRADE_12', 'Grade 12 Exam'),
-        ('EXIT', 'Exit Exam')
-      ON CONFLICT (code) DO NOTHING;
-    `);
-
-    // ================= INSTITUTION =================
-    await pool.query(`
-      INSERT INTO institution (name, code, type)
-      VALUES 
-        ('Ministry of Education', 'MOE', 'GOVERNMENT_BODY'),
-        ('Regional Exam Board', 'REB', 'EXAM_BOARD')
-      ON CONFLICT (code) DO NOTHING;
-    `);
-
-    // ================= SUPER ADMIN =================
+    // =================INSERT SUPER ADMIN =================
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
     const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
 
@@ -95,9 +94,35 @@ async function seed() {
       ["Super", "Admin", superAdminEmail, passwordHash, roleId],
     );
 
+    // =================INSERT REGISTRAR =================
+    // use demy data for registrar
+    await pool.query(
+      `
+  INSERT INTO app_user (
+    first_name,
+    last_name,
+    email,
+    password_hash,
+    is_active,
+    role_id,
+    institution_id
+  )
+  VALUES ($1, $2, $3, $4, TRUE, (SELECT id FROM roles WHERE role_name = 'REGISTRAR'), (SELECT id FROM institution WHERE code = 'REB'))
+  ON CONFLICT (email) DO UPDATE
+  SET
+    password_hash = EXCLUDED.password_hash,
+    role_id = EXCLUDED.role_id,
+    is_active = TRUE,
+    institution_id = EXCLUDED.institution_id,
+    updated_at = CURRENT_TIMESTAMP;
+  `,
+      ["John", "Doe", "john.doe@example.com", passwordHash],
+    );
+
     console.log("Seeding completed!");
   } catch (err) {
     console.error("Seed failed:", err.message);
+    process.exitCode = 1;
   } finally {
     await pool.end();
   }

@@ -13,6 +13,7 @@ import {
   deleteExamRecordById,
 } from "./exam.repository.js";
 import { findInstitutionById } from "../institutions/institution.repository.js";
+import { findStudentById } from "../students/student.repository.js";
 
 const normalizeString = (value) =>
   value === undefined || value === null ? null : String(value).trim();
@@ -88,7 +89,6 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     resultStatus,
   } = data;
 
-  // enforce / validate institution
   if (user.role !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
@@ -100,18 +100,20 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     }
   }
 
-  // validate institution exists
   const institution = await findInstitutionById(institutionId);
   if (!institution) {
     throw new AppError("Invalid institution.", 400);
   }
 
-  // required fields
   if (!studentId || !examTypeId || year === undefined) {
     throw new AppError("Student ID, exam type, and year are required.", 400);
   }
 
-  // numeric parsing
+  const student = await findStudentById(studentId);
+  if (!student) {
+    throw new AppError("Student not found.", 400);
+  }
+
   const parsedYear = parseNumber(year, "Year");
   if (parsedYear <= 0) {
     throw new AppError("Year must be greater than 0.", 400);
@@ -129,13 +131,11 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     throw new AppError("At least one exam score field is required.", 400);
   }
 
-  // exam type check
   const examType = await findExamTypeById(examTypeId);
   if (!examType || !examType.isActive) {
     throw new AppError("Exam type not found or inactive.", 400);
   }
 
-  // result status
   const normalizedResultStatus = normalizeString(resultStatus);
   if (
     !normalizedResultStatus ||
@@ -179,18 +179,37 @@ export const getExamTypeByIdService = async ({ examTypeId }) => {
     throw new AppError("Exam type ID is required.", 400);
   }
 
-  return findExamTypeById(examTypeId);
+  const examType = await findExamTypeById(examTypeId);
+  if (!examType) {
+    throw new AppError("Exam type not found.", 404);
+  }
+  return examType;
 };
 
-export const getExamRecordByIdService = async ({ examId }) => {
+export const getExamRecordByIdService = async ({ user, examId }) => {
   if (!examId) {
     throw new AppError("Exam ID is required.", 400);
   }
 
-  return findExamRecordById(examId);
+  let institutionId = null;
+
+  if (user.role !== "SUPER_ADMIN") {
+    if (!user.institutionId) {
+      throw new AppError("Institution context missing for user.", 400);
+    }
+
+    institutionId = user.institutionId;
+  }
+
+  const examRecord = await findExamRecordById(examId, institutionId);
+  if (!examRecord) {
+    throw new AppError("Exam record not found.", 404);
+  }
+  return examRecord;
 };
 
 export const updateExamRecordService = async ({
+  user,
   examId,
   year,
   totalScore,
@@ -202,9 +221,33 @@ export const updateExamRecordService = async ({
     throw new AppError("Exam ID is required.", 400);
   }
 
-  const currentRecord = await findExamRecordById(examId);
+  let institutionId = null;
+
+  if (user.role !== "SUPER_ADMIN") {
+    if (!user.institutionId) {
+      throw new AppError("Institution context missing for user.", 400);
+    }
+
+    institutionId = user.institutionId;
+  } 
+
+  const currentRecord = await findExamRecordById(examId, institutionId);
   if (!currentRecord) {
     throw new AppError("Exam record not found.", 404);
+  }
+
+  const parsedYear = year === undefined ? null : parseNumber(year, "Year");
+  const parsedTotalScore =
+    totalScore === undefined ? null : parseNumber(totalScore, "Total score");
+  const parsedAverageScore =
+    averageScore === undefined
+      ? null
+      : parseNumber(averageScore, "Average score");
+  const parsedPercentile =
+    percentile === undefined ? null : parseNumber(percentile, "Percentile");
+
+  if (parsedYear !== null && parsedYear <= 0) {
+    throw new AppError("Year must be greater than 0.", 400);
   }
 
   const normalizedResultStatus =
@@ -221,10 +264,11 @@ export const updateExamRecordService = async ({
 
   await updateExamRecordById({
     id: examId,
-    year: year === undefined ? null : Number(year),
-    totalScore: totalScore === undefined ? null : Number(totalScore),
-    averageScore: averageScore === undefined ? null : Number(averageScore),
-    percentile: percentile === undefined ? null : Number(percentile),
+    institutionId,
+    year: parsedYear,
+    totalScore: parsedTotalScore,
+    averageScore: parsedAverageScore,
+    percentile: parsedPercentile,
     resultStatus: normalizedResultStatus,
   });
 

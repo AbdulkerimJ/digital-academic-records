@@ -106,27 +106,35 @@ export const createExamRecordRecord = async ({
   return result.rows[0];
 };
 
-export const findExamRecordById = async (id) => {
-  const result = await pool.query(
-    `SELECT e.id,
-            e.student_id AS "studentId",
-            e.exam_type_id AS "examTypeId",
-            et.code AS "examTypeCode",
-            et.name AS "examTypeName",
-            e.institution_id AS "institutionId",
-            e.year,
-            e.total_score AS "totalScore",
-            e.average_score AS "averageScore",
-            e.percentile,
-            e.result_status AS "resultStatus",
-            e.created_at AS "createdAt",
-            e.updated_at AS "updatedAt"
-     FROM exams e
-     JOIN exam_types et ON e.exam_type_id = et.id
-     WHERE e.id = $1
-     LIMIT 1`,
-    [id],
-  );
+export const findExamRecordById = async (id, institutionId = null) => {
+  const params = [id];
+
+  let sql = `
+    SELECT 
+      e.id,
+      e.student_id AS "studentId",
+      e.exam_type_id AS "examTypeId",
+      et.code AS "examTypeCode",
+      et.name AS "examTypeName",
+      e.institution_id AS "institutionId",
+      e.year,
+      e.total_score AS "totalScore",
+      e.average_score AS "averageScore",
+      e.percentile,
+      e.result_status AS "resultStatus",
+      e.created_at AS "createdAt",
+      e.updated_at AS "updatedAt"
+    FROM exams e
+    JOIN exam_types et ON e.exam_type_id = et.id
+    WHERE e.id = $1
+  `;
+
+  if (institutionId) {
+    params.push(institutionId);
+    sql += ` AND e.institution_id = $${params.length}`;
+  }
+
+  const result = await pool.query(sql, params);
 
   return result.rows[0] || null;
 };
@@ -201,24 +209,63 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
 
 export const updateExamRecordById = async ({
   id,
-  year = null,
-  totalScore = null,
-  averageScore = null,
-  percentile = null,
-  resultStatus = null,
+  institutionId = null,
+  year,
+  totalScore,
+  averageScore,
+  percentile,
+  resultStatus,
 }) => {
-  const result = await pool.query(
-    `UPDATE exams
-     SET year = COALESCE($2, year),
-         total_score = COALESCE($3, total_score),
-         average_score = COALESCE($4, average_score),
-         percentile = COALESCE($5, percentile),
-         result_status = COALESCE($6, result_status),
-         updated_at = CURRENT_TIMESTAMP
-     WHERE id = $1
-     RETURNING id`,
-    [id, year, totalScore, averageScore, percentile, resultStatus],
-  );
+  const updates = [];
+  const params = [];
+
+  // always first param = id
+  params.push(id);
+
+  // dynamic fields
+  if (year !== undefined) {
+    params.push(year);
+    updates.push(`year = $${params.length}`);
+  }
+
+  if (totalScore !== undefined) {
+    params.push(totalScore);
+    updates.push(`total_score = $${params.length}`);
+  }
+
+  if (averageScore !== undefined) {
+    params.push(averageScore);
+    updates.push(`average_score = $${params.length}`);
+  }
+
+  if (percentile !== undefined) {
+    params.push(percentile);
+    updates.push(`percentile = $${params.length}`);
+  }
+
+  if (resultStatus !== undefined) {
+    params.push(resultStatus);
+    updates.push(`result_status = $${params.length}`);
+  }
+
+  // always update timestamp
+  updates.push(`updated_at = CURRENT_TIMESTAMP`);
+
+  let sql = `
+    UPDATE exams
+    SET ${updates.join(", ")}
+    WHERE id = $1
+  `;
+
+  // institution scoping
+  if (institutionId) {
+    params.push(institutionId);
+    sql += ` AND institution_id = $${params.length}`;
+  }
+
+  sql += ` RETURNING id`;
+
+  const result = await pool.query(sql, params);
 
   return result.rows[0] || null;
 };
