@@ -25,9 +25,19 @@ const options = {
         description: "Endpoints accessible only to SUPER_ADMIN users",
       },
       {
+        name: "Admin - Users",
+        description:
+          "User management endpoints accessible only to SUPER_ADMIN users",
+      },
+      {
         name: "Admin - Exams",
         description:
           "Exam administration endpoints accessible only to SUPER_ADMIN users",
+      },
+      {
+        name: "Admin - Institutions",
+        description:
+          "Institution management endpoints accessible only to SUPER_ADMIN users",
       },
       {
         name: "Users",

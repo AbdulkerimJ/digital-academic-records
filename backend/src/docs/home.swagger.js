@@ -1,5 +1,17 @@
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     HealthResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: success
+ *         message:
+ *           type: string
+ *           example: Welcome to the Digital Academic Records API
+ *
  * /:
  *   get:
  *     summary: Check API status
@@ -11,14 +23,7 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Welcome to the Digital Academic Records API
+ *               $ref: '#/components/schemas/HealthResponse'
  */
 
 export {};

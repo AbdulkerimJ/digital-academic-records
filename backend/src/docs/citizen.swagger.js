@@ -1,5 +1,29 @@
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     CitizenErrorResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *     CitizenResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: Citizen fetched successfully
+ *         data:
+ *           type: object
+ *           description: Citizen profile returned by the Fayda service
+ *           additionalProperties: true
+ *
  * /api/citizens/{faydaId}:
  *   get:
  *     summary: Fetch citizen profile by Fayda ID from Fayda service
@@ -18,56 +42,25 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Citizen fetched successfully
- *                 data:
- *                   type: object
- *                   additionalProperties: true
+ *               $ref: '#/components/schemas/CitizenResponse'
  *       400:
  *         description: Fayda ID is required
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Fayda ID is required
+ *               $ref: '#/components/schemas/CitizenErrorResponse'
  *       404:
  *         description: Citizen not found
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Citizen not found
+ *               $ref: '#/components/schemas/CitizenErrorResponse'
  *       500:
  *         description: Server error
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Something went wrong.
+ *               $ref: '#/components/schemas/CitizenErrorResponse'
  */
 
 export {};

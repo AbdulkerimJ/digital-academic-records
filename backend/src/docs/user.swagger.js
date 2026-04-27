@@ -1,5 +1,340 @@
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     UserErrorResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *     UserAuthUser:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         roleName:
+ *           type: string
+ *         institutionId:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         institutionName:
+ *           type: string
+ *           nullable: true
+ *         institutionCode:
+ *           type: string
+ *           nullable: true
+ *         institutionType:
+ *           type: string
+ *           nullable: true
+ *     UserAuthResponse:
+ *       type: object
+ *       properties:
+ *         accessToken:
+ *           type: string
+ *         user:
+ *           $ref: '#/components/schemas/UserAuthUser'
+ *     CurrentUserProfile:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         role:
+ *           type: string
+ *         roleId:
+ *           type: integer
+ *         institutionId:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         institutionName:
+ *           type: string
+ *           nullable: true
+ *         institutionCode:
+ *           type: string
+ *           nullable: true
+ *         institutionType:
+ *           type: string
+ *           nullable: true
+ *         tokenVersion:
+ *           type: integer
+ *         passwordChangedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *     RoleItem:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         role_name:
+ *           type: string
+ *     AdminUserRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         isActive:
+ *           type: boolean
+ *         isSuspended:
+ *           type: boolean
+ *         suspendedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         suspensionReason:
+ *           type: string
+ *           nullable: true
+ *         suspender:
+ *           type: object
+ *           nullable: true
+ *           properties:
+ *             id:
+ *               type: string
+ *               format: uuid
+ *             firstName:
+ *               type: string
+ *             lastName:
+ *               type: string
+ *             email:
+ *               type: string
+ *               format: email
+ *         invitationExpires:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         roleId:
+ *           type: integer
+ *         roleName:
+ *           type: string
+ *           nullable: true
+ *         institutionId:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         institutionName:
+ *           type: string
+ *           nullable: true
+ *         institutionCode:
+ *           type: string
+ *           nullable: true
+ *         institutionType:
+ *           type: string
+ *           nullable: true
+ *         tokenVersion:
+ *           type: integer
+ *         passwordChangedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     UserInviteRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         isActive:
+ *           type: boolean
+ *         invitationExpires:
+ *           type: string
+ *           format: date-time
+ *         roleId:
+ *           type: integer
+ *         institutionId:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         institutionName:
+ *           type: string
+ *           nullable: true
+ *         institutionCode:
+ *           type: string
+ *           nullable: true
+ *         institutionType:
+ *           type: string
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     UserUpdatedRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         roleId:
+ *           type: integer
+ *         institutionId:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     DeletedUserRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *     UserSuspendRecord:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         isActive:
+ *           type: boolean
+ *         isSuspended:
+ *           type: boolean
+ *         suspendedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         suspendedBy:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *         suspensionReason:
+ *           type: string
+ *           nullable: true
+ *         tokenVersion:
+ *           type: integer
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     UserListResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ *           properties:
+ *             count:
+ *               type: integer
+ *             users:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AdminUserRecord'
+ *     UserDetailResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ *           properties:
+ *             user:
+ *               $ref: '#/components/schemas/AdminUserRecord'
+ *     UserActionResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ *           properties:
+ *             user:
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/UserInviteRecord'
+ *                 - $ref: '#/components/schemas/UserUpdatedRecord'
+ *                 - $ref: '#/components/schemas/DeletedUserRecord'
+ *                 - $ref: '#/components/schemas/UserSuspendRecord'
+ *     RoleListResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ *           properties:
+ *             count:
+ *               type: integer
+ *             roles:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/RoleItem'
+ *
  * /api/users/login:
  *   post:
  *     summary: Log in an application user
@@ -23,12 +358,35 @@
  *     responses:
  *       200:
  *         description: User login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/UserAuthResponse'
  *       400:
  *         description: email and password are required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
- *         description: Account is not active
+ *         description: Account is not active or suspended
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/refresh:
  *   post:
@@ -38,8 +396,23 @@
  *     responses:
  *       200:
  *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/UserAuthResponse'
  *       401:
  *         description: Missing, invalid, or expired refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/logout:
  *   post:
@@ -51,8 +424,23 @@
  *     responses:
  *       200:
  *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/activate-invite:
  *   post:
@@ -77,8 +465,26 @@
  *     responses:
  *       200:
  *         description: Account activated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserInviteRecord'
  *       400:
  *         description: Invalid token, expired invite, or weak password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/roles:
  *   get:
@@ -91,10 +497,22 @@
  *     responses:
  *       200:
  *         description: Roles fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RoleListResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/me:
  *   get:
@@ -106,8 +524,26 @@
  *     responses:
  *       200:
  *         description: Current user fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/CurrentUserProfile'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *   patch:
  *     summary: Update currently authenticated user profile
  *     tags:
@@ -128,12 +564,38 @@
  *     responses:
  *       200:
  *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserUpdatedRecord'
  *       400:
  *         description: Invalid request body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/change-password:
  *   patch:
@@ -160,12 +622,35 @@
  *     responses:
  *       200:
  *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/UserAuthResponse'
  *       400:
  *         description: Invalid request body or weak password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in or current password is incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users:
  *   get:
@@ -178,10 +663,22 @@
  *     responses:
  *       200:
  *         description: Users fetched successfully (includes count and users list)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserListResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *   post:
  *     summary: Invite an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
@@ -200,6 +697,7 @@
  *               - lastName
  *               - email
  *               - roleId
+ *               - institutionId
  *             properties:
  *               firstName:
  *                 type: string
@@ -216,12 +714,38 @@
  *     responses:
  *       201:
  *         description: User invited successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserInviteRecord'
  *       400:
  *         description: Validation failed, duplicate email, or invalid role reference
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/{userId}:
  *   get:
@@ -241,12 +765,38 @@
  *     responses:
  *       200:
  *         description: User fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/AdminUserRecord'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *   patch:
  *     summary: Update an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
@@ -283,14 +833,44 @@
  *     responses:
  *       200:
  *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserUpdatedRecord'
  *       400:
  *         description: Validation failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *   delete:
  *     summary: Delete an application user (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
@@ -308,12 +888,38 @@
  *     responses:
  *       200:
  *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/DeletedUserRecord'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/{userId}/resend-invite:
  *   post:
@@ -333,14 +939,44 @@
  *     responses:
  *       200:
  *         description: Invitation resent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserInviteRecord'
  *       400:
  *         description: User is active or request invalid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/{userId}/revoke-invite:
  *   patch:
@@ -360,14 +996,44 @@
  *     responses:
  *       200:
  *         description: Invitation revoked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserInviteRecord'
  *       400:
  *         description: User is active or request invalid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/{userId}/suspend:
  *   patch:
@@ -396,14 +1062,44 @@
  *     responses:
  *       200:
  *         description: User suspended successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserSuspendRecord'
  *       400:
  *         description: Invalid request or user is already suspended
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *
  * /api/users/{userId}/unsuspend:
  *   patch:
@@ -423,14 +1119,44 @@
  *     responses:
  *       200:
  *         description: User unsuspended successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/UserSuspendRecord'
  *       400:
  *         description: Invalid request or user is not suspended
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       401:
  *         description: Not logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       403:
  *         description: Forbidden (requires SUPER_ADMIN)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  *       404:
  *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserErrorResponse'
  */
 
 export {};
