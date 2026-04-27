@@ -78,6 +78,9 @@ export const createAndSendUserToken = (
     lastName,
     roleName,
     institutionId,
+    institutionName,
+    institutionCode,
+    institutionType,
     tokenVersion = 0,
   } = user;
   const payload = {
@@ -103,6 +106,9 @@ export const createAndSendUserToken = (
         email,
         roleName,
         institutionId,
+        institutionName,
+        institutionCode,
+        institutionType,
       },
     },
   });

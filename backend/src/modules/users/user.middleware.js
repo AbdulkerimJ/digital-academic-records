@@ -25,6 +25,9 @@ export const protectUser = catchAsync(async (req, res, next) => {
     role: currentUser.roleName,
     roleId: currentUser.roleId,
     institutionId: currentUser.institutionId,
+    institutionName: currentUser.institutionName,
+    institutionCode: currentUser.institutionCode,
+    institutionType: currentUser.institutionType,
     tokenVersion: currentUser.tokenVersion,
     passwordChangedAt: currentUser.passwordChangedAt,
   };

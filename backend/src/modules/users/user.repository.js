@@ -25,7 +25,7 @@ export const getRoleById = async (roleId) => {
 
 export const findUserByEmail = async (email) => {
   const result = await pool.query(
-    `SELECT id,
+    `SELECT app_user.id,
             first_name AS "firstName",
             last_name AS "lastName",
             email,
@@ -42,10 +42,14 @@ export const findUserByEmail = async (email) => {
             token_version AS "tokenVersion",
             role_id AS "roleId",
             institution_id AS "institutionId",
+                 institution.name AS "institutionName",
+                 institution.code AS "institutionCode",
+                 institution.type AS "institutionType",
             password_changed_at AS "passwordChangedAt",
             created_at AS "createdAt",
             updated_at AS "updatedAt"
      FROM app_user
+               LEFT JOIN institution ON institution.id = app_user.institution_id
      WHERE email = $1`,
     [email],
   );
@@ -72,12 +76,16 @@ export const findUserByEmailWithRole = async (email) => {
             app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
+                 institution.name AS "institutionName",
+                 institution.code AS "institutionCode",
+                 institution.type AS "institutionType",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
+               LEFT JOIN institution ON institution.id = app_user.institution_id
      WHERE app_user.email = $1`,
     [email],
   );
@@ -104,6 +112,9 @@ export const findUserByIdWithRole = async (id) => {
             app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
+              institution.name AS "institutionName",
+              institution.code AS "institutionCode",
+              institution.type AS "institutionType",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
@@ -114,6 +125,7 @@ export const findUserByIdWithRole = async (id) => {
                  suspender.email AS "suspenderEmail"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
+               LEFT JOIN institution ON institution.id = app_user.institution_id
                LEFT JOIN app_user AS suspender ON suspender.id = app_user.suspended_by
      WHERE app_user.id = $1`,
     [id],
@@ -139,12 +151,16 @@ export const findUsersWithRole = async ({ excludeUserId } = {}) => {
             app_user.token_version AS "tokenVersion",
             app_user.role_id AS "roleId",
             app_user.institution_id AS "institutionId",
+                 institution.name AS "institutionName",
+                 institution.code AS "institutionCode",
+                 institution.type AS "institutionType",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
             roles.role_name AS "roleName"
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
+               LEFT JOIN institution ON institution.id = app_user.institution_id
     WHERE app_user.id != $1
      ORDER BY app_user.created_at DESC`,
     [excludeUserId || null],
@@ -173,6 +189,9 @@ export const createUserRecord = async ({
           invitation_expires AS "invitationExpires",
           role_id AS "roleId",
           institution_id AS "institutionId",
+          (SELECT name FROM institution WHERE institution.id = app_user.institution_id) AS "institutionName",
+          (SELECT code FROM institution WHERE institution.id = app_user.institution_id) AS "institutionCode",
+          (SELECT type FROM institution WHERE institution.id = app_user.institution_id) AS "institutionType",
           created_at AS "createdAt",
           updated_at AS "updatedAt"`,
     [
@@ -191,7 +210,7 @@ export const createUserRecord = async ({
 
 export const findUserByInvitationToken = async (invitationToken) => {
   const result = await pool.query(
-    `SELECT id,
+    `SELECT app_user.id,
             first_name AS "firstName",
             last_name AS "lastName",
             email,
@@ -201,9 +220,13 @@ export const findUserByInvitationToken = async (invitationToken) => {
             invitation_expires AS "invitationExpires",
             role_id AS "roleId",
             institution_id AS "institutionId",
+                 institution.name AS "institutionName",
+                 institution.code AS "institutionCode",
+                 institution.type AS "institutionType",
             created_at AS "createdAt",
             updated_at AS "updatedAt"
      FROM app_user
+               LEFT JOIN institution ON institution.id = app_user.institution_id
      WHERE invitation_token = $1`,
     [invitationToken],
   );
@@ -231,6 +254,9 @@ export const activateUserByInvitationToken = async ({
                is_active AS "isActive",
                role_id AS "roleId",
                institution_id AS "institutionId",
+               (SELECT name FROM institution WHERE institution.id = app_user.institution_id) AS "institutionName",
+               (SELECT code FROM institution WHERE institution.id = app_user.institution_id) AS "institutionCode",
+               (SELECT type FROM institution WHERE institution.id = app_user.institution_id) AS "institutionType",
                updated_at AS "updatedAt"`,
     [invitationToken, passwordHash],
   );
@@ -251,6 +277,10 @@ export const revokeInvitationByUserId = async (id) => {
                email,
                is_active AS "isActive",
                invitation_expires AS "invitationExpires",
+               institution_id AS "institutionId",
+               (SELECT name FROM institution WHERE institution.id = app_user.institution_id) AS "institutionName",
+               (SELECT code FROM institution WHERE institution.id = app_user.institution_id) AS "institutionCode",
+               (SELECT type FROM institution WHERE institution.id = app_user.institution_id) AS "institutionType",
                updated_at AS "updatedAt"`,
     [id],
   );
