@@ -4,6 +4,9 @@
  *   schemas:
  *     ExamErrorResponse:
  *       type: object
+ *       example:
+ *         success: false
+ *         message: Exam record not found
  *       properties:
  *         success:
  *           type: boolean
@@ -12,6 +15,12 @@
  *           type: string
  *     ExamTypeItem:
  *       type: object
+ *       example:
+ *         id: 1
+ *         code: GRADE_12
+ *         name: Grade 12 Exam
+ *         isActive: true
+ *         createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         id:
  *           type: integer
@@ -26,6 +35,16 @@
  *           format: date-time
  *     ExamTypeResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Exam type fetched successfully
+ *         data:
+ *           examType:
+ *             id: 1
+ *             code: GRADE_12
+ *             name: Grade 12 Exam
+ *             isActive: true
+ *             createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         success:
  *           type: boolean
@@ -39,6 +58,17 @@
  *               $ref: '#/components/schemas/ExamTypeItem'
  *     ExamTypeListResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Exam types fetched successfully
+ *         data:
+ *           count: 2
+ *           examTypes:
+ *             - id: 1
+ *               code: GRADE_12
+ *               name: Grade 12 Exam
+ *               isActive: true
+ *               createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         success:
  *           type: boolean
@@ -56,6 +86,20 @@
  *                 $ref: '#/components/schemas/ExamTypeItem'
  *     ExamRecordItem:
  *       type: object
+ *       example:
+ *         id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
+ *         studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *         examTypeId: 1
+ *         examTypeCode: GRADE_12
+ *         examTypeName: Grade 12 Exam
+ *         institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *         year: 2025
+ *         totalScore: 78.5
+ *         averageScore: 78.5
+ *         percentile: 92
+ *         resultStatus: PASS
+ *         createdAt: 2026-04-27T09:15:00.000Z
+ *         updatedAt: 2026-04-27T09:15:00.000Z
  *       properties:
  *         id:
  *           type: string
@@ -96,6 +140,24 @@
  *           format: date-time
  *     ExamRecordResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Exam record fetched successfully
+ *         data:
+ *           examRecord:
+ *             id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
+ *             studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *             examTypeId: 1
+ *             examTypeCode: GRADE_12
+ *             examTypeName: Grade 12 Exam
+ *             institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *             year: 2025
+ *             totalScore: 78.5
+ *             averageScore: 78.5
+ *             percentile: 92
+ *             resultStatus: PASS
+ *             createdAt: 2026-04-27T09:15:00.000Z
+ *             updatedAt: 2026-04-27T09:15:00.000Z
  *       properties:
  *         success:
  *           type: boolean
@@ -109,6 +171,24 @@
  *               $ref: '#/components/schemas/ExamRecordItem'
  *     ExamRecordListResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Exam records fetched successfully
+ *         data:
+ *           examRecords:
+ *             - id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
+ *               studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *               examTypeId: 1
+ *               examTypeCode: GRADE_12
+ *               examTypeName: Grade 12 Exam
+ *               institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *               year: 2025
+ *               totalScore: 78.5
+ *               averageScore: 78.5
+ *               percentile: 92
+ *               resultStatus: PASS
+ *               createdAt: 2026-04-27T09:15:00.000Z
+ *               updatedAt: 2026-04-27T09:15:00.000Z
  *       properties:
  *         success:
  *           type: boolean
@@ -124,6 +204,12 @@
  *                 $ref: '#/components/schemas/ExamRecordItem'
  *     CreatedExamRecordResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Exam record created successfully
+ *         data:
+ *           examRecord:
+ *             id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
  *       properties:
  *         success:
  *           type: boolean

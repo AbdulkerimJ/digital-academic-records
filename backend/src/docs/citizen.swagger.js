@@ -4,6 +4,9 @@
  *   schemas:
  *     CitizenErrorResponse:
  *       type: object
+ *       example:
+ *         success: false
+ *         message: Citizen not found
  *       properties:
  *         success:
  *           type: boolean
@@ -12,6 +15,14 @@
  *           type: string
  *     CitizenResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Citizen fetched successfully
+ *         data:
+ *           faydaId: FD-2026-0001
+ *           firstName: Hana
+ *           fatherName: Tekle
+ *           dateOfBirth: 2008-02-12
  *       properties:
  *         success:
  *           type: boolean

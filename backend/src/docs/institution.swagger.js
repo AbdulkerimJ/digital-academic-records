@@ -4,6 +4,9 @@
  *   schemas:
  *     InstitutionErrorResponse:
  *       type: object
+ *       example:
+ *         success: false
+ *         message: Institution not found
  *       properties:
  *         success:
  *           type: boolean
@@ -12,6 +15,13 @@
  *           type: string
  *     InstitutionItem:
  *       type: object
+ *       example:
+ *         id: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *         name: Regional Exam Board
+ *         code: REB
+ *         type: EXAM_BOARD
+ *         isActive: true
+ *         createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         id:
  *           type: string
@@ -36,6 +46,17 @@
  *           format: date-time
  *     InstitutionResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Institution fetched successfully
+ *         data:
+ *           institution:
+ *             id: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *             name: Regional Exam Board
+ *             code: REB
+ *             type: EXAM_BOARD
+ *             isActive: true
+ *             createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         success:
  *           type: boolean
@@ -49,6 +70,18 @@
  *               $ref: '#/components/schemas/InstitutionItem'
  *     InstitutionListResponse:
  *       type: object
+ *       example:
+ *         success: true
+ *         message: Institutions fetched successfully
+ *         data:
+ *           count: 2
+ *           institutions:
+ *             - id: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
+ *               name: Regional Exam Board
+ *               code: REB
+ *               type: EXAM_BOARD
+ *               isActive: true
+ *               createdAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         success:
  *           type: boolean

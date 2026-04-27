@@ -12,6 +12,16 @@
  *           type: string
  *     UserAuthUser:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: John
+ *         lastName: Doe
+ *         email: john.doe@example.com
+ *         roleName: REGISTRAR
+ *         institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *         institutionName: Regional Exam Board
+ *         institutionCode: REB
+ *         institutionType: EXAM_BOARD
  *       properties:
  *         id:
  *           type: string
@@ -40,6 +50,18 @@
  *           nullable: true
  *     UserAuthResponse:
  *       type: object
+ *       example:
+ *         accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *         user:
+ *           id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *           firstName: John
+ *           lastName: Doe
+ *           email: john.doe@example.com
+ *           roleName: REGISTRAR
+ *           institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *           institutionName: Regional Exam Board
+ *           institutionCode: REB
+ *           institutionType: EXAM_BOARD
  *       properties:
  *         accessToken:
  *           type: string
@@ -47,6 +69,19 @@
  *           $ref: '#/components/schemas/UserAuthUser'
  *     CurrentUserProfile:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: John
+ *         lastName: Doe
+ *         email: john.doe@example.com
+ *         role: REGISTRAR
+ *         roleId: 2
+ *         institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *         institutionName: Regional Exam Board
+ *         institutionCode: REB
+ *         institutionType: EXAM_BOARD
+ *         tokenVersion: 0
+ *         passwordChangedAt: null
  *       properties:
  *         id:
  *           type: string
@@ -83,6 +118,9 @@
  *           nullable: true
  *     RoleItem:
  *       type: object
+ *       example:
+ *         id: 1
+ *         role_name: SUPER_ADMIN
  *       properties:
  *         id:
  *           type: integer
@@ -90,6 +128,27 @@
  *           type: string
  *     AdminUserRecord:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: John
+ *         lastName: Doe
+ *         email: john.doe@example.com
+ *         isActive: true
+ *         isSuspended: false
+ *         suspendedAt: null
+ *         suspensionReason: null
+ *         suspender: null
+ *         invitationExpires: 2026-04-28T10:00:00.000Z
+ *         roleId: 2
+ *         roleName: REGISTRAR
+ *         institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *         institutionName: Regional Exam Board
+ *         institutionCode: REB
+ *         institutionType: EXAM_BOARD
+ *         tokenVersion: 0
+ *         passwordChangedAt: null
+ *         createdAt: 2026-04-27T09:00:00.000Z
+ *         updatedAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         id:
  *           type: string
@@ -162,6 +221,20 @@
  *           format: date-time
  *     UserInviteRecord:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: John
+ *         lastName: Doe
+ *         email: john.doe@example.com
+ *         isActive: false
+ *         invitationExpires: 2026-04-28T10:00:00.000Z
+ *         roleId: 2
+ *         institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *         institutionName: Regional Exam Board
+ *         institutionCode: REB
+ *         institutionType: EXAM_BOARD
+ *         createdAt: 2026-04-27T09:00:00.000Z
+ *         updatedAt: 2026-04-27T09:00:00.000Z
  *       properties:
  *         id:
  *           type: string
@@ -201,6 +274,15 @@
  *           format: date-time
  *     UserUpdatedRecord:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: Jane
+ *         lastName: Doe
+ *         email: jane.doe@example.com
+ *         roleId: 2
+ *         institutionId: 8f1f2b40-3d74-4df7-8f2d-0b1b4e1d9fd1
+ *         createdAt: 2026-04-27T09:00:00.000Z
+ *         updatedAt: 2026-04-27T10:00:00.000Z
  *       properties:
  *         id:
  *           type: string
@@ -226,6 +308,11 @@
  *           format: date-time
  *     DeletedUserRecord:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: Jane
+ *         lastName: Doe
+ *         email: jane.doe@example.com
  *       properties:
  *         id:
  *           type: string
@@ -239,6 +326,18 @@
  *           format: email
  *     UserSuspendRecord:
  *       type: object
+ *       example:
+ *         id: 2f2d8c2c-0fd1-4d0d-a8db-8d7d8a5c4d6a
+ *         firstName: Jane
+ *         lastName: Doe
+ *         email: jane.doe@example.com
+ *         isActive: true
+ *         isSuspended: true
+ *         suspendedAt: 2026-04-27T10:00:00.000Z
+ *         suspendedBy: 4c4c2b5b-3e3c-46dd-8c18-fc76b1b2d1a1
+ *         suspensionReason: Test account misuse
+ *         tokenVersion: 1
+ *         updatedAt: 2026-04-27T10:00:00.000Z
  *       properties:
  *         id:
  *           type: string

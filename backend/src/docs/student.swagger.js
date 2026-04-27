@@ -4,6 +4,9 @@
  *   schemas:
  *     StudentErrorResponse:
  *       type: object
+ *       example:
+ *         success: false
+ *         message: Citizen not found
  *       properties:
  *         success:
  *           type: boolean
@@ -12,6 +15,11 @@
  *           type: string
  *     StudentAuthUser:
  *       type: object
+ *       example:
+ *         id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *         firstName: Hana
+ *         lastName: Tekle
+ *         nationalId: FD-2026-0001
  *       properties:
  *         id:
  *           type: string
@@ -24,6 +32,12 @@
  *           type: string
  *     StudentProfile:
  *       type: object
+ *       example:
+ *         id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *         firstName: Hana
+ *         lastName: Tekle
+ *         nationalId: FD-2026-0001
+ *         tokenVersion: 0
  *       properties:
  *         id:
  *           type: string
@@ -38,6 +52,13 @@
  *           type: integer
  *     StudentAuthResponse:
  *       type: object
+ *       example:
+ *         accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *         user:
+ *           id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *           firstName: Hana
+ *           lastName: Tekle
+ *           nationalId: FD-2026-0001
  *       properties:
  *         accessToken:
  *           type: string
@@ -45,6 +66,13 @@
  *           $ref: '#/components/schemas/StudentAuthUser'
  *     StudentMeResponse:
  *       type: object
+ *       example:
+ *         user:
+ *           id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
+ *           firstName: Hana
+ *           lastName: Tekle
+ *           nationalId: FD-2026-0001
+ *           tokenVersion: 0
  *       properties:
  *         user:
  *           $ref: '#/components/schemas/StudentProfile'

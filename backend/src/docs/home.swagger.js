@@ -4,6 +4,9 @@
  *   schemas:
  *     HealthResponse:
  *       type: object
+ *       example:
+ *         status: success
+ *         message: Welcome to the Digital Academic Records API
  *       properties:
  *         status:
  *           type: string
