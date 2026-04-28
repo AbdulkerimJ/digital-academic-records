@@ -1,9 +1,9 @@
 import pool from "../../common/config/pool.js";
 
-export const findExamTypeByCode = async (code) => {
+export const findExamLevelByCode = async (code) => {
   const result = await pool.query(
     `SELECT id, code, name, is_active AS "isActive", created_at AS "createdAt"
-     FROM exam_types
+     FROM exam_levels
      WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))
      LIMIT 1`,
     [code],
@@ -12,10 +12,10 @@ export const findExamTypeByCode = async (code) => {
   return result.rows[0] || null;
 };
 
-export const findExamTypeById = async (id) => {
+export const findExamLevelById = async (id) => {
   const result = await pool.query(
     `SELECT id, code, name, is_active AS "isActive", created_at AS "createdAt"
-     FROM exam_types
+     FROM exam_levels
      WHERE id = $1
      LIMIT 1`,
     [id],
@@ -24,23 +24,23 @@ export const findExamTypeById = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findExamTypes = async () => {
+export const findExamLevels = async () => {
   const result = await pool.query(
     `SELECT id,
             code,
             name,
             is_active AS "isActive",
             created_at AS "createdAt"
-     FROM exam_types
+     FROM exam_levels
      ORDER BY code ASC`,
   );
 
   return result.rows;
 };
 
-export const createExamTypeRecord = async ({ code, name, isActive }) => {
+export const createExamLevelRecord = async ({ code, name, isActive }) => {
   const result = await pool.query(
-    `INSERT INTO exam_types (code, name, is_active)
+    `INSERT INTO exam_levels (code, name, is_active)
      VALUES ($1, $2, $3)
      RETURNING id, code, name, is_active AS "isActive", created_at AS "createdAt"`,
     [code, name, isActive],
@@ -49,14 +49,14 @@ export const createExamTypeRecord = async ({ code, name, isActive }) => {
   return result.rows[0];
 };
 
-export const updateExamTypeById = async ({
+export const updateExamLevelById = async ({
   id,
   code = null,
   name = null,
   isActive = null,
 }) => {
   const result = await pool.query(
-    `UPDATE exam_types
+    `UPDATE exam_levels
      SET code = COALESCE($2, code),
          name = COALESCE($3, name),
          is_active = COALESCE($4, is_active)
@@ -70,7 +70,7 @@ export const updateExamTypeById = async ({
 
 export const createExamRecordRecord = async ({
   studentId,
-  examTypeId,
+  examLevelId,
   institutionId,
   year,
   totalScore = null,
@@ -81,7 +81,7 @@ export const createExamRecordRecord = async ({
   const result = await pool.query(
     `INSERT INTO exams (
       student_id,
-      exam_type_id,
+      exam_level_id,
       institution_id,
       year,
       total_score,
@@ -93,7 +93,7 @@ export const createExamRecordRecord = async ({
     RETURNING id`,
     [
       studentId,
-      examTypeId,
+      examLevelId,
       institutionId,
       year,
       totalScore,
@@ -113,9 +113,9 @@ export const findExamRecordById = async (id, institutionId = null) => {
     SELECT 
       e.id,
       e.student_id AS "studentId",
-      e.exam_type_id AS "examTypeId",
-      et.code AS "examTypeCode",
-      et.name AS "examTypeName",
+      e.exam_level_id AS "examLevelId",
+      et.code AS "examLevelCode",
+      et.name AS "examLevelName",
       e.institution_id AS "institutionId",
       e.year,
       e.total_score AS "totalScore",
@@ -125,7 +125,7 @@ export const findExamRecordById = async (id, institutionId = null) => {
       e.created_at AS "createdAt",
       e.updated_at AS "updatedAt"
     FROM exams e
-    JOIN exam_types et ON e.exam_type_id = et.id
+    JOIN exam_levels et ON e.exam_level_id = et.id
     WHERE e.id = $1
   `;
 
@@ -144,9 +144,9 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
     SELECT 
       e.id,
       e.student_id AS "studentId",
-      e.exam_type_id AS "examTypeId",
-      et.code AS "examTypeCode",
-      et.name AS "examTypeName",
+      e.exam_level_id AS "examLevelId",
+      et.code AS "examLevelCode",
+      et.name AS "examLevelName",
       e.institution_id AS "institutionId",
       e.year,
       e.total_score AS "totalScore",
@@ -156,13 +156,13 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
       e.created_at AS "createdAt",
       e.updated_at AS "updatedAt"
     FROM exams e
-    JOIN exam_types et ON e.exam_type_id = et.id
+    JOIN exam_levels et ON e.exam_level_id = et.id
   `;
 
   const conditions = [];
   const params = [];
 
-  const { institutionId, examTypeCode, year, studentId } = query;
+  const { institutionId, examLevelCode, year, studentId } = query;
   const { page = 1, limit = 10 } = pagination;
 
   const offset = (page - 1) * limit;
@@ -172,8 +172,8 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
     conditions.push(`e.institution_id = $${params.length}`);
   }
 
-  if (examTypeCode) {
-    params.push(examTypeCode);
+  if (examLevelCode) {
+    params.push(examLevelCode);
     conditions.push(`et.code = $${params.length}`);
   }
 

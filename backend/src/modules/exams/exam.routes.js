@@ -1,14 +1,14 @@
 import express from "express";
 import {
-  createExamType,
-  listExamTypes,
-  updateExamType,
+  createExamLevel,
+  listExamLevels,
+  updateExamLevel,
   createExamRecord,
   listExamRecords,
   getExamRecordById,
   updateExamRecord,
   deleteExamRecord,
-  getExamTypeById,
+  getExamLevelById,
 } from "./exam.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
 
@@ -16,10 +16,10 @@ const router = express.Router();
 
 router.use(protectUser);
 
-router.get("/types", listExamTypes);
-router.post("/types", restrictTo("SUPER_ADMIN"), createExamType);
-router.get("/types/:examTypeId", getExamTypeById);
-router.patch("/types/:examTypeId", restrictTo("SUPER_ADMIN"), updateExamType);
+router.get("/levels", listExamLevels);
+router.post("/levels", restrictTo("SUPER_ADMIN"), createExamLevel);
+router.get("/levels/:examLevelId", getExamLevelById);
+router.patch("/levels/:examLevelId", restrictTo("SUPER_ADMIN"), updateExamLevel);
 
 router.get("/", listExamRecords);
 router.get("/:examId", getExamRecordById);

@@ -22,13 +22,31 @@ async function seed() {
       VALUES 
       ('Ministry of Education', 'MOE', 'EXAM_BOARD'),
       ('Regional Exam Board', 'REB', 'EXAM_BOARD'),
-      ('Central College', 'CC', 'COLLEGE')
+      ('Central University', 'CC', 'COLLEGE')
       ON CONFLICT (code) DO NOTHING;
       `);
 
-    // ================= EXAM TYPES =================
+    // ================= COLLEGES =================
     await pool.query(`
-        INSERT INTO exam_types (code, name)
+      INSERT INTO colleges (institution_id, name, code)
+      VALUES
+        ((SELECT id FROM institution WHERE code = 'CC'), 'College of Engineering', 'COE'),
+        ((SELECT id FROM institution WHERE code = 'CC'), 'College of Business and Economics', 'CBE')
+      ON CONFLICT (institution_id, code) DO NOTHING;
+    `);
+
+    // ================= DEPARTMENTS =================
+    await pool.query(`
+      INSERT INTO departments (college_id, name, code)
+      VALUES
+        ((SELECT id FROM colleges WHERE code = 'COE'), 'Department of Computer Science', 'CS'),
+        ((SELECT id FROM colleges WHERE code = 'COE'), 'Department of Civil Engineering', 'CE')
+      ON CONFLICT (college_id, code) DO NOTHING;
+    `);
+
+    // ================= EXAM LEVELS =================
+    await pool.query(`
+      INSERT INTO exam_levels (code, name)
         VALUES 
           ('GRADE_6', 'Grade 6 Exam'),
           ('GRADE_8', 'Grade 8 Exam'),
@@ -37,12 +55,37 @@ async function seed() {
         ON CONFLICT (code) DO NOTHING;
       `);
 
+    // ================= DEGREE LEVELS =================
+    await pool.query(`
+  INSERT INTO degree_levels (code, name, rank)
+  VALUES 
+    ('BACHELOR', 'Bachelor Degree', 1),
+    ('MASTER', 'Master Degree', 2),
+    ('PHD', 'Doctorate (PhD)', 3)
+  ON CONFLICT (code) DO NOTHING;
+`);
+
+    // ================= DEGREE TITLES =================
+    await pool.query(`
+      INSERT INTO degree_titles (degree_level_id, code, title)
+      VALUES
+        (1, 'BSC', 'Bachelor of Science (BSc)'),
+        (1, 'BA', 'Bachelor of Arts (BA)'),
+        (1, 'BENG', 'Bachelor of Engineering (BEng)'),
+        (1, 'BBA', 'Bachelor of Business Administration (BBA)'),
+        (2, 'MSC', 'Master of Science (MSc)'),
+        (2, 'MA', 'Master of Arts (MA)'),
+        (2, 'MBA', 'Master of Business Administration (MBA)'),
+        (3, 'PHD', 'Doctor of Philosophy (PhD)')
+      ON CONFLICT (code) DO NOTHING;
+    `);
+
     // ================= RECORD TYPES =================
     await pool.query(`
       INSERT INTO record_types (name)
       VALUES 
         ('EXAM'),
-        ('CERTIFICATE')
+        ('DEGREE')
       ON CONFLICT (name) DO NOTHING;
     `);
 
@@ -95,7 +138,6 @@ async function seed() {
     );
 
     // =================INSERT REGISTRAR =================
-    // use demy data for registrar
     await pool.query(
       `
   INSERT INTO app_user (
@@ -121,7 +163,10 @@ async function seed() {
 
     console.log("Seeding completed!");
   } catch (err) {
-    console.error("Seed failed:", err.message);
+    console.error("Seed failed:", err?.message || err);
+    if (err && !err.message) {
+      console.error(err);
+    }
     process.exitCode = 1;
   } finally {
     await pool.end();

@@ -7,7 +7,8 @@
     "start": "cross-env NODE_ENV=production node server.js",
     "dev": "cross-env NODE_ENV=development nodemon server.js",
     "migrate": "node migrations/init_schema.js.js",
-    "seed": "node migrations/seed.js"
+    "seed": "node migrations/seed.js",
+    "drop": "node migrations/drop.js"
   },
   "keywords": [],
   "author": "",

@@ -1,11 +1,11 @@
 import AppError from "../../common/utils/appError.js";
 import parseNumber from "../../common/utils/parseNumber.js";
 import {
-  createExamTypeRecord,
-  findExamTypeByCode,
-  findExamTypeById,
-  findExamTypes,
-  updateExamTypeById,
+  createExamLevelRecord,
+  findExamLevelByCode,
+  findExamLevelById,
+  findExamLevels,
+  updateExamLevelById,
   createExamRecordRecord,
   findExamRecordById,
   findExamRecords,
@@ -18,43 +18,43 @@ import { findStudentById } from "../students/student.repository.js";
 const normalizeString = (value) =>
   value === undefined || value === null ? null : String(value).trim();
 
-export const createExamTypeService = async ({ code, name, isActive }) => {
+export const createExamLevelService = async ({ code, name, isActive }) => {
   if (!code || !name) {
-    throw new AppError("Exam type code and name are required.", 400);
+    throw new AppError("Exam level code and name are required.", 400);
   }
 
   const normalizedCode = normalizeString(code).toUpperCase();
   const normalizedName = normalizeString(name);
 
-  const existingType = await findExamTypeByCode(normalizedCode);
+  const existingType = await findExamLevelByCode(normalizedCode);
   if (existingType) {
-    throw new AppError("Exam type code already exists.", 400);
+    throw new AppError("Exam level code already exists.", 400);
   }
 
-  return createExamTypeRecord({
+  return createExamLevelRecord({
     code: normalizedCode,
     name: normalizedName,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
 };
 
-export const listExamTypesService = async () => {
-  return findExamTypes();
+export const listExamLevelsService = async () => {
+  return findExamLevels();
 };
 
-export const updateExamTypeService = async ({
-  examTypeId,
+export const updateExamLevelService = async ({
+  examLevelId,
   code,
   name,
   isActive,
 }) => {
-  if (!examTypeId) {
-    throw new AppError("Exam type is required.", 400);
+  if (!examLevelId) {
+    throw new AppError("Exam level is required.", 400);
   }
 
-  const existingType = await findExamTypeById(examTypeId);
+  const existingType = await findExamLevelById(examLevelId);
   if (!existingType) {
-    throw new AppError("Exam type not found.", 404);
+    throw new AppError("Exam level not found.", 404);
   }
 
   const normalizedCode =
@@ -63,14 +63,14 @@ export const updateExamTypeService = async ({
   const normalizedIsActive = isActive === undefined ? null : Boolean(isActive);
 
   if (normalizedCode !== null) {
-    const duplicate = await findExamTypeByCode(normalizedCode);
+    const duplicate = await findExamLevelByCode(normalizedCode);
     if (duplicate && duplicate.id !== existingType.id) {
-      throw new AppError("Exam type code already exists", 400);
+      throw new AppError("Exam level code already exists", 400);
     }
   }
 
-  return updateExamTypeById({
-    id: examTypeId,
+  return updateExamLevelById({
+    id: examLevelId,
     code: normalizedCode,
     name: normalizedName,
     isActive: normalizedIsActive,
@@ -80,7 +80,7 @@ export const updateExamTypeService = async ({
 export const createExamRecordService = async ({ user, data = {} }) => {
   let {
     studentId,
-    examTypeId,
+    examLevelId,
     institutionId,
     year,
     totalScore,
@@ -105,8 +105,8 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     throw new AppError("Invalid institution.", 400);
   }
 
-  if (!studentId || !examTypeId || year === undefined) {
-    throw new AppError("Student ID, exam type, and year are required.", 400);
+  if (!studentId || !examLevelId || year === undefined) {
+    throw new AppError("Student ID, exam level, and year are required.", 400);
   }
 
   const student = await findStudentById(studentId);
@@ -131,9 +131,9 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     throw new AppError("At least one exam score field is required.", 400);
   }
 
-  const examType = await findExamTypeById(examTypeId);
-  if (!examType || !examType.isActive) {
-    throw new AppError("Exam type not found or inactive.", 400);
+  const examLevel = await findExamLevelById(examLevelId);
+  if (!examLevel || !examLevel.isActive) {
+    throw new AppError("Exam level not found or inactive.", 400);
   }
 
   const normalizedResultStatus = normalizeString(resultStatus);
@@ -146,7 +146,7 @@ export const createExamRecordService = async ({ user, data = {} }) => {
 
   return createExamRecordRecord({
     studentId,
-    examTypeId,
+    examLevelId,
     institutionId,
     year: parsedYear,
     totalScore: parsedTotalScore,
@@ -174,16 +174,16 @@ export const listExamRecordsService = async ({
   return findExamRecords(query, pagination);
 };
 
-export const getExamTypeByIdService = async ({ examTypeId }) => {
-  if (!examTypeId) {
-    throw new AppError("Exam type ID is required.", 400);
+export const getExamLevelByIdService = async ({ examLevelId }) => {
+  if (!examLevelId) {
+    throw new AppError("Exam level ID is required.", 400);
   }
 
-  const examType = await findExamTypeById(examTypeId);
-  if (!examType) {
-    throw new AppError("Exam type not found.", 404);
+  const examLevel = await findExamLevelById(examLevelId);
+  if (!examLevel) {
+    throw new AppError("Exam level not found.", 404);
   }
-  return examType;
+  return examLevel;
 };
 
 export const getExamRecordByIdService = async ({ user, examId }) => {

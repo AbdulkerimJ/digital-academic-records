@@ -13,7 +13,7 @@
  *           example: false
  *         message:
  *           type: string
- *     ExamTypeItem:
+ *     ExamLevelItem:
  *       type: object
  *       example:
  *         id: 1
@@ -33,13 +33,13 @@
  *         createdAt:
  *           type: string
  *           format: date-time
- *     ExamTypeResponse:
+ *     ExamLevelResponse:
  *       type: object
  *       example:
  *         success: true
- *         message: Exam type fetched successfully
+ *         message: Exam level fetched successfully
  *         data:
- *           examType:
+ *           examLevel:
  *             id: 1
  *             code: GRADE_12
  *             name: Grade 12 Exam
@@ -54,16 +54,16 @@
  *         data:
  *           type: object
  *           properties:
- *             examType:
- *               $ref: '#/components/schemas/ExamTypeItem'
- *     ExamTypeListResponse:
+ *             examLevel:
+ *               $ref: '#/components/schemas/ExamLevelItem'
+ *     ExamLevelListResponse:
  *       type: object
  *       example:
  *         success: true
- *         message: Exam types fetched successfully
+ *         message: Exam levels fetched successfully
  *         data:
  *           count: 2
- *           examTypes:
+ *           examLevels:
  *             - id: 1
  *               code: GRADE_12
  *               name: Grade 12 Exam
@@ -80,18 +80,18 @@
  *           properties:
  *             count:
  *               type: integer
- *             examTypes:
+ *             examLevels:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/ExamTypeItem'
+ *                 $ref: '#/components/schemas/ExamLevelItem'
  *     ExamRecordItem:
  *       type: object
  *       example:
  *         id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
  *         studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *         examTypeId: 1
- *         examTypeCode: GRADE_12
- *         examTypeName: Grade 12 Exam
+ *         examLevelId: 1
+ *         examLevelCode: GRADE_12
+ *         examLevelName: Grade 12 Exam
  *         institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
  *         year: 2025
  *         totalScore: 78.5
@@ -107,11 +107,11 @@
  *         studentId:
  *           type: string
  *           format: uuid
- *         examTypeId:
+ *         examLevelId:
  *           type: integer
- *         examTypeCode:
+ *         examLevelCode:
  *           type: string
- *         examTypeName:
+ *         examLevelName:
  *           type: string
  *         institutionId:
  *           type: string
@@ -147,9 +147,9 @@
  *           examRecord:
  *             id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
  *             studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *             examTypeId: 1
- *             examTypeCode: GRADE_12
- *             examTypeName: Grade 12 Exam
+ *             examLevelId: 1
+ *             examLevelCode: GRADE_12
+ *             examLevelName: Grade 12 Exam
  *             institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
  *             year: 2025
  *             totalScore: 78.5
@@ -178,9 +178,9 @@
  *           examRecords:
  *             - id: 1b6e7c2d-7ed6-4d9a-9d52-2b0ce0d724f4
  *               studentId: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *               examTypeId: 1
- *               examTypeCode: GRADE_12
- *               examTypeName: Grade 12 Exam
+ *               examLevelId: 1
+ *               examLevelCode: GRADE_12
+ *               examLevelName: Grade 12 Exam
  *               institutionId: 9a6a2bf0-8c10-4f0d-a5d8-2d8f87c7b701
  *               year: 2025
  *               totalScore: 78.5
@@ -226,9 +226,9 @@
  *                   type: string
  *                   format: uuid
  *
- * /api/exams/types:
+ * /api/exams/levels:
  *   get:
- *     summary: List exam types
+ *     summary: List exam levels
  *     tags:
  *       - Exams
  *     security:
@@ -236,11 +236,11 @@
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: Exam types fetched successfully
+ *         description: Exam levels fetched successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExamTypeListResponse'
+ *               $ref: '#/components/schemas/ExamLevelListResponse'
  *       401:
  *         description: Not logged in
  *         content:
@@ -248,7 +248,7 @@
  *             schema:
  *               $ref: '#/components/schemas/ExamErrorResponse'
  *   post:
- *     summary: Create a new exam type (Admin only)
+ *     summary: Create a new exam level (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
  *       - Admin - Exams
@@ -276,13 +276,13 @@
  *                 default: true
  *     responses:
  *       201:
- *         description: Exam type created successfully
+ *         description: Exam level created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExamTypeResponse'
+ *               $ref: '#/components/schemas/ExamLevelResponse'
  *       400:
- *         description: Validation failed or duplicate exam type code
+ *         description: Validation failed or duplicate exam level code
  *         content:
  *           application/json:
  *             schema:
@@ -300,9 +300,9 @@
  *             schema:
  *               $ref: '#/components/schemas/ExamErrorResponse'
  *
- * /api/exams/types/{examTypeId}:
+ * /api/exams/levels/{examLevelId}:
  *   get:
- *     summary: Get exam type by ID
+ *     summary: Get exam level by ID
  *     tags:
  *       - Exams
  *     security:
@@ -310,31 +310,31 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: examTypeId
+ *         name: examLevelId
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Exam type fetched successfully
+ *         description: Exam level fetched successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExamTypeResponse'
+ *               $ref: '#/components/schemas/ExamLevelResponse'
  *       400:
- *         description: Exam type is required
+ *         description: Exam level is required
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ExamErrorResponse'
  *       404:
- *         description: Exam type not found
+ *         description: Exam level not found
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ExamErrorResponse'
  *   patch:
- *     summary: Update an exam type (Admin only)
+ *     summary: Update an exam level (Admin only)
  *     description: Accessible only to SUPER_ADMIN users.
  *     tags:
  *       - Admin - Exams
@@ -343,7 +343,7 @@
  *       - cookieAuth: []
  *     parameters:
  *       - in: path
- *         name: examTypeId
+ *         name: examLevelId
  *         required: true
  *         schema:
  *           type: string
@@ -362,13 +362,13 @@
  *                 type: boolean
  *     responses:
  *       200:
- *         description: Exam type updated successfully
+ *         description: Exam level updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExamTypeResponse'
+ *               $ref: '#/components/schemas/ExamLevelResponse'
  *       400:
- *         description: Validation failed or duplicate exam type code
+ *         description: Validation failed or duplicate exam level code
  *         content:
  *           application/json:
  *             schema:
@@ -386,7 +386,7 @@
  *             schema:
  *               $ref: '#/components/schemas/ExamErrorResponse'
  *       404:
- *         description: Exam type not found
+ *         description: Exam level not found
  *         content:
  *           application/json:
  *             schema:
@@ -408,10 +408,10 @@
  *           format: uuid
  *         description: Filter by institution ID
  *       - in: query
- *         name: examTypeCode
+ *         name: examLevelCode
  *         schema:
  *           type: string
- *         description: Filter by exam type code
+ *         description: Filter by exam level code
  *       - in: query
  *         name: year
  *         schema:
@@ -466,14 +466,14 @@
  *             type: object
  *             required:
  *               - studentId
- *               - examTypeId
+ *               - examLevelId
  *               - year
  *               - resultStatus
  *             properties:
  *               studentId:
  *                 type: string
  *                 format: uuid
- *               examTypeId:
+ *               examLevelId:
  *                 type: integer
  *               institutionId:
  *                 type: string

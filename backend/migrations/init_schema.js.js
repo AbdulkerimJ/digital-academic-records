@@ -34,9 +34,47 @@ async function migrate() {
       );
     `);
 
-    // ===================== EXAM TYPES =====================
+    // ===================== COLLEGES =====================
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS exam_types (
+      CREATE TABLE IF NOT EXISTS colleges (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        institution_id UUID NOT NULL,
+        name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (institution_id)
+          REFERENCES institution(id)
+          ON DELETE CASCADE,
+
+        UNIQUE (institution_id, code),
+        UNIQUE (institution_id, name)
+      );
+    `);
+
+    // ===================== DEPARTMENTS =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS departments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        college_id UUID NOT NULL,
+        name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (college_id)
+          REFERENCES colleges(id)
+          ON DELETE CASCADE,
+
+        UNIQUE (college_id, code),
+        UNIQUE (college_id, name)
+      );
+    `);
+
+    // ===================== EXAM LEVELS =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exam_levels (
         id SERIAL PRIMARY KEY,
         code TEXT UNIQUE NOT NULL,
         name TEXT NOT NULL,
@@ -55,15 +93,34 @@ async function migrate() {
       );
     `);
 
-    // ===================== CERTIFICATE TYPES =====================
+    // ===================== DEGREE TYPES =====================
     await pool.query(`
-    CREATE TABLE IF NOT EXISTS certificate_types (
-    id SERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS degree_levels (
+  id SERIAL PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  rank INT UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+    `);
+
+    // ===================== DEGREE TITLES =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS degree_titles (
+        id SERIAL PRIMARY KEY,
+        degree_level_id INT NOT NULL,
+        code TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (degree_level_id)
+          REFERENCES degree_levels(id)
+          ON DELETE CASCADE,
+
+        UNIQUE (degree_level_id, code)
+      );
     `);
 
     // ===================== STUDENT =====================
@@ -87,7 +144,7 @@ async function migrate() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
         student_id UUID NOT NULL,
-        exam_type_id INT NOT NULL,
+        exam_level_id INT NOT NULL,
         institution_id UUID NOT NULL,
 
         year INT NOT NULL,
@@ -108,8 +165,8 @@ async function migrate() {
           REFERENCES student(id)
           ON DELETE RESTRICT,
 
-      FOREIGN KEY (exam_type_id)
-        REFERENCES exam_types(id)
+      FOREIGN KEY (exam_level_id)
+        REFERENCES exam_levels(id)
         ON DELETE RESTRICT,
 
       FOREIGN KEY (institution_id)
@@ -117,7 +174,7 @@ async function migrate() {
         ON DELETE RESTRICT,
 
       -- Prevent duplicates
-      UNIQUE (student_id, exam_type_id, year, institution_id),
+      UNIQUE (student_id, exam_level_id, year, institution_id),
 
         -- Ensure at least one score exists
         CHECK (
@@ -128,18 +185,19 @@ async function migrate() {
           );
   `);
 
-    // ===================== CERTIFICATE RECORD =====================
+    // ===================== DEGREE RECORD =====================
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS certificates (
+      CREATE TABLE IF NOT EXISTS degrees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   student_id UUID NOT NULL,
   institution_id UUID NOT NULL,
-  certificate_type_id INT NOT NULL,
-
-  field_of_study TEXT,
-  gpa FLOAT,
-  graduation_year INT NOT NULL,
+  degree_level_id INT NOT NULL,
+  degree_title_id INT NOT NULL,
+  college_id UUID NOT NULL,
+  department_id UUID NOT NULL,
+  cgpa FLOAT,
+  graduation_date DATE NOT NULL,
 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -153,12 +211,24 @@ async function migrate() {
     REFERENCES institution(id)
     ON DELETE RESTRICT,
 
-  FOREIGN KEY (certificate_type_id)
-    REFERENCES certificate_types(id)
+  FOREIGN KEY (degree_level_id)
+    REFERENCES degree_levels(id)
     ON DELETE RESTRICT,
 
-  -- Prevent duplicate certificates
-  UNIQUE (student_id, certificate_type_id, institution_id, graduation_year)
+  FOREIGN KEY (degree_title_id)
+    REFERENCES degree_titles(id)
+    ON DELETE RESTRICT,
+
+  FOREIGN KEY (college_id)
+    REFERENCES colleges(id)
+    ON DELETE RESTRICT,
+
+  FOREIGN KEY (department_id)
+    REFERENCES departments(id)
+    ON DELETE RESTRICT,
+
+  -- Prevent duplicate degrees
+  UNIQUE (student_id, degree_level_id, degree_title_id, institution_id, graduation_date)
 );
     `);
 
@@ -255,7 +325,10 @@ async function migrate() {
 
     console.log("Migration completed successfully!");
   } catch (err) {
-    console.error("Migration failed:", err.message);
+    console.error("Migration failed:", err?.message || err);
+    if (err && !err.message) {
+      console.error(err);
+    }
   } finally {
     await pool.end();
   }

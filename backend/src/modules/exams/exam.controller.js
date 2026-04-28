@@ -1,44 +1,44 @@
 import catchAsync from "../../common/utils/catchAsync.js";
 import { sendSuccess } from "../../common/utils/response.js";
 import {
-  createExamTypeService,
-  listExamTypesService,
-  updateExamTypeService,
+  createExamLevelService,
+  listExamLevelsService,
+  updateExamLevelService,
   createExamRecordService,
   listExamRecordsService,
   getExamRecordByIdService,
   updateExamRecordService,
   deleteExamRecordService,
-  getExamTypeByIdService,
+  getExamLevelByIdService,
 } from "./exam.service.js";
 
 //Super admin only functions
-export const createExamType = catchAsync(async (req, res) => {
-  const examType = await createExamTypeService(req.body || {});
-  return sendSuccess(res, "Exam type created successfully", { examType }, 201);
+export const createExamLevel = catchAsync(async (req, res) => {
+  const examLevel = await createExamLevelService(req.body || {});
+  return sendSuccess(res, "Exam level created successfully", { examLevel }, 201);
 });
 
-export const updateExamType = catchAsync(async (req, res) => {
-  const examType = await updateExamTypeService({
-    examTypeId: req.params.examTypeId,
+export const updateExamLevel = catchAsync(async (req, res) => {
+  const examLevel = await updateExamLevelService({
+    examLevelId: req.params.examLevelId,
     ...req.body,
   });
-  return sendSuccess(res, "Exam type updated successfully", { examType });
+  return sendSuccess(res, "Exam level updated successfully", { examLevel });
 });
 
-export const getExamTypeById = catchAsync(async (req, res) => {
-  const { examTypeId } = req.params;
-  const examType = await getExamTypeByIdService({ examTypeId });
+export const getExamLevelById = catchAsync(async (req, res) => {
+  const { examLevelId } = req.params;
+  const examLevel = await getExamLevelByIdService({ examLevelId });
 
-  return sendSuccess(res, "Exam type fetched successfully", { examType });
+  return sendSuccess(res, "Exam level fetched successfully", { examLevel });
 });
 
 // User functions
-export const listExamTypes = catchAsync(async (req, res) => {
-  const examTypes = await listExamTypesService();
-  return sendSuccess(res, "Exam types fetched successfully", {
-    count: examTypes.length,
-    examTypes,
+export const listExamLevels = catchAsync(async (req, res) => {
+  const examLevels = await listExamLevelsService();
+  return sendSuccess(res, "Exam levels fetched successfully", {
+    count: examLevels.length,
+    examLevels,
   });
 });
 
@@ -60,7 +60,7 @@ export const listExamRecords = catchAsync(async (req, res) => {
   const examRecords = await listExamRecordsService({
     user: req.user,
     filters: {
-      examTypeCode: req.query.examTypeCode,
+      examLevelCode: req.query.examLevelCode,
       year: req.query.year,
       studentId: req.query.studentId,
     },

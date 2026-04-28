@@ -61,7 +61,7 @@ const options = {
       },
       {
         name: "Exams",
-        description: "Exam type and exam result endpoints",
+        description: "Exam level and exam result endpoints",
       },
       {
         name: "Health",
