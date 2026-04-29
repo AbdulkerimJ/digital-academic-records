@@ -64,6 +64,10 @@ const options = {
         description: "Exam level and exam result endpoints",
       },
       {
+        name: "Degrees",
+        description: "Degree level, degree title, and degree record endpoints",
+      },
+      {
         name: "Health",
         description: "Service health check endpoint",
       },

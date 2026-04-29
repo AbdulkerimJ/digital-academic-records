@@ -6,6 +6,7 @@ import {
   updateInstitution,
 } from "./institution.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
+import collegeRoutes from "./college.routes.js";
 
 const router = express.Router();
 
@@ -23,5 +24,7 @@ router.patch(
   restrictTo("SUPER_ADMIN"),
   updateInstitution,
 );
+
+router.use("/:institutionId/colleges", collegeRoutes);
 
 export default router;
