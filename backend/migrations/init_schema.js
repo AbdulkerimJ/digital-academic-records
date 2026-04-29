@@ -289,20 +289,36 @@ async function migrate() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
         student_id UUID NOT NULL,
+        institution_id UUID NOT NULL,
 
         request_text TEXT NOT NULL,
+
 
         status TEXT NOT NULL DEFAULT 'PENDING' CHECK (
           status IN ('PENDING', 'APPROVED', 'REJECTED')
         ),
+
+        reviewed_by UUID,
+        reviewed_at TIMESTAMP,
+        rejection_reason TEXT,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (student_id)
           REFERENCES student(id)
+          ON DELETE CASCADE,
+
+        FOREIGN KEY (reviewed_by)
+          REFERENCES app_user(id)
+          ON DELETE SET NULL,
+
+        FOREIGN KEY (institution_id)
+          REFERENCES institution(id)
           ON DELETE CASCADE
       );
+
+
     `);
 
     // ===================== AUDIT LOG =====================

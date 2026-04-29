@@ -13,6 +13,7 @@ import getCitizenRoutes from "./modules/citizens/citizen.routes.js";
 import institutionRoutes from "./modules/institutions/institution.routes.js";
 import examRoutes from "./modules/exams/exam.routes.js";
 import degreeRoutes from "./modules/degrees/degree.routes.js";
+import correctionRequestRoutes from "./modules/correction-requests/correction-request.routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/citizens", getCitizenRoutes);
 app.use("/api/institutions", institutionRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/degrees", degreeRoutes);
+app.use("/api/correction-requests", correctionRequestRoutes);
 
 // unmatched routes
 app.use((req, res, next) => {
