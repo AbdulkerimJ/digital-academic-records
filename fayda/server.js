@@ -4,6 +4,8 @@ import citizenRoutes from "./routes/citizen.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import swaggerSpec from "./config/swagger.js";
 import dotenv from "dotenv";
+import cors from "cors";  
+
 dotenv.config();
 
 const app = express();
