@@ -2,9 +2,11 @@ import jwt from "jsonwebtoken";
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
-const REFRESH_COOKIE_MAX_AGE_MS = Number(
-  process.env.REFRESH_COOKIE_MAX_AGE_MS || 7 * 24 * 60 * 60 * 1000,
-);
+let REFRESH_COOKIE_MAX_AGE_MS = Number(process.env.REFRESH_COOKIE_MAX_AGE_MS);
+if (isNaN(REFRESH_COOKIE_MAX_AGE_MS)) {
+  REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days default
+}
+
 const REFRESH_COOKIE_SAME_SITE =
   process.env.REFRESH_COOKIE_SAME_SITE || "Strict";
 const REFRESH_COOKIE_PATH = process.env.REFRESH_COOKIE_PATH || "/";

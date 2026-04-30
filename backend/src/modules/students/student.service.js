@@ -1,5 +1,6 @@
 import AppError from "../../common/utils/appError.js";
-import { findStudentById, findStudents, updateStudentById } from "./student.repository.js";
+import { findStudentById, findStudents } from "./student.repository.js";
+
 import { findExamRecords } from "../exams/exam.repository.js";
 import { findDegrees } from "../degrees/degree.repository.js";
 

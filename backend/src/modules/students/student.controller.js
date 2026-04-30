@@ -37,8 +37,6 @@ export const listStudents = catchAsync(async (req, res) => {
 });
 
 
-
-
 export const getStudentById = catchAsync(async (req, res) => {
   const student = await getStudentByIdService(req.params.id);
   return sendSuccess(res, "Student detail fetched successfully", { student });
