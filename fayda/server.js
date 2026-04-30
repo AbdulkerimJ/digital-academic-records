@@ -14,6 +14,11 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
+// health check
+app.get("/", (req, res) => {
+  res.send("Fayda Server is running");
+});
+
 app.use("/fayda/api/citizens", citizenRoutes);
 app.use("/fayda/api/auth", authRoutes);
 
