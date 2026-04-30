@@ -140,7 +140,8 @@
  *
  * /api/students:
  *   get:
- *     summary: List and search students (Admin only)
+ *     summary: List students (Super Admin can browse all, others must search)
+
  *     tags: [Admin - Students]
  *     security:
  *       - bearerAuth: []
@@ -149,7 +150,10 @@
  *         name: search
  *         schema:
  *           type: string
+ *         description: Search by name or National ID
+
  *       - in: query
+
  *         name: page
  *         schema:
  *           type: integer

@@ -29,9 +29,15 @@ export const getMyDegrees = catchAsync(async (req, res) => {
 
 export const listStudents = catchAsync(async (req, res) => {
   const { search, page, limit } = req.query;
-  const students = await listStudentsService({ search, page, limit });
+  const students = await listStudentsService({ 
+    user: req.user,
+    query: { search, page, limit } 
+  });
   return sendSuccess(res, "Students list fetched successfully", { count: students.length, students });
 });
+
+
+
 
 export const getStudentById = catchAsync(async (req, res) => {
   const student = await getStudentByIdService(req.params.id);

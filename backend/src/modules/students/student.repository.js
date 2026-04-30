@@ -67,26 +67,77 @@ export const incrementStudentTokenVersionById = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findStudents = async ({ search, page = 1, limit = 10 } = {}) => {
+export const findStudents = async ({
+  search,
+  page = 1,
+  limit = 10,
+} = {}) => {
   const offset = (page - 1) * limit;
+
   let sql = `
-    SELECT id, national_id AS "nationalId", first_name AS "firstName", last_name AS "lastName", 
-           date_of_birth AS "dateOfBirth", created_at AS "createdAt"
+    SELECT id,
+           national_id AS "nationalId",
+           first_name AS "firstName",
+           last_name AS "lastName",
+           date_of_birth AS "dateOfBirth",
+           created_at AS "createdAt"
     FROM student
   `;
+
+  const conditions = [];
   const params = [];
 
   if (search) {
-    params.push(`%${search}%`);
-    sql += ` WHERE first_name ILIKE $1 OR last_name ILIKE $1 OR national_id ILIKE $1`;
+    const terms = search.trim().split(/\s+/);
+
+    if (terms.length === 1) {
+      // single word → match anything
+      params.push(`%${terms[0]}%`);
+      const i = params.length;
+
+      conditions.push(`
+        (
+          first_name ILIKE $${i}
+          OR last_name ILIKE $${i}
+          OR national_id ILIKE $${i}
+        )
+      `);
+    } else {
+      // multiple words → full name match
+      const first = `%${terms[0]}%`;
+      const last = `%${terms[1]}%`;
+
+      params.push(first);
+      const i1 = params.length;
+
+      params.push(last);
+      const i2 = params.length;
+
+      conditions.push(`
+        (
+          (first_name ILIKE $${i1} AND last_name ILIKE $${i2})
+          OR (first_name ILIKE $${i2} AND last_name ILIKE $${i1})
+        )
+      `);
+    }
   }
 
-  sql += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  params.push(limit, offset);
+  if (conditions.length > 0) {
+    sql += ` WHERE ` + conditions.join(" AND ");
+  }
+
+  sql += ` ORDER BY created_at DESC`;
+
+  params.push(limit);
+  sql += ` LIMIT $${params.length}`;
+
+  params.push(offset);
+  sql += ` OFFSET $${params.length}`;
 
   const result = await pool.query(sql, params);
   return result.rows;
 };
+
 
 
 
