@@ -66,3 +66,27 @@ export const incrementStudentTokenVersionById = async (id) => {
 
   return result.rows[0] || null;
 };
+
+export const findStudents = async ({ search, page = 1, limit = 10 } = {}) => {
+  const offset = (page - 1) * limit;
+  let sql = `
+    SELECT id, national_id AS "nationalId", first_name AS "firstName", last_name AS "lastName", 
+           date_of_birth AS "dateOfBirth", created_at AS "createdAt"
+    FROM student
+  `;
+  const params = [];
+
+  if (search) {
+    params.push(`%${search}%`);
+    sql += ` WHERE first_name ILIKE $1 OR last_name ILIKE $1 OR national_id ILIKE $1`;
+  }
+
+  sql += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  params.push(limit, offset);
+
+  const result = await pool.query(sql, params);
+  return result.rows;
+};
+
+
+

@@ -4,9 +4,6 @@
  *   schemas:
  *     StudentErrorResponse:
  *       type: object
- *       example:
- *         success: false
- *         message: Citizen not found
  *       properties:
  *         success:
  *           type: boolean
@@ -15,11 +12,6 @@
  *           type: string
  *     StudentAuthUser:
  *       type: object
- *       example:
- *         id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *         firstName: Hana
- *         lastName: Tekle
- *         nationalId: FD-2026-0001
  *       properties:
  *         id:
  *           type: string
@@ -32,12 +24,6 @@
  *           type: string
  *     StudentProfile:
  *       type: object
- *       example:
- *         id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *         firstName: Hana
- *         lastName: Tekle
- *         nationalId: FD-2026-0001
- *         tokenVersion: 0
  *       properties:
  *         id:
  *           type: string
@@ -48,17 +34,13 @@
  *           type: string
  *         nationalId:
  *           type: string
+ *         dateOfBirth:
+ *           type: string
+ *           format: date
  *         tokenVersion:
  *           type: integer
  *     StudentAuthResponse:
  *       type: object
- *       example:
- *         accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *         user:
- *           id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *           firstName: Hana
- *           lastName: Tekle
- *           nationalId: FD-2026-0001
  *       properties:
  *         accessToken:
  *           type: string
@@ -66,198 +48,133 @@
  *           $ref: '#/components/schemas/StudentAuthUser'
  *     StudentMeResponse:
  *       type: object
- *       example:
- *         user:
- *           id: 7d0ddf8c-9a7b-4d45-8b14-5f8a9f8a2b21
- *           firstName: Hana
- *           lastName: Tekle
- *           nationalId: FD-2026-0001
- *           tokenVersion: 0
  *       properties:
- *         user:
+ *         student:
  *           $ref: '#/components/schemas/StudentProfile'
  *
  * /api/students/login:
  *   post:
  *     summary: Start student login by validating Fayda ID and sending OTP
- *     description: Sends an OTP to the citizen linked to the given Fayda ID.
- *     tags:
- *       - Students
+ *     tags: [Students]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - faydaId
+ *             required: [faydaId]
  *             properties:
  *               faydaId:
  *                 type: string
- *                 description: National Fayda ID
  *     responses:
  *       200:
  *         description: OTP sent successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: OTP sent successfully
- *       400:
- *         description: Fayda ID is missing or OTP delivery failed
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
- *       404:
- *         description: Citizen not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
  *
  * /api/students/verify:
  *   post:
  *     summary: Verify student OTP and issue login token
- *     description: Verifies the OTP through Fayda and creates the student record if needed.
- *     tags:
- *       - Students
+ *     tags: [Students]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - faydaId
- *               - otp
+ *             required: [faydaId, otp]
  *             properties:
  *               faydaId:
  *                 type: string
- *                 description: National Fayda ID
  *               otp:
  *                 type: string
- *                 description: One-time password from Fayda
  *     responses:
  *       200:
  *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StudentAuthResponse'
- *       400:
- *         description: Missing Fayda ID/OTP or OTP verification failed
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
- *       401:
- *         description: Invalid OTP payload or expired session token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
- *       404:
- *         description: Citizen not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
  *
  * /api/students/refresh:
  *   post:
  *     summary: Refresh student access token
- *     tags:
- *       - Students
+ *     tags: [Students]
  *     responses:
  *       200:
- *         description: Token refreshed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StudentAuthResponse'
- *       401:
- *         description: Missing, invalid, or expired refresh token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
+ *         description: Token refreshed
  *
  * /api/students/logout:
  *   post:
  *     summary: Log out current student
- *     tags:
- *       - Students
+ *     tags: [Students]
  *     security:
- *       - bearerAuth: []
+ *       - studentAuth: []
  *     responses:
  *       200:
- *         description: Logged out successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Logged out successfully
- *       401:
- *         description: Not logged in
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
+ *         description: Logged out
  *
  * /api/students/me:
  *   get:
- *     summary: Get current authenticated student profile
- *     tags:
- *       - Students
+ *     summary: Get current student profile
+ *     tags: [Students]
  *     security:
- *       - bearerAuth: []
+ *       - studentAuth: []
  *     responses:
  *       200:
- *         description: Current user fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StudentMeResponse'
- *       401:
- *         description: Not logged in
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentErrorResponse'
+ *         description: Profile fetched
+ *
+ * /api/students/me/exams:
+ *   get:
+ *     summary: Get current student's exam records
+ *     tags: [Students]
+ *     security:
+ *       - studentAuth: []
+ *     responses:
+ *       200:
+ *         description: Exam records fetched
+ *
+ * /api/students/me/degrees:
+ *   get:
+ *     summary: Get current student's degree records
+ *     tags: [Students]
+ *     security:
+ *       - studentAuth: []
+ *     responses:
+ *       200:
+ *         description: Degree records fetched
+ *
+ * /api/students:
+ *   get:
+ *     summary: List and search students (Admin only)
+ *     tags: [Admin - Students]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Student list fetched
+ *
+ * /api/students/{id}:
+ *   get:
+ *     summary: Get student detail by ID (Admin only)
+ *     tags: [Admin - Students]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Student detail fetched
  */
-
-export {};
