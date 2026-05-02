@@ -39,21 +39,8 @@ export const inviteUserService = async ({
   roleId,
   institutionId,
 }) => {
-  if (
-    !firstName ||
-    !lastName ||
-    !email ||
-    roleId === undefined ||
-    roleId === null ||
-    roleId === "" ||
-    institutionId === undefined ||
-    institutionId === null ||
-    institutionId === ""
-  ) {
-    throw new AppError(
-      "firstName, lastName, email, roleId and institutionId are required",
-      400,
-    );
+  if (!firstName || !lastName || !email || roleId === undefined || roleId === null || roleId === "") {
+    throw new AppError("firstName, lastName, email, and roleId are required", 400);
   }
 
   const normalizedEmail = email.trim().toLowerCase();
@@ -61,6 +48,17 @@ export const inviteUserService = async ({
 
   if (!Number.isInteger(numericRoleId) || numericRoleId <= 0) {
     throw new AppError("roleId must be a positive integer", 400);
+  }
+
+  // There is only one Super Admin (ID 1). Invitations are only for Registrars.
+  if (numericRoleId === 1) {
+    throw new AppError("Creating additional Super Admins is not allowed.", 403);
+  }
+
+  const finalInstitutionId = institutionId;
+
+  if (!finalInstitutionId || finalInstitutionId === "") {
+    throw new AppError("Institution is required for the Registrar role.", 400);
   }
 
   const isRoleExists = await getRoleById(numericRoleId);
@@ -82,7 +80,7 @@ export const inviteUserService = async ({
     lastName: lastName.trim(),
     email: normalizedEmail,
     roleId: numericRoleId,
-    institutionId,
+    institutionId: finalInstitutionId,
     invitationToken,
     invitationExpires,
   });
@@ -163,7 +161,6 @@ export const updateUserService = async ({
   firstName,
   lastName,
   email,
-  roleId,
   institutionId,
 }) => {
   if (!userId) {
@@ -185,30 +182,10 @@ export const updateUserService = async ({
   const normalizedEmail =
     email !== undefined ? String(email).trim().toLowerCase() : undefined;
 
-  const numericRoleId =
-    roleId !== undefined && roleId !== null && roleId !== ""
-      ? Number(roleId)
-      : undefined;
-
   const nextInstitutionId =
     institutionId !== undefined && institutionId !== null && institutionId !== ""
       ? institutionId
       : undefined;
-
-  // validate roleId
-  if (
-    numericRoleId !== undefined &&
-    (!Number.isInteger(numericRoleId) || numericRoleId <= 0)
-  ) {
-    throw new AppError("roleId must be a positive integer", 400);
-  }
-
-  if (numericRoleId !== undefined) {
-    const roleExists = await getRoleById(numericRoleId);
-    if (!roleExists) {
-      throw new AppError("role does not exist", 400);
-    }
-  }
 
   // email uniqueness check
   if (normalizedEmail !== undefined) {
@@ -218,16 +195,14 @@ export const updateUserService = async ({
     }
   }
 
-  // must update at least one field
-  const hasUpdate =
-    trimmedFirstName !== undefined ||
-    trimmedLastName !== undefined ||
-    normalizedEmail !== undefined ||
-    numericRoleId !== undefined ||
-    nextInstitutionId !== undefined;
+  // resolve final institution to respect DB constraint
+  const isSuperAdmin = currentUser.roleId === 1;
+  let finalInstitutionId = nextInstitutionId !== undefined ? nextInstitutionId : currentUser.institutionId;
 
-  if (!hasUpdate) {
-    throw new AppError("At least one field is required to update the user", 400);
+  if (isSuperAdmin) {
+    finalInstitutionId = null;
+  } else if (!finalInstitutionId) {
+    throw new AppError("Institution is required for this role", 400);
   }
 
   const updatedUser = await updateUserById({
@@ -235,8 +210,7 @@ export const updateUserService = async ({
     firstName: trimmedFirstName,
     lastName: trimmedLastName,
     email: normalizedEmail,
-    roleId: numericRoleId,
-    institutionId: nextInstitutionId,
+    institutionId: finalInstitutionId,
   });
 
   if (!updatedUser) {

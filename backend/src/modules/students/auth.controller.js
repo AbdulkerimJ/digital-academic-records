@@ -39,10 +39,7 @@ export const logout = catchAsync(async (req, res) => {
   return sendSuccess(res, "Logged out successfully");
 });
 
-export const getMe = (req, res) => {
-  return sendSuccess(
-    res,
-    "Current user fetched successfully",
-    getStudentProfileService(req.user),
-  );
-};
+export const getMe = catchAsync(async (req, res) => {
+  const student = await getStudentProfileService(req.user.id);
+  return sendSuccess(res, "Current user fetched successfully", { student });
+});

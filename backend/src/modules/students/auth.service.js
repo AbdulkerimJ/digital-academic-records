@@ -7,17 +7,31 @@ import {
   incrementStudentTokenVersionById,
 } from "./student.repository.js";
 
+// add comments in the below service function to explain the code
 export const requestStudentLoginService = async ({ faydaId }) => {
+  // check if faydaId is provided
   if (!faydaId) {
     throw new AppError("faydaId is required", 400);
   }
 
-  const citizenRes = await getCitizen(faydaId);
-
-  if (!citizenRes.success) {
-    throw new AppError("Citizen not found", 404);
+  // Check if student is already registered in our database
+  const student = await findStudentByNationalId(faydaId);
+  if (!student) {
+    throw new AppError(
+      "You are not registered in our system. Please contact your institution.",
+      403,
+    );
   }
 
+  // get citizen from fayda service
+  const citizenRes = await getCitizen(faydaId);
+
+  // check if citizen is found
+  if (!citizenRes.success) {
+    throw new AppError("Citizen not found in the national system", 404);
+  }
+
+  // Send OTP only if the student is registered
   const otpRes = await sendOtp(faydaId);
 
   if (!otpRes.success) {
@@ -38,16 +52,10 @@ export const verifyStudentLoginService = async ({ faydaId, otp }) => {
     throw new AppError(result.message || "OTP verification failed", 400);
   }
 
-  let user = await findStudentByNationalId(faydaId);
+  const user = await findStudentByNationalId(faydaId);
 
   if (!user) {
-    const citizenRes = await getCitizen(faydaId);
-
-    if (!citizenRes.success) {
-      throw new AppError(citizenRes.message || "Citizen not found", 404);
-    }
-
-    user = await createStudentFromCitizen(faydaId, citizenRes.data);
+    throw new AppError("Student record not found.", 404);
   }
 
   return user;
@@ -81,7 +89,7 @@ export const refreshStudentSessionService = async (refreshToken) => {
 
   let decoded;
   try {
-    decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    decoded = jwt.verify(refreshToken, process.env.STUDENT_REFRESH_SECRET);
   } catch {
     throw new AppError("Invalid or expired refresh token", 401);
   }

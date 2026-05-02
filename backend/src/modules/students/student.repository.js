@@ -25,7 +25,7 @@ export const findStudentByNationalId = async (faydaId) => {
             first_name AS "firstName",
             last_name AS "lastName",
             date_of_birth AS "dateOfBirth",
-                 token_version AS "tokenVersion",
+            token_version AS "tokenVersion",
             created_at AS "createdAt"
      FROM student
      WHERE national_id = $1`,

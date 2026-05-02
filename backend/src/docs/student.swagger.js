@@ -54,7 +54,8 @@
  *
  * /api/students/login:
  *   post:
- *     summary: Start student login by validating Fayda ID and sending OTP
+ *     summary: Start student login (Only for registered students)
+ *     description: Validates Fayda ID against local registry and sends OTP if registered.
  *     tags: [Students]
  *     requestBody:
  *       required: true
@@ -69,6 +70,10 @@
  *     responses:
  *       200:
  *         description: OTP sent successfully
+ *       403:
+ *         description: Not registered in the system
+ *       404:
+ *         description: Citizen not found in national system
  *
  * /api/students/verify:
  *   post:
@@ -164,6 +169,48 @@
  *     responses:
  *       200:
  *         description: Student list fetched
+ *
+ * /api/students/register:
+ *   post:
+ *     summary: Register a student by harmonizing with Fayda data (Admin/Registrar only)
+ *     tags: [Admin - Students]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [faydaId]
+ *             properties:
+ *               faydaId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Student registered successfully
+ *       400:
+ *         description: Already registered or invalid ID
+ *
+ * /api/students/register-bulk:
+ *   post:
+ *     summary: Bulk register students via CSV file (Admin/Registrar only)
+ *     tags: [Admin - Students]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Bulk registration completed
  *
  * /api/students/{id}:
  *   get:

@@ -26,31 +26,31 @@ export const getRoleById = async (roleId) => {
 export const findUserByEmail = async (email) => {
   const result = await pool.query(
     `SELECT app_user.id,
-            first_name AS "firstName",
-            last_name AS "lastName",
-            email,
-            password_hash AS "passwordHash",
-            is_active AS "isActive",
-            is_suspended AS "isSuspended",
-            suspended_at AS "suspendedAt",
-            suspended_by AS "suspendedBy",
-            suspension_reason AS "suspensionReason",
-            invitation_token AS "invitationToken",
-            invitation_expires AS "invitationExpires",
-            reset_token AS "resetToken",
-            reset_expires AS "resetExpires",
-            token_version AS "tokenVersion",
-            role_id AS "roleId",
-            institution_id AS "institutionId",
-                 institution.name AS "institutionName",
-                 institution.code AS "institutionCode",
-                 institution.type AS "institutionType",
-            password_changed_at AS "passwordChangedAt",
-            created_at AS "createdAt",
-            updated_at AS "updatedAt"
+            app_user.first_name AS "firstName",
+            app_user.last_name AS "lastName",
+            app_user.email,
+            app_user.password_hash AS "passwordHash",
+            app_user.is_active AS "isActive",
+            app_user.is_suspended AS "isSuspended",
+            app_user.suspended_at AS "suspendedAt",
+            app_user.suspended_by AS "suspendedBy",
+            app_user.suspension_reason AS "suspensionReason",
+            app_user.invitation_token AS "invitationToken",
+            app_user.invitation_expires AS "invitationExpires",
+            app_user.reset_token AS "resetToken",
+            app_user.reset_expires AS "resetExpires",
+            app_user.token_version AS "tokenVersion",
+            app_user.role_id AS "roleId",
+            app_user.institution_id AS "institutionId",
+            institution.name AS "institutionName",
+            institution.code AS "institutionCode",
+            institution.type AS "institutionType",
+            app_user.password_changed_at AS "passwordChangedAt",
+            app_user.created_at AS "createdAt",
+            app_user.updated_at AS "updatedAt"
      FROM app_user
-               LEFT JOIN institution ON institution.id = app_user.institution_id
-     WHERE email = $1`,
+     LEFT JOIN institution ON institution.id = app_user.institution_id
+     WHERE app_user.email = $1`,
     [email],
   );
 
@@ -211,23 +211,23 @@ export const createUserRecord = async ({
 export const findUserByInvitationToken = async (invitationToken) => {
   const result = await pool.query(
     `SELECT app_user.id,
-            first_name AS "firstName",
-            last_name AS "lastName",
-            email,
-            password_hash AS "passwordHash",
-            is_active AS "isActive",
-            invitation_token AS "invitationToken",
-            invitation_expires AS "invitationExpires",
-            role_id AS "roleId",
-            institution_id AS "institutionId",
-                 institution.name AS "institutionName",
-                 institution.code AS "institutionCode",
-                 institution.type AS "institutionType",
-            created_at AS "createdAt",
-            updated_at AS "updatedAt"
+            app_user.first_name AS "firstName",
+            app_user.last_name AS "lastName",
+            app_user.email,
+            app_user.password_hash AS "passwordHash",
+            app_user.is_active AS "isActive",
+            app_user.invitation_token AS "invitationToken",
+            app_user.invitation_expires AS "invitationExpires",
+            app_user.role_id AS "roleId",
+            app_user.institution_id AS "institutionId",
+            institution.name AS "institutionName",
+            institution.code AS "institutionCode",
+            institution.type AS "institutionType",
+            app_user.created_at AS "createdAt",
+            app_user.updated_at AS "updatedAt"
      FROM app_user
-               LEFT JOIN institution ON institution.id = app_user.institution_id
-     WHERE invitation_token = $1`,
+     LEFT JOIN institution ON institution.id = app_user.institution_id
+     WHERE app_user.invitation_token = $1`,
     [invitationToken],
   );
 

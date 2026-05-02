@@ -25,6 +25,18 @@ export const signRefreshToken = (payload) => {
   });
 };
 
+export const signStudentAccessToken = (payload) => {
+  return jwt.sign(payload, process.env.STUDENT_ACCESS_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+  });
+};
+
+export const signStudentRefreshToken = (payload) => {
+  return jwt.sign(payload, process.env.STUDENT_REFRESH_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+  });
+};
+
 export const refreshCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -48,8 +60,8 @@ export const clearStudentAuthCookie = (res) => {
 
 export const createAndSendStudentToken = (student, res) => {
   const { id, nationalId, firstName, lastName, tokenVersion = 0 } = student;
-  const accessToken = signAccessToken({ id, nationalId, tokenVersion });
-  const refreshToken = signRefreshToken({ id, nationalId, tokenVersion });
+  const accessToken = signStudentAccessToken({ id, nationalId, tokenVersion });
+  const refreshToken = signStudentRefreshToken({ id, nationalId, tokenVersion });
 
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions);
 

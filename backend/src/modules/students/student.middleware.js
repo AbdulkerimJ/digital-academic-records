@@ -14,7 +14,7 @@ export const protectStudent = catchAsync(async (req, res, next) => {
     );
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(token, process.env.STUDENT_ACCESS_SECRET);
   const currentStudent = await getStudentAuthContextService(decoded);
 
   req.user = {

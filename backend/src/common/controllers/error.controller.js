@@ -73,6 +73,19 @@ const handleAxiosError = (err) => {
   return new AppError("External service request failed", 500);
 };
 
+// Multer errors
+const handleMulterFileSizeError = () =>
+  new AppError("File is too large. Please upload a smaller file.", 400);
+
+const handleMulterUnexpectedFileError = (err) =>
+  new AppError(
+    `Unexpected field: "${err.field}". Please ensure you are using the "file" key and only uploading one file.`,
+    400,
+  );
+
+const handleMulterGenericError = (err) =>
+  new AppError(err.message || "An error occurred during file upload.", 400);
+
 // ================= OTHER =================
 
 const handlePayloadTooLargeError = () =>
@@ -130,10 +143,15 @@ const globalErrorHandler = (err, req, res, next) => {
     if (error.name === "JsonWebTokenError") error = handleJWTError();
     if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
 
-    // Payload
+    // Multer
+    if (error.code === "LIMIT_FILE_SIZE") error = handleMulterFileSizeError();
+    if (error.code === "LIMIT_UNEXPECTED_FILE") error = handleMulterUnexpectedFileError(error);
+    if (error.name === "MulterError") error = handleMulterGenericError(error);
+
+    // Other
     if (error.type === "entity.too.large") error = handlePayloadTooLargeError();
 
-    // Axios / External API
+    // Axios
     if (error.isAxiosError) error = handleAxiosError(error);
 
     sendErrorProd(error, req, res);

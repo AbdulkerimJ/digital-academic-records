@@ -6,6 +6,8 @@ import {
   getMyDegrees,
   listStudents,
   getStudentById,
+  registerStudent,
+  registerBulkStudents,
 } from "./student.controller.js";
 
 import {
@@ -15,7 +17,8 @@ import {
   verifyLogin,
 } from "./auth.controller.js";
 import { protectStudent } from "./student.middleware.js";
-import { protectUser } from "../users/user.middleware.js";
+import { protectUser, restrictTo } from "../users/user.middleware.js";
+import upload from "../../common/utils/upload.js";
 import { submitRequest, getMyRequests } from "../correction-requests/correction-request.controller.js";
 
 const router = express.Router();
@@ -36,8 +39,24 @@ router.get("/me/degrees", protectStudent, getMyDegrees);
 router.post("/correction-requests", protectStudent, submitRequest);
 router.get("/correction-requests", protectStudent, getMyRequests);
 
-// Admin Student Management
+// Admin & Registrar Student Management
 router.get("/", protectUser, listStudents);
+
+router.post(
+  "/register",
+  protectUser,
+  restrictTo("SUPER_ADMIN", "REGISTRAR"),
+  registerStudent,
+);
+
+router.post(
+  "/register-bulk",
+  protectUser,
+  restrictTo("SUPER_ADMIN", "REGISTRAR"),
+  upload.single("file"),
+  registerBulkStudents,
+);
+
 router.get("/:id", protectUser, getStudentById);
 
 
