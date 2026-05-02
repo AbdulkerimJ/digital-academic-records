@@ -14,6 +14,8 @@ import institutionRoutes from "./modules/institutions/institution.routes.js";
 import examRoutes from "./modules/exams/exam.routes.js";
 import degreeRoutes from "./modules/degrees/degree.routes.js";
 import correctionRequestRoutes from "./modules/correction-requests/correction-request.routes.js";
+import qrRoutes from "./modules/qr/qr.routes.js";
+
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.use("/api/institutions", institutionRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/degrees", degreeRoutes);
 app.use("/api/correction-requests", correctionRequestRoutes);
+app.use("/api/qr", qrRoutes);
+
 
 // unmatched routes
 app.use((req, res, next) => {

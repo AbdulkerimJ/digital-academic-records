@@ -7,7 +7,9 @@ import {
   getMyDegreesService,
   listStudentsService,
   getStudentByIdService,
+  getStudentFullRecordsService,
   registerStudentService,
+
   registerBulkStudentsService,
 } from "./student.service.js";
 
@@ -44,6 +46,12 @@ export const getStudentById = catchAsync(async (req, res) => {
   const student = await getStudentByIdService(req.params.id);
   return sendSuccess(res, "Student detail fetched successfully", { student });
 });
+
+export const getStudentRecords = catchAsync(async (req, res) => {
+  const data = await getStudentFullRecordsService(req.params.id);
+  return sendSuccess(res, "Student records fetched successfully", data);
+});
+
 
 export const registerStudent = catchAsync(async (req, res) => {
   const { faydaId } = req.body || {};

@@ -71,6 +71,11 @@ const options = {
         name: "Health",
         description: "Service health check endpoint",
       },
+      {
+        name: "QR Codes",
+        description: "Student QR code generation and public employer verification",
+      },
+
     ],
 
     // Prepare for future auth

@@ -1,4 +1,5 @@
 import catchAsync from "../../common/utils/catchAsync.js";
+import AppError from "../../common/utils/appError.js";
 import { sendSuccess } from "../../common/utils/response.js";
 import {
   listDegreeLevelsService,
@@ -14,6 +15,7 @@ import {
   getDegreeByIdService,
   updateDegreeService,
   deleteDegreeService,
+  uploadBulkDegreesService,
 } from "./degree.service.js";
 
 // ===================== DEGREE LEVEL LOOKUPS =====================
@@ -37,20 +39,22 @@ export const getDegreeLevelById = catchAsync(async (req, res) => {
 export const createDegreeLevel = catchAsync(async (req, res) => {
   const degreeLevel = await createDegreeLevelService({
     user: req.user,
-    data: req.body,
+    data: req.body || {},
   });
   return sendSuccess(res, "Degree level created successfully", { degreeLevel }, 201);
 });
+
 
 export const updateDegreeLevel = catchAsync(async (req, res) => {
   const { degreeLevelId } = req.params;
   const degreeLevel = await updateDegreeLevelService({
     user: req.user,
     id: degreeLevelId,
-    data: req.body,
+    data: req.body || {},
   });
   return sendSuccess(res, "Degree level updated successfully", { degreeLevel });
 });
+
 
 
 // ===================== DEGREE TITLE LOOKUPS =====================
@@ -76,20 +80,22 @@ export const getDegreeTitleById = catchAsync(async (req, res) => {
 export const createDegreeTitle = catchAsync(async (req, res) => {
   const degreeTitle = await createDegreeTitleService({
     user: req.user,
-    data: req.body,
+    data: req.body || {},
   });
   return sendSuccess(res, "Degree title created successfully", { degreeTitle }, 201);
 });
+
 
 export const updateDegreeTitle = catchAsync(async (req, res) => {
   const { degreeTitleId } = req.params;
   const degreeTitle = await updateDegreeTitleService({
     user: req.user,
     id: degreeTitleId,
-    data: req.body,
+    data: req.body || {},
   });
   return sendSuccess(res, "Degree title updated successfully", { degreeTitle });
 });
+
 
 
 // ===================== DEGREE RECORD CRUD =====================
@@ -139,10 +145,11 @@ export const updateDegree = catchAsync(async (req, res) => {
   const degree = await updateDegreeService({
     user: req.user,
     degreeId: req.params.degreeId,
-    ...req.body,
+    ...(req.body || {}),
   });
   return sendSuccess(res, "Degree record updated successfully", { degree });
 });
+
 
 export const deleteDegree = catchAsync(async (req, res) => {
   await deleteDegreeService({
@@ -151,6 +158,41 @@ export const deleteDegree = catchAsync(async (req, res) => {
   });
 
   return sendSuccess(res, "Degree record deleted successfully");
+});
+
+export const uploadBulkDegrees = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new AppError("No file provided. Please upload a CSV file.", 400);
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const onProgress = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const results = await uploadBulkDegreesService({
+      user: req.user,
+      fileBuffer: req.file.buffer,
+      onProgress,
+      institutionId: (req.body || {}).institutionId || req.query.institutionId,
+      institutionCode: (req.body || {}).institutionCode || req.query.institutionCode,
+    });
+
+
+    res.write(`data: ${JSON.stringify({ complete: true, results })}\n\n`);
+    res.end();
+  } catch (err) {
+    res.write(
+      `data: ${JSON.stringify({
+        error: err.message || "Internal server error during processing",
+      })}\n\n`,
+    );
+    res.end();
+  }
 });
 
 

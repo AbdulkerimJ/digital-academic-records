@@ -22,7 +22,7 @@ async function seed() {
       VALUES 
       ('Ministry of Education', 'MOE', 'EXAM_BOARD'),
       ('Regional Exam Board', 'REB', 'EXAM_BOARD'),
-      ('Central University', 'CC', 'COLLEGE')
+      ('Central University', 'CU', 'COLLEGE')
       ON CONFLICT (code) DO NOTHING;
       `);
 
@@ -30,8 +30,8 @@ async function seed() {
     await pool.query(`
       INSERT INTO colleges (institution_id, name, code)
       VALUES
-        ((SELECT id FROM institution WHERE code = 'CC'), 'College of Engineering', 'COE'),
-        ((SELECT id FROM institution WHERE code = 'CC'), 'College of Business and Economics', 'CBE')
+        ((SELECT id FROM institution WHERE code = 'CU'), 'College of Engineering', 'COE'),
+        ((SELECT id FROM institution WHERE code = 'CU'), 'College of Business and Economics', 'CBE')
       ON CONFLICT (institution_id, code) DO NOTHING;
     `);
 
@@ -158,7 +158,7 @@ async function seed() {
     institution_id = EXCLUDED.institution_id,
     updated_at = CURRENT_TIMESTAMP;
   `,
-      ["John", "Doe", "john.doe@example.com", passwordHash],
+      ["Abdulkerim", "Jemal", "abdulkerimjemal.dev@gmail.com", passwordHash],
     );
 
     console.log("Seeding completed!");

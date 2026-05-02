@@ -9,6 +9,7 @@ import {
 } from "./degree.repository.js";
 import {
   findDegreeTitleById,
+  findDegreeTitleByCode,
   findDegreeTitles,
   findDegreeTitlesByLevelId,
   createDegreeTitleRecord,
@@ -18,13 +19,16 @@ import {
 import {
   findDegreeLevelById,
   findDegreeLevels,
+  findDegreeLevelByCode,
   createDegreeLevelRecord,
   updateDegreeLevelById,
 } from "./degree-level.repository.js";
-import { findCollegeById } from "../institutions/college.repository.js";
-import { findDepartmentById } from "../institutions/department.repository.js";
-import { findInstitutionById } from "../institutions/institution.repository.js";
-import { findStudentById } from "../students/student.repository.js";
+import { findCollegeById, findCollegeByCode } from "../institutions/college.repository.js";
+import { findDepartmentById, findDepartmentByCode } from "../institutions/department.repository.js";
+import { findInstitutionById, findInstitutionByCode } from "../institutions/institution.repository.js";
+import { findStudentById, findStudentByNationalId } from "../students/student.repository.js";
+import csv from "csv-parser";
+import { Readable } from "stream";
 
 // ===================== DEGREE LEVEL LOOKUPS =====================
 
@@ -134,102 +138,119 @@ export const updateDegreeTitleService = async ({ user, id, data }) => {
 export const createDegreeService = async ({ user, data = {} }) => {
   let {
     studentId,
+    nationalId,
     institutionId,
+    institutionCode,
     degreeLevelId,
+    degreeLevelCode,
     degreeTitleId,
+    degreeTitleCode,
     collegeId,
+    collegeCode,
     departmentId,
+    departmentCode,
     cgpa,
     graduationDate,
   } = data;
 
-  // Institution scoping
+  // 1. Institution context
   if (user.role !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
     institutionId = user.institutionId;
   } else {
+    // Super Admin: Resolve code if provided
+    if (!institutionId && institutionCode) {
+      const inst = await findInstitutionByCode(institutionCode);
+      if (!inst) throw new AppError("Institution code not found.", 404);
+      institutionId = inst.id;
+    }
+
     if (!institutionId) {
-      throw new AppError("Institution ID is required for super admin.", 400);
+      throw new AppError("Institution ID or Code is required for super admin.", 400);
     }
   }
 
-  // Validate institution
-  const institution = await findInstitutionById(institutionId);
-  if (!institution) {
-    throw new AppError("Invalid institution.", 400);
+  // 2. Resolve Student
+  let student;
+  if (studentId) {
+    student = await findStudentById(studentId);
+  } else if (nationalId) {
+    student = await findStudentByNationalId(nationalId);
   }
 
-  // Validate required fields
-  if (!studentId || !degreeLevelId || !degreeTitleId || !collegeId || !departmentId || !graduationDate) {
-    throw new AppError(
-      "Student ID, degree level, degree title, college, department, and graduation date are required.",
-      400,
-    );
-  }
-
-  // Validate student
-  const student = await findStudentById(studentId);
   if (!student) {
-    throw new AppError("Student not found.", 400);
+    throw new AppError("Student not registered.", 404);
+  }
+  studentId = student.id;
+
+  // 3. Resolve Degree Level
+  let degreeLevel;
+  if (degreeLevelId) {
+    degreeLevel = await findDegreeLevelById(degreeLevelId);
+  } else if (degreeLevelCode) {
+    degreeLevel = await findDegreeLevelByCode(degreeLevelCode);
   }
 
-  // Validate degree level
-  const degreeLevel = await findDegreeLevelById(degreeLevelId);
   if (!degreeLevel || !degreeLevel.isActive) {
     throw new AppError("Degree level not found or inactive.", 400);
   }
+  degreeLevelId = degreeLevel.id;
 
-  // Validate degree title
-  const degreeTitle = await findDegreeTitleById(degreeTitleId);
+  // 4. Resolve Degree Title
+  let degreeTitle;
+  if (degreeTitleId) {
+    degreeTitle = await findDegreeTitleById(degreeTitleId);
+  } else if (degreeTitleCode) {
+    degreeTitle = await findDegreeTitleByCode(degreeTitleCode);
+  }
+
   if (!degreeTitle || !degreeTitle.isActive) {
     throw new AppError("Degree title not found or inactive.", 400);
   }
+  degreeTitleId = degreeTitle.id;
 
-  // Validate degree title belongs to the degree level
-  if (degreeTitle.degreeLevelId !== degreeLevel.id) {
-    throw new AppError(
-      "Degree title does not belong to the specified degree level.",
-      400,
-    );
+  if (degreeTitle.degreeLevelId !== degreeLevelId) {
+    throw new AppError("Degree title does not belong to the specified degree level.", 400);
   }
 
-  // Validate college
-  const college = await findCollegeById(collegeId);
+  // 5. Resolve College
+  let college;
+  if (collegeId) {
+    college = await findCollegeById(collegeId);
+  } else if (collegeCode) {
+    college = await findCollegeByCode(collegeCode, institutionId);
+  }
+
   if (!college || !college.isActive) {
     throw new AppError("College not found or inactive.", 400);
   }
+  collegeId = college.id;
 
-  // Validate college belongs to the institution
-  if (college.institutionId !== institutionId) {
-    throw new AppError(
-      "College does not belong to the specified institution.",
-      400,
-    );
+  // 6. Resolve Department
+  let department;
+  if (departmentId) {
+    department = await findDepartmentById(departmentId);
+  } else if (departmentCode) {
+    department = await findDepartmentByCode(departmentCode, collegeId);
   }
 
-  // Validate department
-  const department = await findDepartmentById(departmentId);
   if (!department || !department.isActive) {
     throw new AppError("Department not found or inactive.", 400);
   }
+  departmentId = department.id;
 
-  // Validate department belongs to the college
-  if (department.collegeId !== collegeId) {
-    throw new AppError(
-      "Department does not belong to the specified college.",
-      400,
-    );
+  // 7. Validation
+  if (!graduationDate) {
+    throw new AppError("Graduation date is required.", 400);
   }
 
-  // Validate CGPA
-  const parsedCgpa = parseNumber(cgpa, "CGPA");
+  const parsedCgpa = cgpa !== undefined ? parseNumber(cgpa, "CGPA") : null;
   if (parsedCgpa !== null && (parsedCgpa < 0 || parsedCgpa > 4)) {
     throw new AppError("CGPA must be between 0 and 4.", 400);
   }
 
-  // Validate graduation date
   const parsedGraduationDate = new Date(graduationDate);
   if (isNaN(parsedGraduationDate.getTime())) {
     throw new AppError("Graduation date must be a valid date.", 400);
@@ -247,6 +268,91 @@ export const createDegreeService = async ({ user, data = {} }) => {
   });
 
   return findDegreeById(created.id);
+};
+
+export const uploadBulkDegreesService = async ({
+  user,
+  fileBuffer,
+  onProgress,
+  institutionId,
+  institutionCode,
+}) => {
+  if (!fileBuffer) {
+    throw new AppError("No file provided", 400);
+  }
+
+  const records = [];
+  await new Promise((resolve, reject) => {
+    const stream = Readable.from(fileBuffer);
+    stream
+      .pipe(csv())
+      .on("data", (data) => records.push(data))
+      .on("end", resolve)
+      .on("error", reject);
+  });
+
+  if (records.length === 0) {
+    throw new AppError("No records found in the CSV file.", 400);
+  }
+
+  const results = {
+    total: records.length,
+    successRate: "0%",
+    successful: [],
+    failed: [],
+  };
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    try {
+      const mappedData = {
+        nationalId: record.nationalId || record.nationalid || record.NationalId,
+        degreeLevelCode: record.degreeLevelCode || record.degreelevelcode || record.DegreeLevelCode,
+        degreeTitleCode: record.degreeTitleCode || record.degreetitlecode || record.DegreeTitleCode,
+        collegeCode: record.collegeCode || record.collegecode || record.CollegeCode,
+        departmentCode: record.departmentCode || record.departmentcode || record.DepartmentCode,
+        cgpa: record.cgpa || record.CGPA,
+        graduationDate: record.graduationDate || record.graduationdate || record.GraduationDate,
+      };
+
+      await createDegreeService({
+        user,
+        data: {
+          ...mappedData,
+          institutionId,
+          institutionCode,
+        },
+      });
+      results.successful.push({
+        id: mappedData.nationalId,
+        date: mappedData.graduationDate,
+      });
+    } catch (err) {
+      results.failed.push({
+        id: record.nationalId || record.nationalid || `Row ${i + 1}`,
+        reason: err.message,
+      });
+    }
+
+    if (onProgress) {
+      const progress = Math.round(((i + 1) / records.length) * 100);
+      onProgress({
+        percent: `${progress}%`,
+        current: i + 1,
+        total: records.length,
+        lastResult: {
+          id: record.nationalId || record.nationalid || `Row ${i + 1}`,
+          success: !results.failed.find((f) => f.id === (record.nationalId || record.nationalid) || f.id === `Row ${i + 1}`),
+        },
+      });
+    }
+  }
+
+  results.successRate = results.total > 0
+    ? `${Math.round((results.successful.length / results.total) * 100)}%`
+    : "0%";
+
+  return results;
 };
 
 export const listDegreesService = async ({

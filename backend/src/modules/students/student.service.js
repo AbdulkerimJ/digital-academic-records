@@ -46,6 +46,27 @@ export const getStudentByIdService = async (id) => {
   return student;
 };
 
+export const getStudentFullRecordsService = async (id) => {
+  // 1. Verify student exists
+  const student = await findStudentById(id);
+  if (!student) {
+    throw new AppError("Student not found", 404);
+  }
+
+  // 2. Fetch records in parallel
+  const [exams, degrees] = await Promise.all([
+    findExamRecords({ studentId: id }),
+    findDegrees({ studentId: id }),
+  ]);
+
+  return {
+    student,
+    exams,
+    degrees,
+  };
+};
+
+
 export const registerStudentService = async (faydaId) => {
   if (!faydaId) {
     throw new AppError("Fayda ID is required", 400);

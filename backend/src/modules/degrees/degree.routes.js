@@ -13,8 +13,10 @@ import {
   getDegreeById,
   updateDegree,
   deleteDegree,
+  uploadBulkDegrees,
 } from "./degree.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
+import upload from "../../common/utils/upload.js";
 
 const router = express.Router();
 
@@ -36,8 +38,15 @@ router.patch("/titles/:degreeTitleId", restrictTo("SUPER_ADMIN"), updateDegreeTi
 // Degree record CRUD
 router.get("/", listDegrees);
 router.get("/:degreeId", getDegreeById);
-router.post("/", createDegree);
 router.patch("/:degreeId", updateDegree);
+
+router.post("/upload", createDegree);
+router.post(
+  "/upload-bulk",
+  restrictTo("SUPER_ADMIN", "REGISTRAR"),
+  upload.single("file"),
+  uploadBulkDegrees,
+);
 router.delete("/:degreeId", deleteDegree);
 
 export default router;

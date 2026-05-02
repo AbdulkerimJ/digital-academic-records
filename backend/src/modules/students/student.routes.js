@@ -6,7 +6,9 @@ import {
   getMyDegrees,
   listStudents,
   getStudentById,
+  getStudentRecords,
   registerStudent,
+
   registerBulkStudents,
 } from "./student.controller.js";
 
@@ -36,8 +38,9 @@ router.get("/me/exams", protectStudent, getMyExams);
 router.get("/me/degrees", protectStudent, getMyDegrees);
 
 // Correction Requests (Student facing)
-router.post("/correction-requests", protectStudent, submitRequest);
+router.post("/records/:recordId/correction", protectStudent, submitRequest);
 router.get("/correction-requests", protectStudent, getMyRequests);
+
 
 // Admin & Registrar Student Management
 router.get("/", protectUser, listStudents);
@@ -58,6 +61,8 @@ router.post(
 );
 
 router.get("/:id", protectUser, getStudentById);
+router.get("/:id/records", protectUser, getStudentRecords);
+
 
 
 

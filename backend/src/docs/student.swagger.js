@@ -108,7 +108,7 @@
  *     summary: Log out current student
  *     tags: [Students]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logged out
@@ -118,7 +118,7 @@
  *     summary: Get current student profile
  *     tags: [Students]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Profile fetched
@@ -128,7 +128,7 @@
  *     summary: Get current student's exam records
  *     tags: [Students]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Exam records fetched
@@ -138,7 +138,7 @@
  *     summary: Get current student's degree records
  *     tags: [Students]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Degree records fetched
@@ -228,4 +228,24 @@
  *     responses:
  *       200:
  *         description: Student detail fetched
+ *
+ * /api/students/{id}/records:
+ *   get:
+ *     summary: Get all academic records (Exams & Degrees) for a specific student
+ *     tags: [Admin - Students]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: All academic records for the student fetched successfully
+ *       404:
+ *         description: Student not found
  */
+

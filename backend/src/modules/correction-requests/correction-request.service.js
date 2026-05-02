@@ -5,21 +5,76 @@ import {
   findCorrectionRequests,
   findCorrectionRequestById,
   updateCorrectionRequestStatus,
+  deleteCorrectionRequestsByRecord,
+  deleteCorrectionRequestById,
 } from "./correction-request.repository.js";
+
+
+import { findExamRecordById } from "../exams/exam.repository.js";
+import { findDegreeById } from "../degrees/degree.repository.js";
+
+
 
 // ===================== STUDENT ACTIONS =====================
 
-export const submitCorrectionRequestService = async ({ studentId, institutionId, requestText }) => {
-  if (!requestText || !institutionId) {
-    throw new AppError("Request text and institution ID are required.", 400);
+export const submitCorrectionRequestService = async ({ studentId, recordId, recordType, requestText }) => {
+  if (!requestText) {
+    throw new AppError("Request text is required.", 400);
   }
+
+  if (!recordId || !recordType) {
+    throw new AppError("Record ID and Record Type are required to submit a correction.", 400);
+  }
+
+  let derivedInstitutionId;
+
+
+  // 1. Validate record and automatically fetch institutionId
+  let record;
+  if (recordType === "EXAM") {
+    record = await findExamRecordById(recordId);
+  } else if (recordType === "DEGREE") {
+    record = await findDegreeById(recordId);
+  } else {
+    throw new AppError("Invalid record type. Must be EXAM or DEGREE.", 400);
+  }
+
+  if (!record) {
+    throw new AppError(`${recordType} record not found.`, 404);
+  }
+
+  if (record.studentId !== studentId) {
+    throw new AppError("You can only request corrections for your own records.", 403);
+  }
+
+  // Use the institution from the record
+  derivedInstitutionId = record.institutionId;
+
+  if (!derivedInstitutionId) {
+    throw new AppError("Could not determine the institution for this record.", 400);
+  }
+
+  // 2. Cleanup: Delete only PENDING requests for this record
+  // (APPROVED and REJECTED requests are kept as history)
+  await deleteCorrectionRequestsByRecord({
+    studentId,
+    recordId,
+    recordType,
+    statuses: ["PENDING"],
+  });
+
+
 
   return await createCorrectionRequestRecord({
     studentId,
-    institutionId,
+    institutionId: derivedInstitutionId,
     requestText: requestText.trim(),
+    recordId,
+    recordType,
   });
 };
+
+
 
 export const getStudentCorrectionRequestsService = async (studentId) => {
   return await findCorrectionRequestsByStudentId(studentId);
@@ -77,6 +132,7 @@ export const approveCorrectionRequestService = async ({ id, user }) => {
     reviewedBy: user.id,
   });
 };
+
 
 export const rejectCorrectionRequestService = async ({ id, user, reason }) => {
   if (!reason) {

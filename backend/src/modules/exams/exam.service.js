@@ -12,7 +12,7 @@ import {
   updateExamRecordById,
   deleteExamRecordById,
 } from "./exam.repository.js";
-import { findInstitutionById } from "../institutions/institution.repository.js";
+import { findInstitutionById, findInstitutionByCode } from "../institutions/institution.repository.js";
 import { findStudentById, findStudentByNationalId } from "../students/student.repository.js";
 import csv from "csv-parser";
 import { Readable } from "stream";
@@ -86,6 +86,7 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     examLevelId,
     examLevelCode,
     institutionId,
+    institutionCode,
     year,
     totalScore,
     averageScore,
@@ -100,8 +101,15 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     }
     institutionId = user.institutionId;
   } else {
+    // Super Admin: Resolve code if provided
+    if (!institutionId && institutionCode) {
+      const inst = await findInstitutionByCode(institutionCode);
+      if (!inst) throw new AppError("Institution code not found.", 404);
+      institutionId = inst.id;
+    }
+
     if (!institutionId) {
-      throw new AppError("Institution ID is required for super admin.", 400);
+      throw new AppError("Institution ID or Code is required for super admin.", 400);
     }
   }
 
@@ -169,7 +177,13 @@ export const createExamRecordService = async ({ user, data = {} }) => {
   });
 };
 
-export const uploadBulkExamsService = async ({ user, fileBuffer, onProgress }) => {
+export const uploadBulkExamsService = async ({
+  user,
+  fileBuffer,
+  onProgress,
+  institutionId,
+  institutionCode,
+}) => {
   if (!fileBuffer) {
     throw new AppError("No file provided", 400);
   }
@@ -213,7 +227,14 @@ export const uploadBulkExamsService = async ({ user, fileBuffer, onProgress }) =
         resultStatus: record.resultStatus || record.resultstatus || record.ResultStatus,
       };
 
-      const exam = await createExamRecordService({ user, data: mappedData });
+      const exam = await createExamRecordService({
+        user,
+        data: {
+          ...mappedData,
+          institutionId,
+          institutionCode,
+        },
+      });
       results.successful.push({
         id: mappedData.nationalId,
         year: mappedData.year,

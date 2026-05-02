@@ -291,12 +291,15 @@ async function migrate() {
         student_id UUID NOT NULL,
         institution_id UUID NOT NULL,
 
-        request_text TEXT NOT NULL,
+        record_id UUID,
+        record_type TEXT CHECK (record_type IN ('EXAM', 'DEGREE')),
 
+        request_text TEXT NOT NULL,
 
         status TEXT NOT NULL DEFAULT 'PENDING' CHECK (
           status IN ('PENDING', 'APPROVED', 'REJECTED')
         ),
+
 
         reviewed_by UUID,
         reviewed_at TIMESTAMP,
@@ -339,7 +342,22 @@ async function migrate() {
       );
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS qr_tokens (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+        student_id UUID NOT NULL REFERENCES student(id) ON DELETE CASCADE,
+
+        token TEXT NOT NULL UNIQUE,
+
+        expires_at TIMESTAMP NOT NULL,
+
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log("Migration completed successfully!");
+
   } catch (err) {
     console.error("Migration failed:", err?.message || err);
     if (err && !err.message) {

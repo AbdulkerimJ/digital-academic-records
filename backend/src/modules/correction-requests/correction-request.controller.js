@@ -12,15 +12,21 @@ import {
 // ===================== STUDENT HANDLERS =====================
 
 export const submitRequest = catchAsync(async (req, res) => {
+  const { recordId } = req.params;
+  const { requestText, recordType } = req.body || {};
+  
   // req.user is populated by protectStudent
   const request = await submitCorrectionRequestService({
     studentId: req.user.id,
-    institutionId: req.body.institutionId,
-    requestText: req.body.requestText,
+    recordId,
+    recordType,
+    requestText,
   });
 
   return sendSuccess(res, "Correction request submitted successfully", { request }, 201);
 });
+
+
 
 export const getMyRequests = catchAsync(async (req, res) => {
   const requests = await getStudentCorrectionRequestsService(req.user.id);
@@ -30,10 +36,10 @@ export const getMyRequests = catchAsync(async (req, res) => {
 // ===================== ADMIN HANDLERS =====================
 
 export const listRequests = catchAsync(async (req, res) => {
-  const { status, studentId, startDate, endDate } = req.query;
+  const { status, studentId, institutionId, startDate, endDate } = req.query;
   const requests = await listAllCorrectionRequestsService({
     user: req.user,
-    filters: { status, studentId, startDate, endDate },
+    filters: { status, studentId, institutionId, startDate, endDate },
   });
   return sendSuccess(res, "Correction requests fetched successfully", { count: requests.length, requests });
 });
@@ -55,11 +61,13 @@ export const approveRequest = catchAsync(async (req, res) => {
 });
 
 export const rejectRequest = catchAsync(async (req, res) => {
+  const { reason } = req.body || {};
   const request = await rejectCorrectionRequestService({
     id: req.params.id,
     user: req.user,
-    reason: req.body.reason,
+    reason,
   });
+
   return sendSuccess(res, "Correction request rejected successfully", { request });
 });
 

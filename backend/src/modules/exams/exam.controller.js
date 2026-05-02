@@ -23,10 +23,11 @@ export const createExamLevel = catchAsync(async (req, res) => {
 export const updateExamLevel = catchAsync(async (req, res) => {
   const examLevel = await updateExamLevelService({
     examLevelId: req.params.examLevelId,
-    ...req.body,
+    ...(req.body || {}),
   });
   return sendSuccess(res, "Exam level updated successfully", { examLevel });
 });
+
 
 export const getExamLevelById = catchAsync(async (req, res) => {
   const { examLevelId } = req.params;
@@ -89,10 +90,11 @@ export const updateExamRecord = catchAsync(async (req, res) => {
   const examRecord = await updateExamRecordService({
     user: req.user,
     examId: req.params.examId,
-    ...req.body,
+    ...(req.body || {}),
   });
   return sendSuccess(res, "Exam record updated successfully", { examRecord });
 });
+
 
 export const deleteExamRecord = catchAsync(async (req, res) => {
   await deleteExamRecordService({
@@ -121,7 +123,10 @@ export const uploadBulkExams = catchAsync(async (req, res) => {
       user: req.user,
       fileBuffer: req.file.buffer,
       onProgress,
+      institutionId: (req.body || {}).institutionId || req.query.institutionId,
+      institutionCode: (req.body || {}).institutionCode || req.query.institutionCode,
     });
+
 
     res.write(`data: ${JSON.stringify({ complete: true, results })}\n\n`);
     res.end();

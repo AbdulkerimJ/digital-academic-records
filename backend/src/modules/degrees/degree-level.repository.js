@@ -56,3 +56,14 @@ export const updateDegreeLevelById = async ({ id, code = null, name = null, rank
   return result.rows[0] || null;
 };
 
+export const findDegreeLevelByCode = async (code) => {
+  const result = await pool.query(
+    `SELECT id, code, name, rank, is_active AS "isActive"
+     FROM degree_levels
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))
+     LIMIT 1`,
+    [code],
+  );
+  return result.rows[0] || null;
+};
+

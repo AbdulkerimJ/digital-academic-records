@@ -21,16 +21,32 @@
  *           format: date-time
  *         rejectionReason:
  *           type: string
+ *         recordId:
+ *           type: string
+ *           format: uuid
+ *         recordType:
+ *           type: string
+ *           enum: [EXAM, DEGREE]
  *         createdAt:
  *           type: string
  *           format: date-time
+
  *
- * /api/students/correction-requests:
+ * /api/students/records/{recordId}/correction:
  *   post:
- *     summary: Submit a new correction request (Student only)
+ *     summary: Submit a correction request for a specific record
+ *     description: Automatically links the request to the correct institution based on the record.
  *     tags: [Correction Requests]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: recordId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the exam or degree record to correct
  *     requestBody:
  *       required: true
  *       content:
@@ -38,23 +54,23 @@
  *           schema:
  *             type: object
  *             required:
- *               - institutionId
  *               - requestText
+ *               - recordType
  *             properties:
- *               institutionId:
- *                 type: string
- *                 format: uuid
  *               requestText:
  *                 type: string
-
+ *               recordType:
+ *                 type: string
+ *                 enum: [EXAM, DEGREE]
  *     responses:
  *       201:
  *         description: Request submitted successfully
+
  *   get:
  *     summary: Get student's own correction requests
  *     tags: [Correction Requests]
  *     security:
- *       - studentAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of requests
