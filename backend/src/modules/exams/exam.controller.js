@@ -1,4 +1,5 @@
 import catchAsync from "../../common/utils/catchAsync.js";
+import AppError from "../../common/utils/appError.js";
 import { sendSuccess } from "../../common/utils/response.js";
 import {
   createExamLevelService,
@@ -10,6 +11,7 @@ import {
   updateExamRecordService,
   deleteExamRecordService,
   getExamLevelByIdService,
+  uploadBulkExamsService,
 } from "./exam.service.js";
 
 //Super admin only functions
@@ -99,4 +101,36 @@ export const deleteExamRecord = catchAsync(async (req, res) => {
   });
 
   return sendSuccess(res, "Exam record deleted successfully");
+});
+
+export const uploadBulkExams = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new AppError("No file provided. Please upload a CSV file.", 400);
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const onProgress = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const results = await uploadBulkExamsService({
+      user: req.user,
+      fileBuffer: req.file.buffer,
+      onProgress,
+    });
+
+    res.write(`data: ${JSON.stringify({ complete: true, results })}\n\n`);
+    res.end();
+  } catch (err) {
+    res.write(
+      `data: ${JSON.stringify({
+        error: err.message || "Internal server error during processing",
+      })}\n\n`,
+    );
+    res.end();
+  }
 });

@@ -9,8 +9,10 @@ import {
   updateExamRecord,
   deleteExamRecord,
   getExamLevelById,
+  uploadBulkExams,
 } from "./exam.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
+import upload from "../../common/utils/upload.js";
 
 const router = express.Router();
 
@@ -24,7 +26,14 @@ router.patch("/levels/:examLevelId", restrictTo("SUPER_ADMIN"), updateExamLevel)
 router.get("/", listExamRecords);
 router.get("/:examId", getExamRecordById);
 router.patch("/:examId", updateExamRecord);
-router.post("/", createExamRecord);
+
+router.post("/upload", createExamRecord);
+router.post(
+  "/upload-bulk",
+  restrictTo("SUPER_ADMIN", "REGISTRAR"),
+  upload.single("file"),
+  uploadBulkExams,
+);
 router.delete("/:examId", deleteExamRecord);
 
 export default router;

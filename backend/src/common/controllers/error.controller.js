@@ -8,10 +8,30 @@ const handleInvalidInputDB = () => {
   return new AppError(message, 400);
 };
 
-// Duplicate value (UNIQUE constraint)
 const handleDuplicateFieldsDB = (err) => {
-  const field = err.detail?.match(/\((.*?)\)/)?.[1];
-  const message = `Duplicate field value: ${field}. Please use another value!`;
+  const constraint = err.constraint;
+
+  if (constraint === "app_user_email_key") {
+    return new AppError("This email is already in use. Please use a different one.", 400);
+  }
+  if (constraint === "student_national_id_key") {
+    return new AppError("A student with this National ID is already registered.", 400);
+  }
+  if (constraint === "institution_code_key") {
+    return new AppError("An institution with this code already exists.", 400);
+  }
+  if (constraint === "exams_student_id_exam_level_id_year_institution_id_key") {
+    return new AppError("This student already has an exam record for this level and year at this institution.", 400);
+  }
+  if (constraint?.includes("degrees_student_id")) {
+    return new AppError("This student already has a degree record for this title and graduation date.", 400);
+  }
+  if (constraint?.includes("code_key") || constraint?.includes("name_key")) {
+    return new AppError("This record (code or name) already exists in the system.", 400);
+  }
+
+  const field = err.detail?.match(/\((.*?)\)/)?.[1] || "field";
+  const message = `Duplicate value for ${field}. Please use another value!`;
   return new AppError(message, 400);
 };
 
@@ -21,16 +41,33 @@ const handleNotNullViolationDB = (err) => {
   return new AppError(message, 400);
 };
 
-// Foreign key violation
 const handleForeignKeyViolationDB = (err) => {
-  let message = "Invalid reference to related data.";
+  const constraint = err.constraint;
+  let message = "This action cannot be completed because this record is linked to other data.";
 
-  if (err.constraint === "app_user_role_id_fkey") {
-    message = "Invalid roleId. Referenced role does not exist.";
+  if (constraint === "app_user_role_id_fkey") {
+    message = "The specified role does not exist.";
+  } else if (constraint === "app_user_institution_id_fkey") {
+    message = "The specified institution does not exist.";
+  } else if (err.detail?.includes("is still referenced")) {
+    message = "This record cannot be deleted because it is being used by other parts of the system.";
+  } else if (err.detail?.includes("is not present")) {
+    message = "The referenced record (Student, Institution, or Level) does not exist.";
   }
 
-  if (err.constraint === "app_user_institution_id_fkey") {
-    message = "Invalid institutionId. Referenced institution does not exist.";
+  return new AppError(message, 400);
+};
+
+const handleCheckViolationDB = (err) => {
+  const constraint = err.constraint;
+  let message = "The provided data violates system rules.";
+
+  if (constraint === "check_institution_for_non_super_admin") {
+    message = "Account policy violation: Super Admins must not have an institution, while other roles MUST have one.";
+  } else if (constraint?.includes("result_status_check")) {
+    message = "Invalid result status. Must be PASS or FAIL.";
+  } else if (constraint === "exams_check") {
+    message = "At least one score (Total, Average, or Percentile) must be provided.";
   }
 
   return new AppError(message, 400);
@@ -138,6 +175,7 @@ const globalErrorHandler = (err, req, res, next) => {
     if (error.code === "23505") error = handleDuplicateFieldsDB(error);
     if (error.code === "23502") error = handleNotNullViolationDB(error);
     if (error.code === "23503") error = handleForeignKeyViolationDB(error);
+    if (error.code === "23514") error = handleCheckViolationDB(error);
 
     // JWT
     if (error.name === "JsonWebTokenError") error = handleJWTError();

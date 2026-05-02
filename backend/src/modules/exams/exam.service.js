@@ -13,7 +13,9 @@ import {
   deleteExamRecordById,
 } from "./exam.repository.js";
 import { findInstitutionById } from "../institutions/institution.repository.js";
-import { findStudentById } from "../students/student.repository.js";
+import { findStudentById, findStudentByNationalId } from "../students/student.repository.js";
+import csv from "csv-parser";
+import { Readable } from "stream";
 
 const normalizeString = (value) =>
   value === undefined || value === null ? null : String(value).trim();
@@ -80,7 +82,9 @@ export const updateExamLevelService = async ({
 export const createExamRecordService = async ({ user, data = {} }) => {
   let {
     studentId,
+    nationalId,
     examLevelId,
+    examLevelCode,
     institutionId,
     year,
     totalScore,
@@ -89,6 +93,7 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     resultStatus,
   } = data;
 
+  // 1. Institution context
   if (user.role !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
@@ -100,23 +105,36 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     }
   }
 
-  const institution = await findInstitutionById(institutionId);
-  if (!institution) {
-    throw new AppError("Invalid institution.", 400);
+  // 2. Resolve Student
+  let student;
+  if (studentId) {
+    student = await findStudentById(studentId);
+  } else if (nationalId) {
+    student = await findStudentByNationalId(nationalId);
   }
 
-  if (!studentId || !examLevelId || year === undefined) {
-    throw new AppError("Student ID, exam level, and year are required.", 400);
-  }
-
-  const student = await findStudentById(studentId);
   if (!student) {
-    throw new AppError("Student not found.", 400);
+    throw new AppError("Student not registered.", 404);
+  }
+  studentId = student.id;
+
+  // 3. Resolve Exam Level
+  let examLevel;
+  if (examLevelId) {
+    examLevel = await findExamLevelById(examLevelId);
+  } else if (examLevelCode) {
+    examLevel = await findExamLevelByCode(normalizeString(examLevelCode).toUpperCase());
   }
 
+  if (!examLevel || !examLevel.isActive) {
+    throw new AppError("Exam level is not found or inactive.", 400);
+  }
+  examLevelId = examLevel.id;
+
+  // 4. Validation
   const parsedYear = parseNumber(year, "Year");
-  if (parsedYear <= 0) {
-    throw new AppError("Year must be greater than 0.", 400);
+  if (!parsedYear || parsedYear <= 0) {
+    throw new AppError("A valid year is required.", 400);
   }
 
   const parsedTotalScore = parseNumber(totalScore, "Total score");
@@ -129,11 +147,6 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     parsedPercentile === null
   ) {
     throw new AppError("At least one exam score field is required.", 400);
-  }
-
-  const examLevel = await findExamLevelById(examLevelId);
-  if (!examLevel || !examLevel.isActive) {
-    throw new AppError("Exam level not found or inactive.", 400);
   }
 
   const normalizedResultStatus = normalizeString(resultStatus);
@@ -154,6 +167,83 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     percentile: parsedPercentile,
     resultStatus: normalizedResultStatus.toUpperCase(),
   });
+};
+
+export const uploadBulkExamsService = async ({ user, fileBuffer, onProgress }) => {
+  if (!fileBuffer) {
+    throw new AppError("No file provided", 400);
+  }
+
+  const records = [];
+
+  // Parse CSV
+  await new Promise((resolve, reject) => {
+    const stream = Readable.from(fileBuffer);
+    stream
+      .pipe(csv())
+      .on("data", (data) => {
+        records.push(data);
+      })
+      .on("end", resolve)
+      .on("error", reject);
+  });
+
+  if (records.length === 0) {
+    throw new AppError("No records found in the CSV file.", 400);
+  }
+
+  const results = {
+    total: records.length,
+    successRate: "0%",
+    successful: [],
+    failed: [],
+  };
+
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    try {
+      // Map common CSV headers to service expectations
+      const mappedData = {
+        nationalId: record.nationalId || record.nationalid || record.NationalId,
+        examLevelCode: record.examLevelCode || record.examlevelcode || record.ExamLevelCode,
+        year: record.year || record.Year,
+        totalScore: record.totalScore || record.totalscore || record.TotalScore,
+        averageScore: record.averageScore || record.averagescore || record.AverageScore,
+        percentile: record.percentile || record.Percentile,
+        resultStatus: record.resultStatus || record.resultstatus || record.ResultStatus,
+      };
+
+      const exam = await createExamRecordService({ user, data: mappedData });
+      results.successful.push({
+        id: mappedData.nationalId,
+        year: mappedData.year,
+      });
+    } catch (err) {
+      results.failed.push({
+        id: record.nationalId || record.nationalid || `Row ${i + 1}`,
+        reason: err.message,
+      });
+    }
+
+    if (onProgress) {
+      const progress = Math.round(((i + 1) / records.length) * 100);
+      onProgress({
+        percent: `${progress}%`,
+        current: i + 1,
+        total: records.length,
+        lastResult: {
+          id: record.nationalId || record.nationalid || `Row ${i + 1}`,
+          success: !results.failed.find((f) => (f.id === (record.nationalId || record.nationalid) || f.id === `Row ${i + 1}`)),
+        },
+      });
+    }
+  }
+
+  results.successRate = results.total > 0
+    ? `${Math.round((results.successful.length / results.total) * 100)}%`
+    : "0%";
+
+  return results;
 };
 
 export const listExamRecordsService = async ({
