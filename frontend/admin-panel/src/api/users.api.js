@@ -44,3 +44,13 @@ export const updateUser = async ({ userId, data }) => {
   const response = await api.patch(`/api/users/${userId}`, data)
   return response.data
 }
+
+export const updateMe = async (data) => {
+  const response = await api.patch("/api/users/me", data)
+  return response.data
+}
+
+export const changePassword = async (data) => {
+  const response = await api.patch("/api/users/change-password", data)
+  return response.data
+}

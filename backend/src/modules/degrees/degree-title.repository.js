@@ -2,14 +2,16 @@ import pool from "../../common/config/pool.js";
 
 export const findDegreeTitleById = async (id) => {
   const result = await pool.query(
-    `SELECT id,
-            degree_level_id AS "degreeLevelId",
-            code,
-            title,
-            is_active AS "isActive",
-            created_at AS "createdAt"
-     FROM degree_titles
-     WHERE id = $1
+    `SELECT dt.id,
+            dt.degree_level_id AS "degreeLevelId",
+            dl.name AS "levelName",
+            dt.code,
+            dt.title,
+            dt.is_active AS "isActive",
+            dt.created_at AS "createdAt"
+     FROM degree_titles dt
+     JOIN degree_levels dl ON dt.degree_level_id = dl.id
+     WHERE dt.id = $1
      LIMIT 1`,
     [id],
   );
@@ -19,15 +21,17 @@ export const findDegreeTitleById = async (id) => {
 
 export const findDegreeTitlesByLevelId = async (degreeLevelId) => {
   const result = await pool.query(
-    `SELECT id,
-            degree_level_id AS "degreeLevelId",
-            code,
-            title,
-            is_active AS "isActive",
-            created_at AS "createdAt"
-     FROM degree_titles
-     WHERE degree_level_id = $1
-     ORDER BY code ASC`,
+    `SELECT dt.id,
+            dt.degree_level_id AS "degreeLevelId",
+            dl.name AS "levelName",
+            dt.code,
+            dt.title,
+            dt.is_active AS "isActive",
+            dt.created_at AS "createdAt"
+     FROM degree_titles dt
+     JOIN degree_levels dl ON dt.degree_level_id = dl.id
+     WHERE dt.degree_level_id = $1
+     ORDER BY dt.code ASC`,
     [degreeLevelId],
   );
 
@@ -36,14 +40,16 @@ export const findDegreeTitlesByLevelId = async (degreeLevelId) => {
 
 export const findDegreeTitles = async () => {
   const result = await pool.query(
-    `SELECT id,
-            degree_level_id AS "degreeLevelId",
-            code,
-            title,
-            is_active AS "isActive",
-            created_at AS "createdAt"
-     FROM degree_titles
-     ORDER BY code ASC`,
+    `SELECT dt.id,
+            dt.degree_level_id AS "degreeLevelId",
+            dl.name AS "levelName",
+            dt.code,
+            dt.title,
+            dt.is_active AS "isActive",
+            dt.created_at AS "createdAt"
+     FROM degree_titles dt
+     JOIN degree_levels dl ON dt.degree_level_id = dl.id
+     ORDER BY dt.code ASC`,
   );
 
   return result.rows;
@@ -74,9 +80,15 @@ export const updateDegreeTitleById = async ({ id, degreeLevelId = null, code = n
 };
 export const findDegreeTitleByCode = async (code) => {
   const result = await pool.query(
-    `SELECT id, degree_level_id AS "degreeLevelId", code, title, is_active AS "isActive"
-     FROM degree_titles
-     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))
+    `SELECT dt.id, 
+            dt.degree_level_id AS "degreeLevelId", 
+            dl.name AS "levelName",
+            dt.code, 
+            dt.title, 
+            dt.is_active AS "isActive"
+     FROM degree_titles dt
+     JOIN degree_levels dl ON dt.degree_level_id = dl.id
+     WHERE UPPER(TRIM(dt.code)) = UPPER(TRIM($1))
      LIMIT 1`,
     [code],
   );

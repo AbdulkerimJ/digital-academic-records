@@ -1,7 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { useLocation } from "react-router-dom";
-import { Moon, Sun, LogOut, ChevronDown } from "lucide-react";
+import { useLocation, NavLink } from "react-router-dom";
+import { Moon, Sun, LogOut, ChevronDown, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -56,6 +56,12 @@ const sectionTitles = [
     title: "Correction requests",
     description:
       "Process record amendments and verification follow-up requests.",
+  },
+  {
+    path: "/profile",
+    title: "Account settings",
+    description:
+      "Manage your personal information, and account security.",
   },
 ];
 
@@ -159,13 +165,29 @@ export default function Topbar() {
               </DropdownMenuLabel>
 
               <DropdownMenuSeparator className="my-2" />
+              
+              <NavLink to="/profile">
+                <DropdownMenuItem className="gap-3 rounded-xl px-3 py-2.5 cursor-pointer focus:bg-accent transition-colors">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <User size={16} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">Account Settings</span>
+                    <span className="text-[10px] text-muted-foreground">Manage your profile and security</span>
+                  </div>
+                </DropdownMenuItem>
+              </NavLink>
+
+              <DropdownMenuSeparator className="my-2" />
 
               <DropdownMenuItem
-                className="gap-2 rounded-xl px-3 py-2.5 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                className="gap-3 rounded-xl px-3 py-2.5 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
                 onClick={logout}
               >
-                <LogOut size={16} />
-                <span>Sign out</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10">
+                  <LogOut size={16} />
+                </div>
+                <span className="font-semibold">Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
