@@ -6,7 +6,9 @@ import {
   findQrTokenByToken,
   findQrTokensByStudentId,
   deleteExpiredQrTokensByStudentId,
+  deleteQrTokenById,
 } from "./qr.repository.js";
+
 import { getStudentFullRecordsService } from "../students/student.service.js";
 
 // QR token validity in days (configurable via env)
@@ -32,7 +34,7 @@ export const generateQrCodeService = async (studentId) => {
   const qrRecord = await createQrToken({ studentId, token, expiresAt });
 
   // 5. Build the verification URL employers will land on when they scan
-  const verificationUrl = `${APP_BASE_URL}/api/verify/${token}`;
+  const verificationUrl = `${APP_BASE_URL}/api/qr/verify/${token}`;
 
   // 6. Generate QR code as a base64 PNG data URL
   const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
@@ -55,6 +57,15 @@ export const getMyQrTokensService = async (studentId) => {
   await deleteExpiredQrTokensByStudentId(studentId);
   return await findQrTokensByStudentId(studentId);
 };
+
+export const deleteQrTokenService = async (id, studentId) => {
+  const deleted = await deleteQrTokenById(id, studentId);
+  if (!deleted) {
+    throw new AppError("QR token not found or you don't have permission to delete it.", 404);
+  }
+  return true;
+};
+
 
 // ===================== PUBLIC VERIFICATION =====================
 

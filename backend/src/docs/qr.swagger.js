@@ -91,7 +91,29 @@
  *                       items:
  *                         $ref: '#/components/schemas/QrToken'
  *
+ * /api/qr/{id}:
+ *   delete:
+ *     summary: Delete a specific QR token (Student only)
+ *     description: Revokes access for a specific QR token. Once deleted, the QR code will no longer work for employers.
+ *     tags: [QR Codes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the QR token to delete
+ *     responses:
+ *       200:
+ *         description: QR token deleted successfully
+ *       404:
+ *         description: Token not found or not owned by the student
+ *
  * /api/qr/verify/{token}:
+
  *   get:
  *     summary: Verify a QR code and retrieve student records (Public — no auth required)
  *     description: >

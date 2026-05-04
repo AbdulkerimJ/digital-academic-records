@@ -161,6 +161,9 @@ const sendErrorProd = (err, req, res) => {
 // ================= GLOBAL HANDLER =================
 
 const globalErrorHandler = (err, req, res, next) => {
+  if (err.name === "JsonWebTokenError") err = handleJWTError();
+  if (err.name === "TokenExpiredError") err = handleJWTExpiredError();
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
@@ -176,10 +179,6 @@ const globalErrorHandler = (err, req, res, next) => {
     if (error.code === "23502") error = handleNotNullViolationDB(error);
     if (error.code === "23503") error = handleForeignKeyViolationDB(error);
     if (error.code === "23514") error = handleCheckViolationDB(error);
-
-    // JWT
-    if (error.name === "JsonWebTokenError") error = handleJWTError();
-    if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
 
     // Multer
     if (error.code === "LIMIT_FILE_SIZE") error = handleMulterFileSizeError();

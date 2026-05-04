@@ -22,7 +22,7 @@ export const protectUser = catchAsync(async (req, res, next) => {
     firstName: currentUser.firstName,
     lastName: currentUser.lastName,
     email: currentUser.email,
-    role: currentUser.roleName,
+    roleName: currentUser.roleName,
     roleId: currentUser.roleId,
     institutionId: currentUser.institutionId,
     institutionName: currentUser.institutionName,
@@ -37,7 +37,7 @@ export const protectUser = catchAsync(async (req, res, next) => {
 
 export const restrictTo = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
+    if (!req.user || !allowedRoles.includes(req.user.roleName)) {
       throw new AppError(
         "You do not have permission to perform this action.",
         403,

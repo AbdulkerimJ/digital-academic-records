@@ -38,3 +38,14 @@ export const deleteExpiredQrTokensByStudentId = async (studentId) => {
     [studentId],
   );
 };
+
+export const deleteQrTokenById = async (id, studentId) => {
+  const result = await pool.query(
+    `DELETE FROM qr_tokens
+     WHERE id = $1 AND student_id = $2
+     RETURNING id`,
+    [id, studentId],
+  );
+  return result.rows[0] || null;
+};
+

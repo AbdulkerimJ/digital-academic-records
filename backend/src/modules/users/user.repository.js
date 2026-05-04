@@ -3,7 +3,7 @@ import pool from "../../common/config/pool.js";
 export const findRoles = async () => {
   const result = await pool.query(
     `SELECT id,
-            role_name
+            role_name AS "roleName"
      FROM roles
      ORDER BY id ASC`,
   );
@@ -134,38 +134,99 @@ export const findUserByIdWithRole = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findUsersWithRole = async ({ excludeUserId } = {}) => {
-  const result = await pool.query(
-    `SELECT app_user.id,
-            app_user.first_name AS "firstName",
-            app_user.last_name AS "lastName",
-            app_user.email,
-            app_user.is_active AS "isActive",
-            app_user.is_suspended AS "isSuspended",
-            app_user.suspended_at AS "suspendedAt",
-            app_user.suspension_reason AS "suspensionReason",
-            app_user.invitation_token AS "invitationToken",
-            app_user.invitation_expires AS "invitationExpires",
-            app_user.reset_token AS "resetToken",
-            app_user.reset_expires AS "resetExpires",
-            app_user.token_version AS "tokenVersion",
-            app_user.role_id AS "roleId",
-            app_user.institution_id AS "institutionId",
-                 institution.name AS "institutionName",
-                 institution.code AS "institutionCode",
-                 institution.type AS "institutionType",
-            app_user.created_at AS "createdAt",
-            app_user.updated_at AS "updatedAt",
-            app_user.password_changed_at AS "passwordChangedAt",
-            roles.role_name AS "roleName"
-     FROM app_user
-     INNER JOIN roles ON roles.id = app_user.role_id
-               LEFT JOIN institution ON institution.id = app_user.institution_id
-    WHERE app_user.id != $1
-     ORDER BY app_user.created_at DESC`,
-    [excludeUserId || null],
-  );
+export const findUsersWithRole = async ({ 
+  excludeUserId, 
+  limit = 10, 
+  offset = 0, 
+  sortBy = 'createdAt', 
+  sortDir = 'DESC',
+  search = '',
+  role = 'all',
+  status = 'all',
+  institutionId = 'all'
+} = {}) => {
+  const params = [];
+  let query = `
+    SELECT app_user.id,
+           app_user.first_name AS "firstName",
+           app_user.last_name AS "lastName",
+           app_user.email,
+           app_user.is_active AS "isActive",
+           app_user.is_suspended AS "isSuspended",
+           app_user.suspended_at AS "suspendedAt",
+           app_user.suspension_reason AS "suspensionReason",
+           app_user.invitation_token AS "invitationToken",
+           app_user.invitation_expires AS "invitationExpires",
+           app_user.role_id AS "roleId",
+           app_user.institution_id AS "institutionId",
+           institution.name AS "institutionName",
+           roles.role_name AS "roleName",
+           app_user.created_at AS "createdAt",
+           COUNT(*) OVER() AS "totalCount"
+    FROM app_user
+    INNER JOIN roles ON roles.id = app_user.role_id
+    LEFT JOIN institution ON institution.id = app_user.institution_id
+    WHERE 1=1
+  `;
 
+  if (excludeUserId) {
+    params.push(excludeUserId);
+    query += ` AND app_user.id != $${params.length}`;
+  }
+
+  if (search && search.trim()) {
+    params.push(`%${search.trim().toLowerCase()}%`);
+    query += ` AND (LOWER(app_user.first_name) LIKE $${params.length} 
+                OR LOWER(app_user.last_name) LIKE $${params.length} 
+                OR LOWER(app_user.email) LIKE $${params.length})`;
+  }
+
+  if (role !== 'all') {
+    params.push(role);
+    query += ` AND roles.role_name = $${params.length}`;
+  }
+
+  if (institutionId !== 'all') {
+    params.push(institutionId);
+    query += ` AND app_user.institution_id = $${params.length}`;
+  }
+
+  if (status !== 'all') {
+    if (status === 'ACTIVE') {
+      query += ` AND app_user.is_active = TRUE AND app_user.is_suspended = FALSE`;
+    } else if (status === 'SUSPENDED') {
+      query += ` AND app_user.is_suspended = TRUE`;
+    } else if (status === 'PENDING') {
+      query += ` AND app_user.invitation_token IS NOT NULL AND app_user.is_active = FALSE`;
+    } else if (status === 'REVOKED') {
+      query += ` AND app_user.invitation_token IS NULL AND app_user.is_active = FALSE AND app_user.is_suspended = FALSE`;
+    }
+  }
+
+  // Sorting
+  const allowedSortFields = ['firstName', 'lastName', 'email', 'roleName', 'institutionName', 'createdAt'];
+  const actualSortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+  const actualSortDir = ['ASC', 'DESC'].includes(sortDir.toUpperCase()) ? sortDir.toUpperCase() : 'DESC';
+  
+  const sortColumnMap = {
+    firstName: 'app_user.first_name',
+    lastName: 'app_user.last_name',
+    email: 'app_user.email',
+    roleName: 'roles.role_name',
+    institutionName: 'institution.name',
+    createdAt: 'app_user.created_at'
+  };
+
+  const sortColumn = sortColumnMap[actualSortField] || 'app_user.created_at';
+  query += ` ORDER BY ${sortColumn} ${actualSortDir}`;
+
+  // Pagination
+  params.push(limit);
+  query += ` LIMIT $${params.length}`;
+  params.push(offset);
+  query += ` OFFSET $${params.length}`;
+
+  const result = await pool.query(query, params);
   return result.rows;
 };
 
@@ -320,6 +381,8 @@ export const updateUserById = async ({
   passwordHash = null,
   roleId = null,
   institutionId = null,
+  invitationToken = undefined,
+  invitationExpires = undefined,
 }) => {
   const result = await pool.query(
     `UPDATE app_user
@@ -333,17 +396,34 @@ export const updateUserById = async ({
          END,
          role_id = COALESCE($6, role_id),
          institution_id = COALESCE($7, institution_id),
+         invitation_token = CASE WHEN $9 = 1 THEN $8 ELSE invitation_token END,
+         invitation_expires = CASE WHEN $11 = 1 THEN $10 ELSE invitation_expires END,
          updated_at = CURRENT_TIMESTAMP
      WHERE id = $1
      RETURNING id,
                first_name AS "firstName",
                last_name AS "lastName",
                email,
+               is_active AS "isActive",
                role_id AS "roleId",
                institution_id AS "institutionId",
+               invitation_token AS "invitationToken",
+               invitation_expires AS "invitationExpires",
                created_at AS "createdAt",
                updated_at AS "updatedAt"`,
-    [id, firstName, lastName, email, passwordHash, roleId, institutionId],
+    [
+      id,
+      firstName,
+      lastName,
+      email,
+      passwordHash,
+      roleId,
+      institutionId,
+      invitationToken === undefined ? null : invitationToken,
+      invitationToken === undefined ? 0 : 1,
+      invitationExpires === undefined ? null : invitationExpires,
+      invitationExpires === undefined ? 0 : 1,
+    ],
   );
 
   return result.rows[0] || null;

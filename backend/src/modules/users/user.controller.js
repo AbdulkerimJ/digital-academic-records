@@ -30,10 +30,34 @@ export const create = catchAsync(async (req, res) => {
 });
 
 export const list = catchAsync(async (req, res) => {
-  const users = await listUsersService({ requesterUserId: req.user.id });
+  const { 
+    limit, 
+    offset, 
+    sortBy, 
+    sortDir, 
+    search, 
+    role, 
+    status, 
+    institutionId 
+  } = req.query;
+
+  const users = await listUsersService({ 
+    requesterUserId: req.user.id,
+    limit: limit ? parseInt(limit, 10) : 10,
+    offset: offset ? parseInt(offset, 10) : 0,
+    sortBy: sortBy || 'createdAt',
+    sortDir: sortDir || 'DESC',
+    search,
+    role,
+    status,
+    institutionId
+  });
+
+  const totalCount = users.length > 0 ? parseInt(users[0].totalCount, 10) : 0;
 
   return sendSuccess(res, "Users fetched successfully", {
     count: users.length,
+    totalCount,
     users,
   });
 });
@@ -54,12 +78,18 @@ export const getUserById = catchAsync(async (req, res) => {
 });
 
 export const update = catchAsync(async (req, res) => {
-  const user = await updateUserService({
+  const result = await updateUserService({
     userId: req.params.userId,
     ...(req.body || {}),
   });
 
-  return sendSuccess(res, "User updated successfully", { user });
+  if (result.inviteLink) {
+    console.log(
+      `[Invitation Link - updated/simulated] email=${result.user.email} inviteLink=${result.inviteLink} expiresAt=${result.invitationExpires.toISOString()}`,
+    );
+  }
+
+  return sendSuccess(res, "User updated successfully", { user: result.user });
 });
 
 export const updateMe = catchAsync(async (req, res) => {

@@ -28,8 +28,9 @@ export const requestStudentLoginService = async ({ faydaId }) => {
 
   // check if citizen is found
   if (!citizenRes.success) {
-    throw new AppError("Citizen not found in the national system", 404);
+    throw new AppError(citizenRes.message || "Citizen not found in the national system", 404);
   }
+
 
   // Send OTP only if the student is registered
   const otpRes = await sendOtp(faydaId);

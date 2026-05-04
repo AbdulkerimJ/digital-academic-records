@@ -93,8 +93,28 @@ export const inviteUserService = async ({
   };
 };
 
-export const listUsersService = async ({ requesterUserId } = {}) => {
-  return findUsersWithRole({ excludeUserId: requesterUserId });
+export const listUsersService = async ({ 
+  requesterUserId,
+  limit,
+  offset,
+  sortBy,
+  sortDir,
+  search,
+  role,
+  status,
+  institutionId
+} = {}) => {
+  return findUsersWithRole({ 
+    excludeUserId: requesterUserId,
+    limit,
+    offset,
+    sortBy,
+    sortDir,
+    search,
+    role,
+    status,
+    institutionId
+  });
 };
 
 export const listRolesService = async () => {
@@ -205,19 +225,39 @@ export const updateUserService = async ({
     throw new AppError("Institution is required for this role", 400);
   }
 
+  // Handle invitation regeneration if email changes for a pending user
+  let invitationToken = undefined;
+  let invitationExpires = undefined;
+  let inviteLink = undefined;
+
+  const emailIsChanging = normalizedEmail !== undefined && normalizedEmail !== currentUser.email;
+
+  if (emailIsChanging && !currentUser.isActive) {
+    const newInvitation = buildInvitation();
+    invitationToken = newInvitation.token;
+    invitationExpires = newInvitation.expiresAt;
+    inviteLink = getInviteLink(invitationToken);
+  }
+
   const updatedUser = await updateUserById({
     id: userId,
     firstName: trimmedFirstName,
     lastName: trimmedLastName,
     email: normalizedEmail,
     institutionId: finalInstitutionId,
+    invitationToken,
+    invitationExpires,
   });
 
   if (!updatedUser) {
     throw new AppError("Failed to update user", 500);
   }
 
-  return updatedUser;
+  return {
+    user: updatedUser,
+    inviteLink,
+    invitationExpires,
+  };
 };
 
 export const updateMyProfileService = async ({

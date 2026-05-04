@@ -1,0 +1,1 @@
+export default function InstitutionsPage() { return (<div><h2 className='text-3xl font-bold tracking-tight'>InstitutionsPage</h2><p className='text-muted-foreground'>Feature coming soon...</p></div>) }
