@@ -14,3 +14,8 @@ export const updateInstitution = async (id, data) => {
   const response = await api.patch(`/api/institutions/${id}`, data)
   return response.data
 }
+
+export const listInstitutionTypes = async () => {
+  const response = await api.get("/api/institutions/types")
+  return response.data
+}

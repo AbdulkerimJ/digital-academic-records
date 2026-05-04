@@ -72,18 +72,60 @@ export const findInstitutionById = async (id) => {
   return result.rows[0] || null;
 };
 
-export const findInstitutions = async () => {
-  const result = await pool.query(
-    `SELECT id,
-            name,
-            code,
-            type,
-            is_active AS "isActive",
-            created_at AS "createdAt"
-     FROM institution
-     ORDER BY name ASC`,
-  );
+export const findInstitutions = async ({
+  limit = 10,
+  offset = 0,
+  search = '',
+  type = 'all',
+  status = 'all',
+  sortBy = 'name',
+  sortDir = 'ASC'
+} = {}) => {
+  const params = [];
+  let query = `
+    SELECT i.id,
+           i.name,
+           i.code,
+           i.type,
+           it.name AS "typeName",
+           i.is_active AS "isActive",
+           i.created_at AS "createdAt",
+           COUNT(*) OVER() AS "totalCount"
+    FROM institution i
+    LEFT JOIN institution_types it ON i.type = it.code
+    WHERE 1=1
+  `;
 
+  if (search && search.trim()) {
+    params.push(`%${search.trim().toLowerCase()}%`);
+    query += ` AND (LOWER(i.name) LIKE $${params.length} OR LOWER(i.code) LIKE $${params.length})`;
+  }
+
+  if (type !== 'all') {
+    params.push(type);
+    query += ` AND i.type = $${params.length}`;
+  }
+
+  if (status !== 'all') {
+    const isActive = status === 'ACTIVE';
+    params.push(isActive);
+    query += ` AND i.is_active = $${params.length}`;
+  }
+
+  // Sorting
+  const allowedSortFields = ['name', 'code', 'type', 'createdAt'];
+  const actualSortField = allowedSortFields.includes(sortBy) ? `i.${sortBy === 'createdAt' ? 'created_at' : sortBy}` : 'i.name';
+  const actualSortDir = ['ASC', 'DESC'].includes(sortDir.toUpperCase()) ? sortDir.toUpperCase() : 'ASC';
+  
+  query += ` ORDER BY ${actualSortField} ${actualSortDir}`;
+
+  // Pagination
+  params.push(limit);
+  query += ` LIMIT $${params.length}`;
+  params.push(offset);
+  query += ` OFFSET $${params.length}`;
+
+  const result = await pool.query(query, params);
   return result.rows;
 };
 
@@ -111,4 +153,11 @@ export const updateInstitutionById = async ({
   );
 
   return result.rows[0] || null;
+};
+
+export const getInstitutionTypes = async () => {
+  const result = await pool.query(
+    `SELECT code, name FROM institution_types WHERE is_active = true ORDER BY name ASC`,
+  );
+  return result.rows;
 };

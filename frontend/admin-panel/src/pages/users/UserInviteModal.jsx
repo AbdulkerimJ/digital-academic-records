@@ -151,27 +151,29 @@ export default function UserInviteModal({ isOpen, onClose }) {
             {errors.roleId && <p className="text-xs text-destructive">{errors.roleId.message}</p>}
           </div>
 
-          {(isRegistrar || selectedRole?.roleName === "SUPER_ADMIN") && (
-            <div className="space-y-2">
-              <Label htmlFor="institution">Institution {isRegistrar && <span className="text-destructive">*</span>}</Label>
-              <Select onValueChange={(value) => setValue("institutionId", value === "null" ? undefined : value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an institution" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="null">None (Global Admin)</SelectItem>
-                  {institutions.map((inst) => (
-                    <SelectItem key={inst.id} value={inst.id.toString()}>
-                      {inst.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[10px] text-muted-foreground">
-                Super Admins can be global (None) or restricted to an institution.
-              </p>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="institution">
+              Affiliated Institution {isRegistrar && <span className="text-destructive">*</span>}
+            </Label>
+            <Select onValueChange={(value) => setValue("institutionId", value === "null" ? undefined : value)}>
+              <SelectTrigger className="h-11 rounded-xl bg-muted/30 border-none">
+                <SelectValue placeholder="Select an institution" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl shadow-xl">
+                <SelectItem value="null" className="font-medium">None (Global Admin)</SelectItem>
+                {institutions.map((inst) => (
+                  <SelectItem key={inst.id} value={inst.id.toString()}>
+                    {inst.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground ml-1">
+              {isRegistrar 
+                ? "Registrars must be assigned to an institution." 
+                : "Super Admins can be global or restricted to an institution."}
+            </p>
+          </div>
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

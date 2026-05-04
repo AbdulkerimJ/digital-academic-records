@@ -16,6 +16,15 @@ async function seed() {
       ON CONFLICT (role_name) DO NOTHING;
     `);
 
+    // ================= INSTITUTION TYPES =================
+    await pool.query(`
+      INSERT INTO institution_types (code, name)
+      VALUES 
+        ('EXAM_BOARD', 'Examination Board'),
+        ('COLLEGE', 'College / Institute')
+      ON CONFLICT (code) DO NOTHING;
+    `);
+
     // ================= INSTITUTION =================
     await pool.query(`
       INSERT INTO institution (name, code, type)

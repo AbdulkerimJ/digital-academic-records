@@ -5,7 +5,16 @@ import {
   getInstitutionByIdService,
   listInstitutionsService,
   updateInstitutionService,
+  getInstitutionTypesService,
 } from "./institution.service.js";
+
+export const getInstitutionTypes = catchAsync(async (req, res) => {
+  const types = await getInstitutionTypesService();
+
+  return sendSuccess(res, "Institution types fetched successfully", {
+    types,
+  });
+});
 
 export const createInstitution = catchAsync(async (req, res) => {
   const institution = await createInstitutionService(req.body || {});
@@ -19,10 +28,31 @@ export const createInstitution = catchAsync(async (req, res) => {
 });
 
 export const listInstitutions = catchAsync(async (req, res) => {
-  const institutions = await listInstitutionsService();
+  const { 
+    limit, 
+    offset, 
+    search, 
+    type, 
+    status, 
+    sortBy, 
+    sortDir 
+  } = req.query;
+
+  const institutions = await listInstitutionsService({
+    limit: limit ? parseInt(limit, 10) : 10,
+    offset: offset ? parseInt(offset, 10) : 0,
+    search,
+    type,
+    status,
+    sortBy,
+    sortDir
+  });
+
+  const totalCount = institutions.length > 0 ? parseInt(institutions[0].totalCount, 10) : 0;
 
   return sendSuccess(res, "Institutions fetched successfully", {
     count: institutions.length,
+    totalCount,
     institutions,
   });
 });

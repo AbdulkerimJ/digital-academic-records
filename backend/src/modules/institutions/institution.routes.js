@@ -4,12 +4,14 @@ import {
   getInstitutionById,
   listInstitutions,
   updateInstitution,
+  getInstitutionTypes,
 } from "./institution.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
 import collegeRoutes from "./college.routes.js";
 
 const router = express.Router();
 
+router.get("/types", protectUser, getInstitutionTypes);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), listInstitutions);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), createInstitution);
 router.get(

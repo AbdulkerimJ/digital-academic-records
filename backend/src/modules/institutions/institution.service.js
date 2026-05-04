@@ -6,16 +6,12 @@ import {
   findInstitutionByName,
   findInstitutions,
   updateInstitutionById,
+  getInstitutionTypes,
 } from "./institution.repository.js";
 
-const INSTITUTION_TYPES = new Set([
-  "GOVERNMENT_BODY",
-  "EXAM_BOARD",
-  "UNIVERSITY",
-  "COLLEGE",
-  "REGIONAL_OFFICE",
-  "OTHER",
-]);
+export const getInstitutionTypesService = async () => {
+  return getInstitutionTypes();
+};
 
 const parseBoolean = (value) => {
   if (typeof value === "boolean") {
@@ -52,9 +48,13 @@ export const createInstitutionService = async ({
     throw new AppError("code is required", 400);
   }
 
+  const allTypes = await getInstitutionTypesService();
+  const allowedCodes = allTypes.map(t => t.code);
+  const INSTITUTION_TYPES = new Set(allowedCodes);
+
   if (!INSTITUTION_TYPES.has(normalizedType)) {
     throw new AppError(
-      "type must be one of GOVERNMENT_BODY, EXAM_BOARD, UNIVERSITY, COLLEGE, REGIONAL_OFFICE, OTHER",
+      `Type must be one of: ${allowedCodes.join(", ")}`,
       400,
     );
   }
@@ -101,8 +101,24 @@ export const getInstitutionByIdService = async ({ institutionId }) => {
   return institution;
 };
 
-export const listInstitutionsService = async () => {
-  return findInstitutions();
+export const listInstitutionsService = async ({
+  limit,
+  offset,
+  search,
+  type,
+  status,
+  sortBy,
+  sortDir
+} = {}) => {
+  return findInstitutions({
+    limit,
+    offset,
+    search,
+    type,
+    status,
+    sortBy,
+    sortDir
+  });
 };
 
 export const updateInstitutionService = async ({
@@ -141,11 +157,17 @@ export const updateInstitutionService = async ({
     throw new AppError("code cannot be empty", 400);
   }
 
-  if (normalizedType !== null && !INSTITUTION_TYPES.has(normalizedType)) {
-    throw new AppError(
-      "This type is not found.",
-      400,
-    );
+  if (normalizedType !== null) {
+    const allTypes = await getInstitutionTypesService();
+    const allowedCodes = allTypes.map(t => t.code);
+    const INSTITUTION_TYPES = new Set(allowedCodes);
+
+    if (!INSTITUTION_TYPES.has(normalizedType)) {
+      throw new AppError(
+        `Type must be one of: ${allowedCodes.join(", ")}`,
+        400,
+      );
+    }
   }
 
   if (isActive !== undefined && parsedIsActive === null) {

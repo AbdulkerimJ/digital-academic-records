@@ -15,22 +15,28 @@ async function migrate() {
       );
     `);
 
+    // ===================== INSTITUTION TYPES =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS institution_types (
+        id SERIAL PRIMARY KEY,
+        code TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // ===================== INSTITUTION =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS institution (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
         code TEXT UNIQUE NOT NULL,
-
-        type TEXT NOT NULL CHECK (
-          type IN (
-            'EXAM_BOARD',
-            'COLLEGE'
-          )
-        ),
-
+        type TEXT NOT NULL,
         is_active BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (type) REFERENCES institution_types(code)
       );
     `);
 
