@@ -16,5 +16,4 @@ router.patch("/:id/approve", approveRequest);
 router.patch("/:id/reject", rejectRequest);
 router.get("/:id", getRequestDetail);
 
-
 export default router;

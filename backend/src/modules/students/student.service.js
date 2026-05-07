@@ -1,4 +1,5 @@
 import AppError from "../../common/utils/appError.js";
+import { translateDatabaseError } from "../../common/utils/dbErrorHelper.js";
 import { findStudentById, findStudents, findStudentByNationalId, createStudentFromCitizen } from "./student.repository.js";
 
 import { findExamRecords } from "../exams/exam.repository.js";
@@ -27,14 +28,14 @@ export const getMyDegreesService = async (studentId) => {
 // ===================== ADMIN ACTIONS =====================
 
 export const listStudentsService = async ({ user, query }) => {
-  const { search, page, limit } = query;
+  const { search, page, limit, startDate, endDate } = query;
 
   // If not super admin, search term is REQUIRED
-  if (user.role !== "SUPER_ADMIN" && !search) {
+  if (user.roleName !== "SUPER_ADMIN" && !search) {
     throw new AppError("Please provide a search term to find a student.", 403);
   }
 
-  return await findStudents({ search, page, limit });
+  return await findStudents({ search, page, limit, startDate, endDate });
 };
 
 
@@ -133,9 +134,10 @@ export const registerBulkStudentsService = async (fileBuffer, onProgress) => {
         name: `${student.firstName} ${student.lastName}`,
       });
     } catch (err) {
+      const translated = translateDatabaseError(err);
       results.failed.push({
         id,
-        reason: err.message,
+        reason: translated ? translated.message : err.message,
       });
     }
 

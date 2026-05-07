@@ -8,6 +8,7 @@ import {
   FileBadge,
   BookOpen,
   ClipboardCheck,
+  Network,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -59,6 +60,13 @@ const navItems = [
     href: "/corrections",
     icon: ClipboardCheck,
     roles: ["SUPER_ADMIN", "REGISTRAR"],
+  },
+  {
+    title: "Academic Structure",
+    href: "/structure",
+    icon: Network,
+    roles: ["SUPER_ADMIN", "REGISTRAR"],
+    institutionTypes: ["COLLEGE"],
   },
 ];
 

@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import FetchingIndicator from "../../components/common/FetchingIndicator"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { listInstitutions, listInstitutionTypes } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
@@ -12,23 +13,67 @@ import PageLoader from "../../components/common/PageLoader"
 import TableSkeleton from "../../components/common/TableSkeleton"
 import useDebounce from "../../hooks/useDebounce"
 
+import { useSearchParams } from "react-router-dom"
+
 export default function InstitutionsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
+  
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [institutionToEdit, setInstitutionToEdit] = useState(null)
   
-  // Filter & Pagination States
-  const [searchTerm, setSearchTerm] = useState("")
+  // Filter & Pagination derived from searchParams
+  const searchTerm = searchParams.get("search") || ""
   const debouncedSearch = useDebounce(searchTerm, 500)
   
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const typeFilter = searchParams.get("type") || "all"
+  const statusFilter = searchParams.get("status") || "all"
   
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [sortBy, setSortBy] = useState("name")
-  const [sortDir, setSortDir] = useState("ASC")
+  const page = parseInt(searchParams.get("page") || "1", 10)
+  const limit = parseInt(searchParams.get("limit") || "10", 10)
+  const sortBy = searchParams.get("sortBy") || "name"
+  const sortDir = searchParams.get("sortDir") || "ASC"
 
-  const queryClient = useQueryClient()
+  const setPage = (newPage) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("page", newPage.toString())
+    setSearchParams(newParams)
+  }
+
+  const setLimit = (newLimit) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("limit", newLimit.toString())
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
+  const updateFilters = (updates) => {
+    const newParams = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === "all" || !value) {
+        newParams.delete(key)
+      } else {
+        newParams.set(key, value)
+      }
+    })
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
+  const setSort = (field) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (sortBy === field) {
+      newParams.set("sortDir", sortDir === "ASC" ? "DESC" : "ASC")
+    } else {
+      newParams.set("sortBy", field)
+      newParams.set("sortDir", "ASC")
+    }
+    setSearchParams(newParams)
+  }
+
+  const clearFilters = () => {
+    setSearchParams({})
+  }
 
   const { data: instData, isLoading, error, isFetching } = useQuery({
     queryKey: ["institutions", { page, limit, sortBy, sortDir, searchTerm: debouncedSearch, typeFilter, statusFilter }],
@@ -41,8 +86,7 @@ export default function InstitutionsPage() {
       search: debouncedSearch, 
       type: typeFilter, 
       status: statusFilter 
-    }),
-    placeholderData: (previousData) => previousData
+    })
   })
 
   const { data: typesData } = useQuery({
@@ -54,17 +98,35 @@ export default function InstitutionsPage() {
   const totalCount = instData?.data?.totalCount || 0
   const institutionTypes = typesData?.data?.types || []
 
-  const clearFilters = () => {
-    setSearchTerm("")
-    setTypeFilter("all")
-    setStatusFilter("all")
-    setPage(1)
-  }
+  // Predictive Prefetching for next/prev pages
+  useEffect(() => {
+    const totalPages = Math.ceil(totalCount / limit)
+    const commonParams = { 
+      limit, 
+      sortBy, 
+      sortDir, 
+      search: debouncedSearch, 
+      type: typeFilter, 
+      status: statusFilter 
+    }
+    
+    // Prefetch Next Page
+    if (page < totalPages) {
+      queryClient.prefetchQuery({
+        queryKey: ["institutions", { ...commonParams, page: page + 1, offset: page * limit }],
+        queryFn: () => listInstitutions({ ...commonParams, page: page + 1, offset: page * limit })
+      })
+    }
 
-  const handleFilterChange = (setter) => (value) => {
-    setter(value)
-    setPage(1)
-  }
+    // Prefetch Previous Page
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: ["institutions", { ...commonParams, page: page - 1, offset: (page - 2) * limit }],
+        queryFn: () => listInstitutions({ ...commonParams, page: page - 1, offset: (page - 2) * limit })
+      })
+    }
+  }, [page, limit, sortBy, sortDir, debouncedSearch, typeFilter, statusFilter, totalCount, queryClient])
+
 
   if (error) return (
     <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5">
@@ -78,6 +140,7 @@ export default function InstitutionsPage() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       {/* Premium Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 rounded-2xl border border-primary/10 shadow-sm relative overflow-hidden">
+        <FetchingIndicator isFetching={isFetching} />
         <div className="absolute -right-12 -top-12 text-primary/5 rotate-12 pointer-events-none">
           <Building2 size={200} />
         </div>
@@ -105,45 +168,34 @@ export default function InstitutionsPage() {
 
       <InstitutionFilters 
         searchTerm={searchTerm}
-        setSearchTerm={handleFilterChange(setSearchTerm)}
+        setSearchTerm={(val) => updateFilters({ search: val })}
         typeFilter={typeFilter}
-        setTypeFilter={handleFilterChange(setTypeFilter)}
+        setTypeFilter={(val) => updateFilters({ type: val })}
         statusFilter={statusFilter}
-        setStatusFilter={handleFilterChange(setStatusFilter)}
+        setStatusFilter={(val) => updateFilters({ status: val })}
         onClear={clearFilters}
         institutionTypes={institutionTypes}
       />
 
-      {isLoading && !instData ? (
-        <TableSkeleton rows={limit} columns={5} />
-      ) : (
-        <InstitutionTable 
-          institutions={institutions}
-          totalCount={totalCount}
-          currentPage={page}
-          onPageChange={setPage}
-          itemsPerPage={limit}
-          onItemsPerPageChange={setLimit}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          onSort={(field) => {
-            if (sortBy === field) {
-              setSortDir(sortDir === "ASC" ? "DESC" : "ASC")
-            } else {
-              setSortBy(field)
-              setSortDir("ASC")
-            }
-          }}
-          isFiltered={searchTerm || typeFilter !== "all" || statusFilter !== "all"}
-          isFetching={isFetching}
-          onEdit={(inst) => {
-            setInstitutionToEdit(inst)
-            setIsModalOpen(true)
-          }}
-          onAdd={() => setIsModalOpen(true)}
-          onClearFilters={clearFilters}
-        />
-      )}
+      <InstitutionTable 
+        institutions={institutions}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={setPage}
+        itemsPerPage={limit}
+        onItemsPerPageChange={setLimit}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSort={setSort}
+        isFiltered={searchTerm || typeFilter !== "all" || statusFilter !== "all"}
+        isFetching={isFetching}
+        onEdit={(inst) => {
+          setInstitutionToEdit(inst)
+          setIsModalOpen(true)
+        }}
+        onAdd={() => setIsModalOpen(true)}
+        onClearFilters={clearFilters}
+      />
 
       <InstitutionModal 
         isOpen={isModalOpen} 

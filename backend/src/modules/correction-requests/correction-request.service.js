@@ -85,7 +85,7 @@ export const getStudentCorrectionRequestsService = async (studentId) => {
 export const listAllCorrectionRequestsService = async ({ user, filters }) => {
   const queryFilters = { ...filters };
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -101,7 +101,7 @@ export const getCorrectionRequestDetailService = async ({ user, id }) => {
     throw new AppError("Correction request not found.", 404);
   }
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (request.institutionId !== user.institutionId) {
       throw new AppError("You do not have permission to access this request.", 403);
     }
@@ -116,7 +116,7 @@ export const approveCorrectionRequestService = async ({ id, user }) => {
     throw new AppError("Correction request not found.", 404);
   }
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (request.institutionId !== user.institutionId) {
       throw new AppError("You do not have permission to approve this request.", 403);
     }
@@ -144,7 +144,7 @@ export const rejectCorrectionRequestService = async ({ id, user, reason }) => {
     throw new AppError("Correction request not found.", 404);
   }
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (request.institutionId !== user.institutionId) {
       throw new AppError("You do not have permission to reject this request.", 403);
     }
@@ -161,4 +161,3 @@ export const rejectCorrectionRequestService = async ({ id, user, reason }) => {
     rejectionReason: reason.trim(),
   });
 };
-

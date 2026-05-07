@@ -6,6 +6,7 @@ export const findStudentById = async (id) => {
             national_id AS "nationalId",
             first_name AS "firstName",
             last_name AS "lastName",
+            gender,
             date_of_birth AS "dateOfBirth",
             token_version AS "tokenVersion",
             created_at AS "createdAt"
@@ -24,6 +25,7 @@ export const findStudentByNationalId = async (faydaId) => {
             national_id AS "nationalId",
             first_name AS "firstName",
             last_name AS "lastName",
+            gender,
             date_of_birth AS "dateOfBirth",
             token_version AS "tokenVersion",
             created_at AS "createdAt"
@@ -36,19 +38,20 @@ export const findStudentByNationalId = async (faydaId) => {
 };
 
 export const createStudentFromCitizen = async (faydaId, citizen) => {
-  const { firstName, fatherName: lastName, dateOfBirth } = citizen;
+  const { firstName, fatherName: lastName, gender, dateOfBirth } = citizen;
 
   const result = await pool.query(
-    `INSERT INTO student (national_id, first_name, last_name, date_of_birth)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO student (national_id, first_name, last_name, gender, date_of_birth)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING id,
      national_id AS "nationalId",
      first_name AS "firstName",
      last_name AS "lastName",
+     gender,
      date_of_birth AS "dateOfBirth",
      token_version AS "tokenVersion",
      created_at AS "createdAt"`,
-    [faydaId, firstName, lastName, dateOfBirth],
+    [faydaId, firstName, lastName, gender, dateOfBirth],
   );
 
   return result.rows[0];
@@ -69,6 +72,8 @@ export const incrementStudentTokenVersionById = async (id) => {
 
 export const findStudents = async ({
   search,
+  startDate,
+  endDate,
   page = 1,
   limit = 10,
 } = {}) => {
@@ -79,6 +84,7 @@ export const findStudents = async ({
            national_id AS "nationalId",
            first_name AS "firstName",
            last_name AS "lastName",
+           gender,
            date_of_birth AS "dateOfBirth",
            created_at AS "createdAt"
     FROM student
@@ -91,51 +97,52 @@ export const findStudents = async ({
     const terms = search.trim().split(/\s+/);
 
     if (terms.length === 1) {
-      // single word → match anything
       params.push(`%${terms[0]}%`);
       const i = params.length;
-
-      conditions.push(`
-        (
-          first_name ILIKE $${i}
-          OR last_name ILIKE $${i}
-          OR national_id ILIKE $${i}
-        )
-      `);
+      conditions.push(`(first_name ILIKE $${i} OR last_name ILIKE $${i} OR national_id ILIKE $${i})`);
     } else {
-      // multiple words → full name match
       const first = `%${terms[0]}%`;
       const last = `%${terms[1]}%`;
-
       params.push(first);
       const i1 = params.length;
-
       params.push(last);
       const i2 = params.length;
-
-      conditions.push(`
-        (
-          (first_name ILIKE $${i1} AND last_name ILIKE $${i2})
-          OR (first_name ILIKE $${i2} AND last_name ILIKE $${i1})
-        )
-      `);
+      conditions.push(`((first_name ILIKE $${i1} AND last_name ILIKE $${i2}) OR (first_name ILIKE $${i2} AND last_name ILIKE $${i1}))`);
     }
+  }
+
+  if (startDate) {
+    params.push(startDate);
+    conditions.push(`created_at >= $${params.length}`);
+  }
+
+  if (endDate) {
+    params.push(endDate);
+    conditions.push(`created_at <= $${params.length}`);
   }
 
   if (conditions.length > 0) {
     sql += ` WHERE ` + conditions.join(" AND ");
   }
 
-  sql += ` ORDER BY created_at DESC`;
+  // 1. Get Total Count
+  const countSql = `SELECT COUNT(*) FROM student ${conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : ""}`;
+  const countRes = await pool.query(countSql, params);
+  const totalCount = parseInt(countRes.rows[0].count, 10);
 
+  // 2. Get Paginated Data
+  sql += ` ORDER BY created_at DESC`;
   params.push(limit);
   sql += ` LIMIT $${params.length}`;
-
   params.push(offset);
   sql += ` OFFSET $${params.length}`;
 
   const result = await pool.query(sql, params);
-  return result.rows;
+  
+  return {
+    students: result.rows,
+    totalCount
+  };
 };
 
 

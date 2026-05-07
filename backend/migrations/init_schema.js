@@ -137,6 +137,7 @@ async function migrate() {
 
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
+        gender TEXT,
         date_of_birth DATE NOT NULL,
         token_version INT NOT NULL DEFAULT 0,
 

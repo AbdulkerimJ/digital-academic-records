@@ -1,4 +1,5 @@
 import AppError from "../../common/utils/appError.js";
+import { translateDatabaseError } from "../../common/utils/dbErrorHelper.js";
 import parseNumber from "../../common/utils/parseNumber.js";
 import {
   createExamLevelRecord,
@@ -95,7 +96,7 @@ export const createExamRecordService = async ({ user, data = {} }) => {
   } = data;
 
   // 1. Institution context
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -220,6 +221,7 @@ export const uploadBulkExamsService = async ({
       const mappedData = {
         nationalId: record.nationalId || record.nationalid || record.NationalId,
         examLevelCode: record.examLevelCode || record.examlevelcode || record.ExamLevelCode,
+        institutionCode: record.institutionCode || record.institutioncode || record.InstitutionCode,
         year: record.year || record.Year,
         totalScore: record.totalScore || record.totalscore || record.TotalScore,
         averageScore: record.averageScore || record.averagescore || record.AverageScore,
@@ -231,8 +233,9 @@ export const uploadBulkExamsService = async ({
         user,
         data: {
           ...mappedData,
-          institutionId,
-          institutionCode,
+          // If the record doesn't have institutionCode, fallback to the one passed to the service
+          institutionId: mappedData.institutionId || institutionId,
+          institutionCode: mappedData.institutionCode || institutionCode,
         },
       });
       results.successful.push({
@@ -240,9 +243,10 @@ export const uploadBulkExamsService = async ({
         year: mappedData.year,
       });
     } catch (err) {
+      const translated = translateDatabaseError(err);
       results.failed.push({
         id: record.nationalId || record.nationalid || `Row ${i + 1}`,
-        reason: err.message,
+        reason: translated ? translated.message : err.message,
       });
     }
 
@@ -275,7 +279,7 @@ export const listExamRecordsService = async ({
   const query = { ...filters };
 
   // enforce institution scope
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution is required.", 400);
     }
@@ -304,7 +308,7 @@ export const getExamRecordByIdService = async ({ user, examId }) => {
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -334,7 +338,7 @@ export const updateExamRecordService = async ({
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -392,7 +396,7 @@ export const deleteExamRecordService = async ({ user, examId }) => {
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }

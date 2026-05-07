@@ -7,7 +7,7 @@ const FAYDA_BASE_URL = process.env.FAYDA_BASE_URL;
 
 const baseConfig = {
   validateStatus: () => true, // Accept all status codes for custom error handling
-  timeout: 5000, // Fail after 5 seconds if no response
+  timeout: 15000, // Fail after 15 seconds if no response
 };
 
 

@@ -36,56 +36,72 @@ export const findCorrectionRequests = async ({
   institutionId,
   startDate,
   endDate,
+  page = 1,
+  limit = 10,
 }) => {
-  let query = `
+  const offset = (page - 1) * limit
+
+  let baseQuery = `
+    FROM correction_request cr
+    JOIN student s ON cr.student_id = s.id
+    JOIN institution i ON cr.institution_id = i.id
+  `
+
+  const conditions = []
+  const params = []
+
+  if (status && status !== "all") {
+    params.push(status.toUpperCase())
+    conditions.push(`cr.status = $${params.length}`)
+  }
+
+  if (studentId !== undefined) {
+    params.push(studentId)
+    conditions.push(`cr.student_id = $${params.length}`)
+  }
+
+  if (institutionId !== undefined) {
+    params.push(institutionId)
+    conditions.push(`cr.institution_id = $${params.length}`)
+  }
+
+  if (startDate) {
+    params.push(startDate)
+    conditions.push(`cr.created_at >= $${params.length}`)
+  }
+
+  if (endDate) {
+    params.push(endDate)
+    conditions.push(`cr.created_at <= $${params.length}`)
+  }
+
+  const whereClause = conditions.length > 0 ? ` WHERE ` + conditions.join(" AND ") : ""
+
+  // 1. Get total count
+  const countResult = await pool.query(`SELECT COUNT(*) ${baseQuery} ${whereClause}`, params)
+  const totalCount = parseInt(countResult.rows[0].count, 10)
+
+  // 2. Get paginated data
+  params.push(limit)
+  const limitIdx = params.length
+  params.push(offset)
+  const offsetIdx = params.length
+
+  const dataQuery = `
     SELECT cr.id, cr.student_id AS "studentId", cr.institution_id AS "institutionId", 
            cr.request_text AS "requestText", cr.status, 
            cr.record_id AS "recordId", cr.record_type AS "recordType",
            cr.reviewed_at AS "reviewedAt", cr.rejection_reason AS "rejectionReason", 
            cr.created_at AS "createdAt",
-           s.first_name AS "studentFirstName", s.last_name AS "studentLastName"
-    FROM correction_request cr
-    JOIN student s ON cr.student_id = s.id
-  `;
+           s.first_name AS "studentFirstName", s.last_name AS "studentLastName", s.national_id AS "studentNationalId",
+           i.name AS "institutionName"
+    ${baseQuery} ${whereClause}
+    ORDER BY cr.created_at DESC
+    LIMIT $${limitIdx} OFFSET $${offsetIdx}
+  `
 
-
-  const conditions = [];
-  const params = [];
-
-  if (status !== undefined) {
-    params.push(status);
-    conditions.push(`cr.status = $${params.length}`);
-  }
-
-  if (studentId !== undefined) {
-    params.push(studentId);
-    conditions.push(`cr.student_id = $${params.length}`);
-  }
-
-  if (institutionId !== undefined) {
-    params.push(institutionId);
-    conditions.push(`cr.institution_id = $${params.length}`);
-  }
-
-  if (startDate) {
-    params.push(startDate);
-    conditions.push(`cr.created_at >= $${params.length}`);
-  }
-
-  if (endDate) {
-    params.push(endDate);
-    conditions.push(`cr.created_at <= $${params.length}`);
-  }
-
-  // Add WHERE only if conditions exist
-  if (conditions.length > 0) {
-    query += ` WHERE ` + conditions.join(" AND ");
-  }
-
-  query += ` ORDER BY cr.created_at DESC`;
-
-  const result = await pool.query(query, params);
-  return result.rows;
+  const result = await pool.query(dataQuery, params)
+  return { requests: result.rows, totalCount }
 };
 
 export const findCorrectionRequestById = async (id) => {
@@ -95,9 +111,11 @@ export const findCorrectionRequestById = async (id) => {
             cr.record_id AS "recordId", cr.record_type AS "recordType",
             cr.reviewed_at AS "reviewedAt", cr.rejection_reason AS "rejectionReason", 
             cr.reviewed_by AS "reviewedBy", cr.created_at AS "createdAt",
-            s.first_name AS "studentFirstName", s.last_name AS "studentLastName", s.national_id AS "studentNationalId"
+            s.first_name AS "studentFirstName", s.last_name AS "studentLastName", s.national_id AS "studentNationalId",
+            i.name AS "institutionName"
      FROM correction_request cr
      JOIN student s ON cr.student_id = s.id
+     JOIN institution i ON cr.institution_id = i.id
      WHERE cr.id = $1`,
     [id],
   );

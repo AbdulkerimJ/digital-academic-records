@@ -33,12 +33,12 @@ export const getMyDegrees = catchAsync(async (req, res) => {
 // ===================== ADMIN AND REGISTRAR HANDLERS =====================
 
 export const listStudents = catchAsync(async (req, res) => {
-  const { search, page, limit } = req.query;
-  const students = await listStudentsService({ 
+  const { search, page, limit, startDate, endDate } = req.query;
+  const { students, totalCount } = await listStudentsService({ 
     user: req.user,
-    query: { search, page, limit } 
+    query: { search, page, limit, startDate, endDate } 
   });
-  return sendSuccess(res, "Students list fetched successfully", { count: students.length, students });
+  return sendSuccess(res, "Students list fetched successfully", { count: totalCount, students });
 });
 
 

@@ -36,12 +36,20 @@ export const getMyRequests = catchAsync(async (req, res) => {
 // ===================== ADMIN HANDLERS =====================
 
 export const listRequests = catchAsync(async (req, res) => {
-  const { status, studentId, institutionId, startDate, endDate } = req.query;
-  const requests = await listAllCorrectionRequestsService({
+  const { status, studentId, institutionId, startDate, endDate, page, limit } = req.query;
+  const { requests, totalCount } = await listAllCorrectionRequestsService({
     user: req.user,
-    filters: { status, studentId, institutionId, startDate, endDate },
+    filters: {
+      status,
+      studentId,
+      institutionId,
+      startDate,
+      endDate,
+      page: page ? parseInt(page, 10) : 1,
+      limit: limit ? parseInt(limit, 10) : 10,
+    },
   });
-  return sendSuccess(res, "Correction requests fetched successfully", { count: requests.length, requests });
+  return sendSuccess(res, "Correction requests fetched successfully", { count: totalCount, requests });
 });
 
 export const getRequestDetail = catchAsync(async (req, res) => {
@@ -70,4 +78,3 @@ export const rejectRequest = catchAsync(async (req, res) => {
 
   return sendSuccess(res, "Correction request rejected successfully", { request });
 });
-

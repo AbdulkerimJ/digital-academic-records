@@ -7,7 +7,9 @@ import StudentsPage from "../pages/students/StudentsPage"
 import DegreesPage from "../pages/degrees/DegreesPage"
 import ExamsPage from "../pages/exams/ExamsPage"
 import CorrectionsPage from "../pages/corrections/CorrectionsPage"
+import CorrectionDetailPage from "../pages/corrections/CorrectionDetailPage"
 import ProfilePage from "../pages/profile/ProfilePage"
+import AcademicStructurePage from "../pages/structure/AcademicStructurePage"
 import GlobalErrorPage from "../pages/error/GlobalErrorPage"
 import AppShell from "../components/layout/AppShell"
 import { useAuth } from "../context/AuthContext"
@@ -102,6 +104,18 @@ const router = createBrowserRouter([
       {
         path: "corrections",
         element: <CorrectionsPage />,
+      },
+      {
+        path: "corrections/:id",
+        element: <CorrectionDetailPage />,
+      },
+      {
+        path: "structure",
+        element: (
+          <ProtectedRoute roles={["SUPER_ADMIN", "REGISTRAR"]}>
+            <AcademicStructurePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",

@@ -19,11 +19,30 @@ import {
 } from "./department.repository.js";
 import { findInstitutionById } from "./institution.repository.js";
 
+/**
+ * Ensures that an institution is of type 'COLLEGE'.
+ * Academic structures (Colleges/Departments) are only allowed for Universities/Colleges.
+ */
+const ensureIsCollegeInstitution = async (institutionId) => {
+  const institution = await findInstitutionById(institutionId);
+  if (!institution) {
+    throw new AppError("Institution not found.", 404);
+  }
+
+  if (institution.type !== "COLLEGE") {
+    throw new AppError(
+      `Academic structures can only be managed for institutions of type COLLEGE. Current type: ${institution.type}`,
+      400
+    );
+  }
+  return institution;
+};
+
 // ===================== COLLEGE CRUD =====================
 
 export const listCollegesService = async ({ user, institutionId }) => {
   // Enforce institution scope for non-super-admins
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to access colleges for this institution.", 403);
     }
@@ -40,7 +59,7 @@ export const listCollegesService = async ({ user, institutionId }) => {
 export const createCollegeService = async ({ user, institutionId, data }) => {
   const { name, code, isActive } = data;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to create colleges for this institution.", 403);
     }
@@ -50,32 +69,32 @@ export const createCollegeService = async ({ user, institutionId, data }) => {
     throw new AppError("Name and code are required.", 400);
   }
 
-  const institution = await findInstitutionById(institutionId);
-  if (!institution) {
-    throw new AppError("Institution not found.", 404);
-  }
+  const normalizedName = String(name).trim();
+  const normalizedCode = String(code).trim().toUpperCase();
+
+  await ensureIsCollegeInstitution(institutionId);
 
   // Check uniqueness per institution
-  const existingName = await findCollegeByName(name, institutionId);
+  const existingName = await findCollegeByName(normalizedName, institutionId);
   if (existingName) {
     throw new AppError("A college with this name already exists in this institution.", 400);
   }
 
-  const existingCode = await findCollegeByCode(code, institutionId);
+  const existingCode = await findCollegeByCode(normalizedCode, institutionId);
   if (existingCode) {
     throw new AppError("A college with this code already exists in this institution.", 400);
   }
 
   return createCollegeRecord({
     institutionId,
-    name: String(name).trim(),
-    code: String(code).trim().toUpperCase(),
+    name: normalizedName,
+    code: normalizedCode,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
 };
 
 export const getCollegeByIdService = async ({ user, institutionId, collegeId }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to access this institution's colleges.", 403);
     }
@@ -92,7 +111,7 @@ export const getCollegeByIdService = async ({ user, institutionId, collegeId }) 
 export const updateCollegeService = async ({ user, institutionId, collegeId, data }) => {
   const { name, code, isActive } = data;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to update colleges for this institution.", 403);
     }
@@ -129,7 +148,7 @@ export const updateCollegeService = async ({ user, institutionId, collegeId, dat
 };
 
 export const deleteCollegeService = async ({ user, institutionId, collegeId }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to delete colleges for this institution.", 403);
     }
@@ -154,6 +173,8 @@ export const deleteCollegeService = async ({ user, institutionId, collegeId }) =
  * Validates that a college exists and belongs to the specified institution.
  */
 const validateCollegeParent = async (collegeId, institutionId) => {
+  await ensureIsCollegeInstitution(institutionId);
+  
   const college = await findCollegeById(collegeId);
   if (!college || college.institutionId !== institutionId) {
     throw new AppError("College not found in this institution.", 404);
@@ -162,7 +183,7 @@ const validateCollegeParent = async (collegeId, institutionId) => {
 };
 
 export const listDepartmentsService = async ({ user, institutionId, collegeId }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to access departments for this institution.", 403);
     }
@@ -176,7 +197,7 @@ export const listDepartmentsService = async ({ user, institutionId, collegeId })
 export const createDepartmentService = async ({ user, institutionId, collegeId, data }) => {
   const { name, code, isActive } = data;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to create departments for this institution.", 403);
     }
@@ -186,29 +207,32 @@ export const createDepartmentService = async ({ user, institutionId, collegeId, 
     throw new AppError("Name and code are required.", 400);
   }
 
+  const normalizedName = String(name).trim();
+  const normalizedCode = String(code).trim().toUpperCase();
+
   await validateCollegeParent(collegeId, institutionId);
 
   // Check uniqueness per college
-  const existingName = await findDepartmentByName(name, collegeId);
+  const existingName = await findDepartmentByName(normalizedName, collegeId);
   if (existingName) {
     throw new AppError("A department with this name already exists in this college.", 400);
   }
 
-  const existingCode = await findDepartmentByCode(code, collegeId);
+  const existingCode = await findDepartmentByCode(normalizedCode, collegeId);
   if (existingCode) {
     throw new AppError("A department with this code already exists in this college.", 400);
   }
 
   return createDepartmentRecord({
     collegeId,
-    name: String(name).trim(),
-    code: String(code).trim().toUpperCase(),
+    name: normalizedName,
+    code: normalizedCode,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
 };
 
 export const getDepartmentByIdService = async ({ user, institutionId, collegeId, departmentId }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to access this institution's departments.", 403);
     }
@@ -227,7 +251,7 @@ export const getDepartmentByIdService = async ({ user, institutionId, collegeId,
 export const updateDepartmentService = async ({ user, institutionId, collegeId, departmentId, data }) => {
   const { name, code, isActive } = data;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to update departments for this institution.", 403);
     }
@@ -266,7 +290,7 @@ export const updateDepartmentService = async ({ user, institutionId, collegeId, 
 };
 
 export const deleteDepartmentService = async ({ user, institutionId, collegeId, departmentId }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to delete departments for this institution.", 403);
     }

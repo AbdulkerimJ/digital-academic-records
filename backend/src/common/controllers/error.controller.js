@@ -1,77 +1,7 @@
 import AppError from "../utils/appError.js";
+import { translateDatabaseError } from "../utils/dbErrorHelper.js";
 
-// ================= DB ERROR HANDLERS =================
-
-// Invalid input (e.g. wrong UUID, wrong type)
-const handleInvalidInputDB = () => {
-  let message = "Invalid input format. Please check your data.";
-  return new AppError(message, 400);
-};
-
-const handleDuplicateFieldsDB = (err) => {
-  const constraint = err.constraint;
-
-  if (constraint === "app_user_email_key") {
-    return new AppError("This email is already in use. Please use a different one.", 400);
-  }
-  if (constraint === "student_national_id_key") {
-    return new AppError("A student with this National ID is already registered.", 400);
-  }
-  if (constraint === "institution_code_key") {
-    return new AppError("An institution with this code already exists.", 400);
-  }
-  if (constraint === "exams_student_id_exam_level_id_year_institution_id_key") {
-    return new AppError("This student already has an exam record for this level and year at this institution.", 400);
-  }
-  if (constraint?.includes("degrees_student_id")) {
-    return new AppError("This student already has a degree record for this title and graduation date.", 400);
-  }
-  if (constraint?.includes("code_key") || constraint?.includes("name_key")) {
-    return new AppError("This record (code or name) already exists in the system.", 400);
-  }
-
-  const field = err.detail?.match(/\((.*?)\)/)?.[1] || "field";
-  const message = `Duplicate value for ${field}. Please use another value!`;
-  return new AppError(message, 400);
-};
-
-// Not null violation
-const handleNotNullViolationDB = (err) => {
-  const message = `Missing required field: ${err.column}`;
-  return new AppError(message, 400);
-};
-
-const handleForeignKeyViolationDB = (err) => {
-  const constraint = err.constraint;
-  let message = "This action cannot be completed because this record is linked to other data.";
-
-  if (constraint === "app_user_role_id_fkey") {
-    message = "The specified role does not exist.";
-  } else if (constraint === "app_user_institution_id_fkey") {
-    message = "The specified institution does not exist.";
-  } else if (err.detail?.includes("is still referenced")) {
-    message = "This record cannot be deleted because it is being used by other parts of the system.";
-  } else if (err.detail?.includes("is not present")) {
-    message = "The referenced record (Student, Institution, or Level) does not exist.";
-  }
-
-  return new AppError(message, 400);
-};
-
-const handleCheckViolationDB = (err) => {
-  const constraint = err.constraint;
-  let message = "The provided data violates system rules.";
-
-  if (constraint === "check_institution_for_non_super_admin") {
-    message = "Account policy violation: Super Admins must not have an institution, while other roles MUST have one.";
-  } else if (constraint?.includes("result_status_check")) {
-    message = "Invalid result status. Must be PASS or FAIL.";
-  } else if (constraint === "exams_check") {
-    message = "At least one score (Total, Average, or Percentile) must be provided.";
-  }
-
-  return new AppError(message, 400);
-};
+// (DB Error handlers removed - moved to dbErrorHelper.js)
 
 // ================= JWT =================
 
@@ -161,36 +91,35 @@ const sendErrorProd = (err, req, res) => {
 // ================= GLOBAL HANDLER =================
 
 const globalErrorHandler = (err, req, res, next) => {
-  if (err.name === "JsonWebTokenError") err = handleJWTError();
-  if (err.name === "TokenExpiredError") err = handleJWTExpiredError();
-
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
+  let error = err;
+  // Ensure we have a message
+  if (!error.message) error.message = "An unexpected error occurred.";
+
+  // 1. Handle specific known error types
+  if (error.name === "JsonWebTokenError") error = handleJWTError();
+  if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+  if (error.name === "MulterError") error = handleMulterGenericError(error);
+  if (error.isAxiosError) error = handleAxiosError(error);
+  if (error.type === "entity.too.large") error = handlePayloadTooLargeError();
+
+  // 2. Handle PostgreSQL error codes (Always)
+  const translated = translateDatabaseError(error);
+  if (translated) {
+    error = translated;
+  }
+
+  // 3. Handle specific codes (Multer etc)
+  const errCode = error.code || err.code;
+  if (errCode === "LIMIT_FILE_SIZE") error = handleMulterFileSizeError();
+  if (errCode === "LIMIT_UNEXPECTED_FILE") error = handleMulterUnexpectedFileError(error);
+
+  // 4. Send Response
   if (process.env.NODE_ENV === "development") {
-    sendErrorDev(err, req, res);
-  } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err };
-    error.message = err.message;
-
-    // PostgreSQL error codes
-    if (error.code === "22P02") error = handleInvalidInputDB(error);
-    if (error.code === "23505") error = handleDuplicateFieldsDB(error);
-    if (error.code === "23502") error = handleNotNullViolationDB(error);
-    if (error.code === "23503") error = handleForeignKeyViolationDB(error);
-    if (error.code === "23514") error = handleCheckViolationDB(error);
-
-    // Multer
-    if (error.code === "LIMIT_FILE_SIZE") error = handleMulterFileSizeError();
-    if (error.code === "LIMIT_UNEXPECTED_FILE") error = handleMulterUnexpectedFileError(error);
-    if (error.name === "MulterError") error = handleMulterGenericError(error);
-
-    // Other
-    if (error.type === "entity.too.large") error = handlePayloadTooLargeError();
-
-    // Axios
-    if (error.isAxiosError) error = handleAxiosError(error);
-
+    sendErrorDev(error, req, res);
+  } else {
     sendErrorProd(error, req, res);
   }
 };

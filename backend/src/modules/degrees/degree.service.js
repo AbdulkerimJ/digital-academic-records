@@ -1,4 +1,5 @@
 import AppError from "../../common/utils/appError.js";
+import { translateDatabaseError } from "../../common/utils/dbErrorHelper.js";
 import parseNumber from "../../common/utils/parseNumber.js";
 import {
   createDegreeRecord,
@@ -49,7 +50,7 @@ export const getDegreeLevelByIdService = async ({ degreeLevelId }) => {
 };
 
 export const createDegreeLevelService = async ({ user, data }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can create degree levels.", 403);
   }
 
@@ -62,7 +63,7 @@ export const createDegreeLevelService = async ({ user, data }) => {
 };
 
 export const updateDegreeLevelService = async ({ user, id, data }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can update degree levels.", 403);
   }
 
@@ -96,7 +97,7 @@ export const getDegreeTitleByIdService = async ({ degreeTitleId }) => {
 };
 
 export const createDegreeTitleService = async ({ user, data }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can create degree titles.", 403);
   }
 
@@ -114,7 +115,7 @@ export const createDegreeTitleService = async ({ user, data }) => {
 };
 
 export const updateDegreeTitleService = async ({ user, id, data }) => {
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can update degree titles.", 403);
   }
 
@@ -154,7 +155,7 @@ export const createDegreeService = async ({ user, data = {} }) => {
   } = data;
 
   // 1. Institution context
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -243,7 +244,7 @@ export const createDegreeService = async ({ user, data = {} }) => {
 
   // 7. Validation
   if (!graduationDate) {
-    throw new AppError("Graduation date is required.", 400);
+    throw new AppError("graduationDate is required", 400);
   }
 
   const parsedCgpa = cgpa !== undefined ? parseNumber(cgpa, "CGPA") : null;
@@ -309,6 +310,7 @@ export const uploadBulkDegreesService = async ({
         nationalId: record.nationalId || record.nationalid || record.NationalId,
         degreeLevelCode: record.degreeLevelCode || record.degreelevelcode || record.DegreeLevelCode,
         degreeTitleCode: record.degreeTitleCode || record.degreetitlecode || record.DegreeTitleCode,
+        institutionCode: record.institutionCode || record.institutioncode || record.InstitutionCode,
         collegeCode: record.collegeCode || record.collegecode || record.CollegeCode,
         departmentCode: record.departmentCode || record.departmentcode || record.DepartmentCode,
         cgpa: record.cgpa || record.CGPA,
@@ -319,8 +321,8 @@ export const uploadBulkDegreesService = async ({
         user,
         data: {
           ...mappedData,
-          institutionId,
-          institutionCode,
+          institutionId: mappedData.institutionId || institutionId,
+          institutionCode: mappedData.institutionCode || institutionCode,
         },
       });
       results.successful.push({
@@ -328,9 +330,10 @@ export const uploadBulkDegreesService = async ({
         date: mappedData.graduationDate,
       });
     } catch (err) {
+      const translated = translateDatabaseError(err);
       results.failed.push({
         id: record.nationalId || record.nationalid || `Row ${i + 1}`,
-        reason: err.message,
+        reason: translated ? translated.message : err.message,
       });
     }
 
@@ -363,7 +366,7 @@ export const listDegreesService = async ({
   const query = { ...filters };
 
   // enforce institution scope
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution is required.", 400);
     }
@@ -380,7 +383,7 @@ export const getDegreeByIdService = async ({ user, degreeId }) => {
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -411,7 +414,7 @@ export const updateDegreeService = async ({
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }
@@ -528,7 +531,7 @@ export const deleteDegreeService = async ({ user, degreeId }) => {
 
   let institutionId = null;
 
-  if (user.role !== "SUPER_ADMIN") {
+  if (user.roleName !== "SUPER_ADMIN") {
     if (!user.institutionId) {
       throw new AppError("Institution context missing for user.", 400);
     }

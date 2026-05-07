@@ -36,6 +36,9 @@ import {
   SelectValue 
 } from "../../components/ui/select"
 
+import { TableBodySkeleton } from "../../components/common/TableSkeleton"
+import Pagination from "../../components/common/Pagination"
+
 export default function InstitutionTable({ 
   institutions, 
   totalCount,
@@ -85,12 +88,6 @@ export default function InstitutionTable({
   return (
     <div className="space-y-4">
       <Card className="shadow-sm border-muted/60 overflow-hidden rounded-2xl relative">
-        {isFetching && (
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex items-center justify-center animate-in fade-in duration-200">
-            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-          </div>
-        )}
-        
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">
@@ -103,7 +100,9 @@ export default function InstitutionTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {institutions.length === 0 ? (
+              {(isFetching && institutions.length === 0) ? (
+                <TableBodySkeleton rows={itemsPerPage} columns={5} />
+              ) : institutions.length === 0 ? (
                 <TableRow>
                    <TableCell colSpan={5} className="h-72 text-center border-none">
                     <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
@@ -181,79 +180,18 @@ export default function InstitutionTable({
             </TableBody>
           </Table>
         </div>
+        
+        <Pagination 
+          page={currentPage} 
+          totalPages={totalPages} 
+          setPage={onPageChange} 
+          limit={itemsPerPage} 
+          setLimit={onItemsPerPageChange} 
+          totalCount={totalCount} 
+          itemName="institutions" 
+          isFetching={isFetching} 
+        />
       </Card>
-
-      {/* Pagination Bar */}
-      {totalCount > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-2">
-          <div className="flex items-center gap-4 order-2 sm:order-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground font-medium">Rows per page</span>
-              <Select 
-                value={itemsPerPage.toString()} 
-                onValueChange={(val) => onItemsPerPageChange(parseInt(val, 10))}
-              >
-                <SelectTrigger className="h-8 w-16 bg-muted/30 border-none rounded-lg text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {[5, 10, 20, 50].map(size => (
-                    <SelectItem key={size} value={size.toString()} className="text-xs">{size}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="text-xs text-muted-foreground font-medium border-l border-muted pl-4">
-              Showing <span className="text-foreground">{Math.min((currentPage - 1) * itemsPerPage + 1, totalCount)}</span> to <span className="text-foreground">{Math.min(currentPage * itemsPerPage, totalCount)}</span> of <span className="text-foreground">{totalCount}</span> institutions
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 order-1 sm:order-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-8 w-8 rounded-lg border-muted bg-background hover:bg-muted disabled:opacity-30"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1 || isFetching}
-            >
-              <ChevronLeft size={16} />
-            </Button>
-            
-            <div className="flex items-center">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = currentPage
-                if (totalPages <= 5) pageNum = i + 1
-                else if (currentPage <= 3) pageNum = i + 1
-                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i
-                else pageNum = currentPage - 2 + i
-
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={currentPage === pageNum ? "default" : "ghost"}
-                    size="icon"
-                    className={`h-8 w-8 rounded-lg text-xs font-semibold ${currentPage === pageNum ? "shadow-md" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => onPageChange(pageNum)}
-                    disabled={isFetching}
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              })}
-            </div>
-
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-8 w-8 rounded-lg border-muted bg-background hover:bg-muted disabled:opacity-30"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages || isFetching}
-            >
-              <ChevronRight size={16} />
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -59,6 +59,9 @@ export const findDegreeById = async (id, institutionId = null) => {
       dep.name AS "departmentName",
       d.cgpa,
       d.graduation_date AS "graduationDate",
+      s.first_name AS "studentFirstName",
+      s.last_name AS "studentLastName",
+      s.national_id AS "studentNationalId",
       d.created_at AS "createdAt",
       d.updated_at AS "updatedAt"
     FROM degrees d
@@ -67,6 +70,7 @@ export const findDegreeById = async (id, institutionId = null) => {
     JOIN colleges c ON d.college_id = c.id
     JOIN departments dep ON d.department_id = dep.id
     JOIN institution i ON d.institution_id = i.id
+    JOIN student s ON d.student_id = s.id
     WHERE d.id = $1
   `;
 
@@ -99,6 +103,9 @@ export const findDegrees = async (query = {}, pagination = {}) => {
       dep.name AS "departmentName",
       d.cgpa,
       d.graduation_date AS "graduationDate",
+      s.first_name AS "studentFirstName",
+      s.last_name AS "studentLastName",
+      s.national_id AS "studentNationalId",
       d.created_at AS "createdAt",
       d.updated_at AS "updatedAt"
     FROM degrees d
@@ -107,6 +114,7 @@ export const findDegrees = async (query = {}, pagination = {}) => {
     JOIN colleges c ON d.college_id = c.id
     JOIN departments dep ON d.department_id = dep.id
     JOIN institution i ON d.institution_id = i.id
+    JOIN student s ON d.student_id = s.id
   `;
 
   const conditions = [];

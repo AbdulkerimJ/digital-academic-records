@@ -1,0 +1,4 @@
+nationalId,degreeLevelCode,degreeTitleCode,collegeCode,departmentCode,cgpa,graduationDate
+"12345678","BACHELOR","BSC_CS","COE","CS",3.85,"2024-06-15"
+"87654321","BACHELOR","MSC_DS","COS","MATH",3.92,"2024-07-20"
+  

@@ -109,7 +109,7 @@ export const createDegree = catchAsync(async (req, res) => {
   return sendSuccess(
     res,
     "Degree record created successfully",
-    { degree },
+    { degreeRecord: degree },
     201,
   );
 });
@@ -134,20 +134,20 @@ export const listDegrees = catchAsync(async (req, res) => {
 });
 
 export const getDegreeById = catchAsync(async (req, res) => {
-  const degree = await getDegreeByIdService({
+  const degreeRecord = await getDegreeByIdService({
     user: req.user,
     degreeId: req.params.degreeId,
   });
-  return sendSuccess(res, "Degree record fetched successfully", { degree });
+  return sendSuccess(res, "Degree record fetched successfully", { degreeRecord });
 });
 
 export const updateDegree = catchAsync(async (req, res) => {
-  const degree = await updateDegreeService({
+  const degreeRecord = await updateDegreeService({
     user: req.user,
     degreeId: req.params.degreeId,
     ...(req.body || {}),
   });
-  return sendSuccess(res, "Degree record updated successfully", { degree });
+  return sendSuccess(res, "Degree record updated successfully", { degreeRecord });
 });
 
 

@@ -113,10 +113,14 @@ export const findExamRecordById = async (id, institutionId = null) => {
     SELECT 
       e.id,
       e.student_id AS "studentId",
+      s.first_name AS "studentFirstName",
+      s.last_name AS "studentLastName",
+      s.national_id AS "studentNationalId",
       e.exam_level_id AS "examLevelId",
       et.code AS "examLevelCode",
       et.name AS "examLevelName",
       e.institution_id AS "institutionId",
+      i.name AS "institutionName",
       e.year,
       e.total_score AS "totalScore",
       e.average_score AS "averageScore",
@@ -126,6 +130,8 @@ export const findExamRecordById = async (id, institutionId = null) => {
       e.updated_at AS "updatedAt"
     FROM exams e
     JOIN exam_levels et ON e.exam_level_id = et.id
+    JOIN student s ON e.student_id = s.id
+    JOIN institution i ON e.institution_id = i.id
     WHERE e.id = $1
   `;
 
@@ -144,10 +150,14 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
     SELECT 
       e.id,
       e.student_id AS "studentId",
+      s.first_name AS "studentFirstName",
+      s.last_name AS "studentLastName",
+      s.national_id AS "studentNationalId",
       e.exam_level_id AS "examLevelId",
       et.code AS "examLevelCode",
       et.name AS "examLevelName",
       e.institution_id AS "institutionId",
+      i.name AS "institutionName",
       e.year,
       e.total_score AS "totalScore",
       e.average_score AS "averageScore",
@@ -157,6 +167,8 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
       e.updated_at AS "updatedAt"
     FROM exams e
     JOIN exam_levels et ON e.exam_level_id = et.id
+    JOIN student s ON e.student_id = s.id
+    JOIN institution i ON e.institution_id = i.id
   `;
 
   const conditions = [];

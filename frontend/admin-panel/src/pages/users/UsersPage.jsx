@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import FetchingIndicator from "../../components/common/FetchingIndicator"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { 
   listUsers, 
@@ -28,21 +29,65 @@ import TableSkeleton from "../../components/common/TableSkeleton"
 import UserFilters from "./UserFilters"
 import UserTable from "./UserTable"
 
+import { useSearchParams } from "react-router-dom"
+
 export default function UsersPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState(null)
   const [userToEdit, setUserToEdit] = useState(null)
   
-  // Filter & Pagination States
-  const [searchTerm, setSearchTerm] = useState("")
-  const [roleFilter, setRoleFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [institutionFilter, setInstitutionFilter] = useState("all")
-  
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [sortBy, setSortBy] = useState("createdAt")
-  const [sortDir, setSortDir] = useState("DESC")
+  // Filter & Pagination derived from searchParams
+  const searchTerm = searchParams.get("search") || ""
+  const roleFilter = searchParams.get("role") || "all"
+  const statusFilter = searchParams.get("status") || "all"
+  const institutionFilter = searchParams.get("institution") || "all"
+  const page = parseInt(searchParams.get("page") || "1", 10)
+  const limit = parseInt(searchParams.get("limit") || "10", 10)
+  const sortBy = searchParams.get("sortBy") || "createdAt"
+  const sortDir = searchParams.get("sortDir") || "DESC"
+
+  const setPage = (newPage) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("page", newPage.toString())
+    setSearchParams(newParams)
+  }
+
+  const setLimit = (newLimit) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("limit", newLimit.toString())
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
+  const updateFilters = (updates) => {
+    const newParams = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === "all" || !value) {
+        newParams.delete(key)
+      } else {
+        newParams.set(key, value)
+      }
+    })
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
+  const setSort = (field) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (sortBy === field) {
+      newParams.set("sortDir", sortDir === "ASC" ? "DESC" : "ASC")
+    } else {
+      newParams.set("sortBy", field)
+      newParams.set("sortDir", "ASC")
+    }
+    setSearchParams(newParams)
+  }
+
+  const clearFilters = () => {
+    setSearchParams({})
+  }
 
   const queryClient = useQueryClient()
 
@@ -58,8 +103,7 @@ export default function UsersPage() {
       role: roleFilter, 
       status: statusFilter, 
       institutionId: institutionFilter 
-    }),
-    placeholderData: (previousData) => previousData
+    })
   })
 
   const { data: rolesData } = useQuery({
@@ -77,6 +121,37 @@ export default function UsersPage() {
   const roles = rolesData?.data?.roles || []
   const institutions = institutionsData?.data?.institutions || []
 
+  // Predictive Prefetching for next/prev pages
+  useEffect(() => {
+    const totalPages = Math.ceil(totalCount / limit)
+    const commonParams = { 
+      limit, 
+      offset: 0, // Will be overridden
+      sortBy, 
+      sortDir, 
+      search: searchTerm, 
+      role: roleFilter, 
+      status: statusFilter, 
+      institutionId: institutionFilter 
+    }
+    
+    // Prefetch Next Page
+    if (page < totalPages) {
+      queryClient.prefetchQuery({
+        queryKey: ["users", { ...commonParams, page: page + 1, offset: page * limit }],
+        queryFn: () => listUsers({ ...commonParams, page: page + 1, offset: page * limit })
+      })
+    }
+
+    // Prefetch Previous Page
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: ["users", { ...commonParams, page: page - 1, offset: (page - 2) * limit }],
+        queryFn: () => listUsers({ ...commonParams, page: page - 1, offset: (page - 2) * limit })
+      })
+    }
+  }, [page, limit, sortBy, sortDir, searchTerm, roleFilter, statusFilter, institutionFilter, totalCount, queryClient])
+
   const getDerivedStatus = (user) => {
     if (user.isSuspended) return "SUSPENDED"
     if (user.isActive) return "ACTIVE"
@@ -89,19 +164,6 @@ export default function UsersPage() {
     status: getDerivedStatus(user)
   }))
 
-  const clearFilters = () => {
-    setSearchTerm("")
-    setRoleFilter("all")
-    setStatusFilter("all")
-    setInstitutionFilter("all")
-    setPage(1)
-  }
-
-  // Reset to page 1 when filters change
-  const handleFilterChange = (setter) => (value) => {
-    setter(value)
-    setPage(1)
-  }
 
   const mutationOptions = {
     onSuccess: (data) => {
@@ -131,6 +193,7 @@ export default function UsersPage() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       {/* Premium Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 rounded-2xl border border-primary/10 shadow-sm relative overflow-hidden">
+        <FetchingIndicator isFetching={isFetching} />
         <div className="absolute -right-12 -top-12 text-primary/5 rotate-12 pointer-events-none">
           <GraduationCap size={200} />
         </div>
@@ -155,50 +218,39 @@ export default function UsersPage() {
 
       <UserFilters 
         searchTerm={searchTerm}
-        setSearchTerm={handleFilterChange(setSearchTerm)}
+        setSearchTerm={(val) => updateFilters({ search: val })}
         roleFilter={roleFilter}
-        setRoleFilter={handleFilterChange(setRoleFilter)}
+        setRoleFilter={(val) => updateFilters({ role: val })}
         statusFilter={statusFilter}
-        setStatusFilter={handleFilterChange(setStatusFilter)}
+        setStatusFilter={(val) => updateFilters({ status: val })}
         institutionFilter={institutionFilter}
-        setInstitutionFilter={handleFilterChange(setInstitutionFilter)}
+        setInstitutionFilter={(val) => updateFilters({ institution: val })}
         roles={roles}
         institutions={institutions}
         onClear={clearFilters}
       />
 
-      {isLoading && !usersData ? (
-        <TableSkeleton rows={limit} columns={5} />
-      ) : (
-        <UserTable 
-          users={users}
-          totalCount={totalCount}
-          currentPage={page}
-          onPageChange={setPage}
-          itemsPerPage={limit}
-          onItemsPerPageChange={setLimit}
-          sortBy={sortBy}
-          sortDir={sortDir}
-          onSort={(field) => {
-            if (sortBy === field) {
-              setSortDir(sortDir === "ASC" ? "DESC" : "ASC")
-            } else {
-              setSortBy(field)
-              setSortDir("ASC")
-            }
-          }}
-          isFiltered={searchTerm || roleFilter !== "all" || statusFilter !== "all" || institutionFilter !== "all"}
-          isFetching={isFetching}
-          onEdit={setUserToEdit}
-          onDelete={setUserToDelete}
-          onSuspend={(userId) => suspendMutation.mutate({ userId })}
-          onUnsuspend={unsuspendMutation.mutate}
-          onResend={resendMutation.mutate}
-          onRevoke={revokeMutation.mutate}
-          onInvite={() => setIsInviteModalOpen(true)}
-          onClearFilters={clearFilters}
-        />
-      )}
+      <UserTable 
+        users={users}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={setPage}
+        itemsPerPage={limit}
+        onItemsPerPageChange={setLimit}
+        sortBy={sortBy}
+        sortDir={sortDir}
+        onSort={setSort}
+        isFiltered={searchTerm || roleFilter !== "all" || statusFilter !== "all" || institutionFilter !== "all"}
+        isFetching={isFetching}
+        onEdit={setUserToEdit}
+        onDelete={setUserToDelete}
+        onSuspend={(userId) => suspendMutation.mutate({ userId })}
+        onUnsuspend={unsuspendMutation.mutate}
+        onResend={resendMutation.mutate}
+        onRevoke={revokeMutation.mutate}
+        onInvite={() => setIsInviteModalOpen(true)}
+        onClearFilters={clearFilters}
+      />
 
       <UserInviteModal 
         isOpen={isInviteModalOpen} 
