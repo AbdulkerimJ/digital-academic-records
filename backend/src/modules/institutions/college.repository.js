@@ -40,7 +40,7 @@ export const findColleges = async (institutionId) => {
 
 export const findCollegeByName = async (name, institutionId) => {
   const result = await pool.query(
-    `SELECT id, name, code FROM colleges 
+    `SELECT id, name, code, is_active AS "isActive" FROM colleges 
      WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) AND institution_id = $2
      LIMIT 1`,
     [name, institutionId],
@@ -50,7 +50,7 @@ export const findCollegeByName = async (name, institutionId) => {
 
 export const findCollegeByCode = async (code, institutionId) => {
   const result = await pool.query(
-    `SELECT id, name, code FROM colleges 
+    `SELECT id, name, code, is_active AS "isActive" FROM colleges 
      WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND institution_id = $2
      LIMIT 1`,
     [code, institutionId],
