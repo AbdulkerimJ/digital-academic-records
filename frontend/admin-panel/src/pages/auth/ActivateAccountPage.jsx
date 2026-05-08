@@ -54,7 +54,7 @@ export default function ActivateAccountPage() {
   useEffect(() => {
     if (isSuccess) {
       const timer = setTimeout(() => {
-        window.location.href = "/"
+        window.location.href = "/login"
       }, 3000)
       return () => clearTimeout(timer)
     }
@@ -78,7 +78,7 @@ export default function ActivateAccountPage() {
           <p className="text-sm text-muted-foreground animate-pulse">
             Redirecting to dashboard...
           </p>
-          <Button onClick={() => window.location.href = "/"} className="w-full">
+          <Button onClick={() => window.location.href = "/login"} className="w-full">
             Go to Dashboard
           </Button>
         </div>
