@@ -41,30 +41,24 @@ export default function ActivateAccountPage() {
     setIsSubmitting(true)
     
     try {
-      console.log("Starting account activation...")
       await activate(token, password)
-      console.log("Activation successful, updating UI...")
       setIsSuccess(true)
       toast.success("Account activated successfully! Welcome to the platform.")
     } catch (error) {
-      console.error("Activation failed:", error)
       toast.error(error.message || "Failed to activate account. The link may have expired.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Handle redirect in a separate effect for reliability
   useEffect(() => {
     if (isSuccess) {
-      console.log("Success state detected, setting redirect timer...")
       const timer = setTimeout(() => {
-        console.log("Timer expired, navigating to dashboard...")
-        navigate("/", { replace: true })
+        window.location.href = "/"
       }, 3000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, navigate])
+  }, [isSuccess])
 
   if (isSuccess) {
     return (
@@ -84,7 +78,7 @@ export default function ActivateAccountPage() {
           <p className="text-sm text-muted-foreground animate-pulse">
             Redirecting to dashboard...
           </p>
-          <Button onClick={() => navigate("/")} className="w-full">
+          <Button onClick={() => window.location.href = "/"} className="w-full">
             Go to Dashboard
           </Button>
         </div>
