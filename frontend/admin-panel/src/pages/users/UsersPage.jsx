@@ -116,10 +116,13 @@ export default function UsersPage() {
     queryFn: () => listInstitutions()
   })
 
-  const rawUsers = usersData?.data?.users || []
+  const rawUsersData = usersData?.data?.users
+  const rawUsers = Array.isArray(rawUsersData) ? rawUsersData : []
   const totalCount = usersData?.data?.totalCount || 0
-  const roles = rolesData?.data?.roles || []
-  const institutions = institutionsData?.data?.institutions || []
+  const rolesRaw = rolesData?.data?.roles
+  const roles = Array.isArray(rolesRaw) ? rolesRaw : []
+  const instRaw = institutionsData?.data?.institutions
+  const institutions = Array.isArray(instRaw) ? instRaw : []
 
   // Predictive Prefetching for next/prev pages
   useEffect(() => {

@@ -79,7 +79,8 @@ export default function AcademicStructurePage() {
     enabled: user?.roleName === "SUPER_ADMIN",
   })
 
-  const institutions = institutionsData?.data?.institutions || []
+  const instRaw = institutionsData?.data?.institutions
+  const institutions = Array.isArray(instRaw) ? instRaw : []
 
   // Fetch colleges
   const { data: collegesData, isLoading: isLoadingColleges, isFetching: isFetchingColleges } = useQuery({
@@ -119,8 +120,10 @@ export default function AcademicStructurePage() {
     )
   }
 
-  const colleges = collegesData?.data?.colleges || []
-  const departments = departmentsData?.data?.departments || []
+  const collegesRaw = collegesData?.data?.colleges
+  const colleges = Array.isArray(collegesRaw) ? collegesRaw : []
+  const deptsRaw = departmentsData?.data?.departments
+  const departments = Array.isArray(deptsRaw) ? deptsRaw : []
 
   // Auto-select first college if none selected
   useEffect(() => {

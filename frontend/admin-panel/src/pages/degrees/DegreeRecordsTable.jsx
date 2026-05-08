@@ -41,7 +41,8 @@ export default function DegreeRecordsTable() {
     queryFn: () => listDegrees({ page, limit, search: searchQuery }),
   })
 
-  const records = data?.data?.degrees || []
+  const recordsData = data?.data?.degrees
+  const records = Array.isArray(recordsData) ? recordsData : []
   const totalCount = data?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 

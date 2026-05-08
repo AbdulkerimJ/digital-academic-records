@@ -46,7 +46,8 @@ export default function CorrectionTable() {
     queryFn: () => listCorrectionRequests({ status: statusFilter, page, limit })
   })
 
-  const requests = requestsData?.data?.requests || []
+  const requestsRaw = requestsData?.data?.requests
+  const requests = Array.isArray(requestsRaw) ? requestsRaw : []
   const totalCount = requestsData?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 

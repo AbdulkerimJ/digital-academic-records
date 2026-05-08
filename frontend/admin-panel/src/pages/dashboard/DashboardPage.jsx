@@ -22,7 +22,8 @@ export default function DashboardPage() {
   })
 
   const stats = data?.data?.stats || {}
-  const activities = data?.data?.recentActivities || []
+  const activitiesRaw = data?.data?.recentActivities
+  const activities = Array.isArray(activitiesRaw) ? activitiesRaw : []
 
   const statCards = [
     {

@@ -117,9 +117,11 @@ export default function InstitutionsPage() {
     queryFn: listInstitutionTypes
   })
 
-  const institutions = instData?.data?.institutions || []
-  const totalCount = instData?.data?.totalCount || 0
-  const institutionTypes = typesData?.data?.types || []
+  const institutionsRaw = instData?.data?.institutions
+  const institutions = Array.isArray(institutionsRaw) ? institutionsRaw : []
+  const totalCount = instData?.data?.count || 0
+  const institutionTypesRaw = typesData?.data?.types
+  const institutionTypes = Array.isArray(institutionTypesRaw) ? institutionTypesRaw : []
 
   // Predictive Prefetching for next/prev pages
   useEffect(() => {

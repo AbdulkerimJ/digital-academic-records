@@ -41,7 +41,8 @@ export default function ExamRecordsTable() {
     queryFn: () => listExams({ page, limit, search: searchQuery }),
   })
 
-  const exams = data?.data?.examRecords || []
+  const examsData = data?.data?.examRecords
+  const exams = Array.isArray(examsData) ? examsData : []
   const totalCount = data?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 

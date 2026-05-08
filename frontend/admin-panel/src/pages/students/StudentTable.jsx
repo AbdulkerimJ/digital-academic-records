@@ -52,7 +52,8 @@ export default function StudentTable({ onSelectStudent }) {
   })
 
   const queryClient = useQueryClient()
-  const students = studentsData?.data?.students || []
+  const studentsRaw = studentsData?.data?.students
+  const students = Array.isArray(studentsRaw) ? studentsRaw : []
   const totalCount = studentsData?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 
