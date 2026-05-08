@@ -33,8 +33,10 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
   })
 
   const student = recordsData?.data?.student
-  const exams = recordsData?.data?.exams || []
-  const degrees = recordsData?.data?.degrees || []
+  const examsRaw = recordsData?.data?.exams
+  const exams = Array.isArray(examsRaw) ? examsRaw : []
+  const degreesRaw = recordsData?.data?.degrees
+  const degrees = Array.isArray(degreesRaw) ? degreesRaw : []
 
   if (!studentId) return null
 
