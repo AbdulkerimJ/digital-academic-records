@@ -21,7 +21,10 @@ import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: [
+    "http://localhost:5173",
+    "digital-academic-records.vercel.app"
+  ],
   credentials: true
 }));
 app.use(express.json());
