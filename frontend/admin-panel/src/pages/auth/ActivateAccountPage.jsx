@@ -41,20 +41,30 @@ export default function ActivateAccountPage() {
     setIsSubmitting(true)
     
     try {
+      console.log("Starting account activation...")
       await activate(token, password)
+      console.log("Activation successful, updating UI...")
       setIsSuccess(true)
       toast.success("Account activated successfully! Welcome to the platform.")
-      
-      // Redirect to dashboard after 3 seconds
-      setTimeout(() => {
-        navigate("/")
-      }, 3000)
     } catch (error) {
+      console.error("Activation failed:", error)
       toast.error(error.message || "Failed to activate account. The link may have expired.")
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  // Handle redirect in a separate effect for reliability
+  useEffect(() => {
+    if (isSuccess) {
+      console.log("Success state detected, setting redirect timer...")
+      const timer = setTimeout(() => {
+        console.log("Timer expired, navigating to dashboard...")
+        navigate("/", { replace: true })
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [isSuccess, navigate])
 
   if (isSuccess) {
     return (
