@@ -23,7 +23,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "digital-academic-records.vercel.app"
+    "https://digital-academic-records.vercel.app"
   ],
   credentials: true
 }));
