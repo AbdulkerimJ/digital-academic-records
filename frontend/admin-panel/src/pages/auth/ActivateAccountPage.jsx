@@ -14,7 +14,6 @@ export default function ActivateAccountPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
   
   const token = searchParams.get("token")
 
@@ -42,8 +41,9 @@ export default function ActivateAccountPage() {
     
     try {
       await activate(token, password)
-      setIsSuccess(true)
-      toast.success("Account activated successfully! Welcome to the platform.")
+      toast.success("Account activated successfully! Redirecting...")
+      // Immediate full-page redirect to dashboard
+      window.location.href = "/"
     } catch (error) {
       toast.error(error.message || "Failed to activate account. The link may have expired.")
     } finally {
@@ -51,40 +51,6 @@ export default function ActivateAccountPage() {
     }
   }
 
-  useEffect(() => {
-    if (isSuccess) {
-      const timer = setTimeout(() => {
-        window.location.href = "/login"
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [isSuccess])
-
-  if (isSuccess) {
-    return (
-      <div className="flex min-h-screen bg-background items-center justify-center p-6">
-        <div className="w-full max-w-md text-center space-y-6 animate-in fade-in zoom-in duration-500">
-          <div className="flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner">
-              <CheckCircle2 size={48} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight">Account Activated!</h2>
-            <p className="text-muted-foreground">
-              Your password has been set successfully. You are now logged in and ready to go.
-            </p>
-          </div>
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Redirecting to dashboard...
-          </p>
-          <Button onClick={() => window.location.href = "/login"} className="w-full">
-            Go to Dashboard
-          </Button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="flex min-h-screen bg-background">
