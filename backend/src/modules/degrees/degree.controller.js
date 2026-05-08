@@ -115,7 +115,7 @@ export const createDegree = catchAsync(async (req, res) => {
 });
 
 export const listDegrees = catchAsync(async (req, res) => {
-  const degrees = await listDegreesService({
+  const { degrees, count } = await listDegreesService({
     user: req.user,
     filters: {
       degreeLevelCode: req.query.degreeLevelCode,
@@ -130,6 +130,7 @@ export const listDegrees = catchAsync(async (req, res) => {
 
   return sendSuccess(res, "Degree records fetched successfully", {
     degrees,
+    count,
   });
 });
 

@@ -208,7 +208,16 @@ export default function CorrectionTable() {
         </div>
       </Card>
 
-      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      <Pagination 
+        page={page} 
+        totalPages={totalPages} 
+        setPage={setPage} 
+        limit={limit}
+        setLimit={setLimit}
+        totalCount={totalCount}
+        itemName="requests"
+        isFetching={isFetching}
+      />
     </div>
   )
 }

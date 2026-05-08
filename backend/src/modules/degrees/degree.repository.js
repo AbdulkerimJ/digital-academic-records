@@ -153,6 +153,18 @@ export const findDegrees = async (query = {}, pagination = {}) => {
     sql += ` WHERE ` + conditions.join(" AND ");
   }
 
+  // 1. Get Total Count
+  const countSql = `
+    SELECT COUNT(*) 
+    FROM degrees d
+    JOIN degree_levels dl ON d.degree_level_id = dl.id
+    JOIN student s ON d.student_id = s.id
+    ${conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : ""}
+  `;
+  const countRes = await pool.query(countSql, params.slice(0, conditions.length));
+  const totalCount = parseInt(countRes.rows[0].count, 10);
+
+  // 2. Get Paginated Data
   sql += ` ORDER BY d.created_at DESC`;
 
   // pagination
@@ -166,7 +178,11 @@ export const findDegrees = async (query = {}, pagination = {}) => {
   sql += ` OFFSET $${offsetIndex}`;
 
   const result = await pool.query(sql, params);
-  return result.rows;
+  
+  return {
+    degrees: result.rows,
+    count: totalCount
+  };
 };
 
 export const updateDegreeById = async ({

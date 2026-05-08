@@ -36,10 +36,35 @@ export default function DegreeRecordsTable() {
   const [isBulkOpen, setIsBulkOpen] = useState(false)
   const [editingDegree, setEditingDegree] = useState(null)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["degrees", page, limit, searchQuery],
     queryFn: () => listDegrees({ page, limit, search: searchQuery }),
   })
+
+  const records = data?.data?.degrees || []
+  const totalCount = data?.data?.count || 0
+  const totalPages = Math.ceil(totalCount / limit)
+
+  // Predictive Prefetching for next/prev pages
+  useEffect(() => {
+    const commonParams = { search: searchQuery, limit }
+    
+    // Prefetch Next Page
+    if (page < totalPages) {
+      queryClient.prefetchQuery({
+        queryKey: ["degrees", page + 1, limit, searchQuery],
+        queryFn: () => listDegrees({ ...commonParams, page: page + 1 })
+      })
+    }
+
+    // Prefetch Previous Page
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: ["degrees", page - 1, limit, searchQuery],
+        queryFn: () => listDegrees({ ...commonParams, page: page - 1 })
+      })
+    }
+  }, [page, searchQuery, limit, totalPages, queryClient])
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteDegree(id),
@@ -73,6 +98,13 @@ export default function DegreeRecordsTable() {
     setSearchParams(newParams)
   }
 
+  const setLimit = (newLimit) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("limit", newLimit.toString())
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this degree record? This action cannot be undone.")) {
       deleteMutation.mutate(id)
@@ -88,10 +120,6 @@ export default function DegreeRecordsTable() {
     setEditingDegree(null)
     setIsModalOpen(true)
   }
-
-  const records = data?.data?.degrees || []
-  const totalCount = data?.data?.count || 0
-  const totalPages = Math.ceil(totalCount / limit)
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
@@ -200,7 +228,16 @@ export default function DegreeRecordsTable() {
         </div>
       </Card>
 
-      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      <Pagination 
+        page={page} 
+        totalPages={totalPages} 
+        setPage={setPage} 
+        limit={limit}
+        setLimit={setLimit}
+        totalCount={totalCount}
+        itemName="degrees"
+        isFetching={isFetching}
+      />
 
       {isModalOpen && (
         <DegreeAddEditModal

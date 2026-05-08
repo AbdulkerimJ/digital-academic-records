@@ -36,10 +36,35 @@ export default function ExamRecordsTable() {
   const [isBulkOpen, setIsBulkOpen] = useState(false)
   const [editingExam, setEditingExam] = useState(null)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["exams", page, limit, searchQuery],
     queryFn: () => listExams({ page, limit, search: searchQuery }),
   })
+
+  const exams = data?.data?.examRecords || []
+  const totalCount = data?.data?.count || 0
+  const totalPages = Math.ceil(totalCount / limit)
+
+  // Predictive Prefetching for next/prev pages
+  useEffect(() => {
+    const commonParams = { search: searchQuery, limit }
+    
+    // Prefetch Next Page
+    if (page < totalPages) {
+      queryClient.prefetchQuery({
+        queryKey: ["exams", page + 1, limit, searchQuery],
+        queryFn: () => listExams({ ...commonParams, page: page + 1 })
+      })
+    }
+
+    // Prefetch Previous Page
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: ["exams", page - 1, limit, searchQuery],
+        queryFn: () => listExams({ ...commonParams, page: page - 1 })
+      })
+    }
+  }, [page, searchQuery, limit, totalPages, queryClient])
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteExam(id),
@@ -73,6 +98,13 @@ export default function ExamRecordsTable() {
     setSearchParams(newParams)
   }
 
+  const setLimit = (newLimit) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("limit", newLimit.toString())
+    newParams.set("page", "1")
+    setSearchParams(newParams)
+  }
+
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this exam record? This action cannot be undone.")) {
       deleteMutation.mutate(id)
@@ -88,10 +120,6 @@ export default function ExamRecordsTable() {
     setEditingExam(null)
     setIsModalOpen(true)
   }
-
-  const exams = data?.data?.examRecords || []
-  const totalCount = data?.data?.count || 0
-  const totalPages = Math.ceil(totalCount / limit)
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
@@ -203,7 +231,16 @@ export default function ExamRecordsTable() {
         </div>
       </Card>
 
-      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      <Pagination 
+        page={page} 
+        totalPages={totalPages} 
+        setPage={setPage} 
+        limit={limit}
+        setLimit={setLimit}
+        totalCount={totalCount}
+        itemName="exams"
+        isFetching={isFetching}
+      />
 
       {isModalOpen && (
         <ExamAddEditModal

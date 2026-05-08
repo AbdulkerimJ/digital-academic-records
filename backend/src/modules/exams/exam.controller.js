@@ -60,7 +60,7 @@ export const createExamRecord = catchAsync(async (req, res) => {
 });
 
 export const listExamRecords = catchAsync(async (req, res) => {
-  const examRecords = await listExamRecordsService({
+  const { examRecords, count } = await listExamRecordsService({
     user: req.user,
     filters: {
       examLevelCode: req.query.examLevelCode,
@@ -75,6 +75,7 @@ export const listExamRecords = catchAsync(async (req, res) => {
 
   return sendSuccess(res, "Exam records fetched successfully", {
     examRecords,
+    count,
   });
 });
 
