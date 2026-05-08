@@ -42,8 +42,10 @@ export default function ActivateAccountPage() {
     try {
       await activate(token, password)
       toast.success("Account activated successfully! Redirecting...")
-      // Immediate full-page redirect to dashboard
-      window.location.href = "/"
+      // Small delay to let the toast be seen before full-page redirect
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 500)
     } catch (error) {
       toast.error(error.message || "Failed to activate account. The link may have expired.")
     } finally {
