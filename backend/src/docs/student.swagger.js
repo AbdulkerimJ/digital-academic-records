@@ -231,7 +231,8 @@
  *
  * /api/students/{id}/records:
  *   get:
- *     summary: Get all academic records (Exams & Degrees) for a specific student
+ *     summary: Get academic records (Exams & Degrees) for a student (Role-filtered)
+ *     description: Returns academic records for the specified student. Note that results are filtered based on the requester's institution type: College Registrars only see degree records, while Exam Board Registrars only see exam results. Super Admins see all records.
  *     tags: [Admin - Students]
  *     security:
  *       - bearerAuth: []
