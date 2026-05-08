@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react"
 import FetchingIndicator from "../../components/common/FetchingIndicator"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { listInstitutions, listInstitutionTypes } from "../../api/institutions.api"
+import { listInstitutions, listInstitutionTypes, deleteInstitution } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
 import { Plus, Building2, GraduationCap, AlertTriangle } from "lucide-react"
 import { Card } from "../../components/ui/card"
+import { toast } from "sonner"
 
 import InstitutionFilters from "./InstitutionFilters"
 import InstitutionTable from "./InstitutionTable"
 import InstitutionModal from "./InstitutionModal"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import PageLoader from "../../components/common/PageLoader"
 import TableSkeleton from "../../components/common/TableSkeleton"
 import useDebounce from "../../hooks/useDebounce"
@@ -21,6 +23,27 @@ export default function InstitutionsPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [institutionToEdit, setInstitutionToEdit] = useState(null)
+  
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [institutionToDelete, setInstitutionToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!institutionToDelete) return
+    
+    setIsDeleting(true)
+    try {
+      await deleteInstitution(institutionToDelete.id)
+      toast.success("Institution deleted successfully")
+      queryClient.invalidateQueries(["institutions"])
+      setIsDeleteModalOpen(false)
+      setInstitutionToDelete(null)
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete institution")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
   
   // Filter & Pagination derived from searchParams
   const searchTerm = searchParams.get("search") || ""
@@ -193,6 +216,10 @@ export default function InstitutionsPage() {
           setInstitutionToEdit(inst)
           setIsModalOpen(true)
         }}
+        onDelete={(inst) => {
+          setInstitutionToDelete(inst)
+          setIsDeleteModalOpen(true)
+        }}
         onAdd={() => setIsModalOpen(true)}
         onClearFilters={clearFilters}
       />
@@ -205,6 +232,18 @@ export default function InstitutionsPage() {
         }} 
         institution={institutionToEdit}
         institutionTypes={institutionTypes}
+      />
+
+      <ConfirmDeleteModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setInstitutionToDelete(null)
+        }}
+        onConfirm={handleDelete}
+        title="Delete Institution"
+        description={`Are you sure you want to delete ${institutionToDelete?.name}? This action will also delete all linked colleges and departments. This cannot be undone.`}
+        isDeleting={isDeleting}
       />
     </div>
   )

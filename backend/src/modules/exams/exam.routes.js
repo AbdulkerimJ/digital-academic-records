@@ -27,7 +27,7 @@ router.get("/", listExamRecords);
 router.get("/:examId", getExamRecordById);
 router.patch("/:examId", updateExamRecord);
 
-router.post("/upload", createExamRecord);
+router.post("/", createExamRecord);
 router.post(
   "/upload-bulk",
   restrictTo("SUPER_ADMIN", "REGISTRAR"),

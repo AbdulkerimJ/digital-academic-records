@@ -174,7 +174,7 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
   const conditions = [];
   const params = [];
 
-  const { institutionId, examLevelCode, year, studentId } = query;
+  const { institutionId, examLevelCode, search, year, studentId } = query;
   const { page = 1, limit = 10 } = pagination;
 
   const offset = (page - 1) * limit;
@@ -182,6 +182,11 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
   if (institutionId) {
     params.push(institutionId);
     conditions.push(`e.institution_id = $${params.length}`);
+  }
+
+  if (studentId) {
+    params.push(studentId);
+    conditions.push(`e.student_id = $${params.length}`);
   }
 
   if (examLevelCode) {
@@ -194,9 +199,9 @@ export const findExamRecords = async (query = {}, pagination = {}) => {
     conditions.push(`e.year = $${params.length}`);
   }
 
-  if (studentId) {
-    params.push(studentId);
-    conditions.push(`e.student_id = $${params.length}`);
+  if (search) {
+    params.push(`%${search}%`);
+    conditions.push(`(s.national_id ILIKE $${params.length} OR s.first_name ILIKE $${params.length} OR s.last_name ILIKE $${params.length})`);
   }
 
   if (conditions.length > 0) {

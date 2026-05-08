@@ -1,10 +1,14 @@
 import pool from "../config/pool.js";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 // Generate OTP and store in DB
 export const generateOtp = async (faydaId) => {
   // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
+  const otpExpiryMinutes = parseInt(process.env.OTP_EXPIRY_MINUTES || "5", 10);
+  const expiresAt = Date.now() + otpExpiryMinutes * 60 * 1000; // Store as BIGINT timestamp
 
   // delete old OTPs for this user
   await pool.query("DELETE FROM otp_codes WHERE fayda_id = $1", [faydaId]);

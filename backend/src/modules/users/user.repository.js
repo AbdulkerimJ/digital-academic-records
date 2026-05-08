@@ -240,21 +240,29 @@ export const createUserRecord = async ({
   invitationExpires,
 }) => {
   const result = await pool.query(
-    `INSERT INTO app_user (first_name, last_name, email, password_hash, is_active, invitation_token, invitation_expires, role_id, institution_id)
-     VALUES ($1, $2, $3, NULL, FALSE, $4, $5, $6, $7)
-      RETURNING id,
-          first_name AS "firstName",
-          last_name AS "lastName",
-          email,
-          is_active AS "isActive",
-          invitation_expires AS "invitationExpires",
-          role_id AS "roleId",
-          institution_id AS "institutionId",
-          (SELECT name FROM institution WHERE institution.id = app_user.institution_id) AS "institutionName",
-          (SELECT code FROM institution WHERE institution.id = app_user.institution_id) AS "institutionCode",
-          (SELECT type FROM institution WHERE institution.id = app_user.institution_id) AS "institutionType",
-          created_at AS "createdAt",
-          updated_at AS "updatedAt"`,
+    `WITH inserted AS (
+       INSERT INTO app_user (first_name, last_name, email, password_hash, is_active, invitation_token, invitation_expires, role_id, institution_id)
+       VALUES ($1, $2, $3, NULL, FALSE, $4, $5, $6, $7)
+       RETURNING *
+     )
+     SELECT 
+       u.id,
+       u.first_name AS "firstName",
+       u.last_name AS "lastName",
+       u.email,
+       u.is_active AS "isActive",
+       u.invitation_expires AS "invitationExpires",
+       u.role_id AS "roleId",
+       r.role_name AS "roleName",
+       u.institution_id AS "institutionId",
+       i.name AS "institutionName",
+       i.code AS "institutionCode",
+       i.type AS "institutionType",
+       u.created_at AS "createdAt",
+       u.updated_at AS "updatedAt"
+     FROM inserted u
+     JOIN roles r ON u.role_id = r.id
+     LEFT JOIN institution i ON u.institution_id = i.id`,
     [
       firstName,
       lastName,
@@ -300,25 +308,33 @@ export const activateUserByInvitationToken = async ({
   passwordHash,
 }) => {
   const result = await pool.query(
-    `UPDATE app_user
-     SET password_hash = $2,
-         is_active = TRUE,
-         invitation_token = NULL,
-         invitation_expires = NULL,
-         password_changed_at = CURRENT_TIMESTAMP,
-         updated_at = CURRENT_TIMESTAMP
-     WHERE invitation_token = $1
-     RETURNING id,
-               first_name AS "firstName",
-               last_name AS "lastName",
-               email,
-               is_active AS "isActive",
-               role_id AS "roleId",
-               institution_id AS "institutionId",
-               (SELECT name FROM institution WHERE institution.id = app_user.institution_id) AS "institutionName",
-               (SELECT code FROM institution WHERE institution.id = app_user.institution_id) AS "institutionCode",
-               (SELECT type FROM institution WHERE institution.id = app_user.institution_id) AS "institutionType",
-               updated_at AS "updatedAt"`,
+    `WITH updated AS (
+       UPDATE app_user
+       SET password_hash = $2,
+           is_active = TRUE,
+           invitation_token = NULL,
+           invitation_expires = NULL,
+           password_changed_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE invitation_token = $1
+       RETURNING *
+     )
+     SELECT 
+       u.id,
+       u.first_name AS "firstName",
+       u.last_name AS "lastName",
+       u.email,
+       u.is_active AS "isActive",
+       u.role_id AS "roleId",
+       r.role_name AS "roleName",
+       u.institution_id AS "institutionId",
+       i.name AS "institutionName",
+       i.code AS "institutionCode",
+       i.type AS "institutionType",
+       u.updated_at AS "updatedAt"
+     FROM updated u
+     JOIN roles r ON u.role_id = r.id
+     LEFT JOIN institution i ON u.institution_id = i.id`,
     [invitationToken, passwordHash],
   );
 
@@ -385,32 +401,39 @@ export const updateUserById = async ({
   invitationExpires = undefined,
 }) => {
   const result = await pool.query(
-    `UPDATE app_user
-     SET first_name = COALESCE($2, first_name),
-         last_name = COALESCE($3, last_name),
-         email = COALESCE($4, email),
-         password_hash = COALESCE($5, password_hash),
-         password_changed_at = CASE
-           WHEN $5 IS NOT NULL THEN CURRENT_TIMESTAMP
-           ELSE password_changed_at
-         END,
-         role_id = COALESCE($6, role_id),
-         institution_id = COALESCE($7, institution_id),
-         invitation_token = CASE WHEN $9 = 1 THEN $8 ELSE invitation_token END,
-         invitation_expires = CASE WHEN $11 = 1 THEN $10 ELSE invitation_expires END,
-         updated_at = CURRENT_TIMESTAMP
-     WHERE id = $1
-     RETURNING id,
-               first_name AS "firstName",
-               last_name AS "lastName",
-               email,
-               is_active AS "isActive",
-               role_id AS "roleId",
-               institution_id AS "institutionId",
-               invitation_token AS "invitationToken",
-               invitation_expires AS "invitationExpires",
-               created_at AS "createdAt",
-               updated_at AS "updatedAt"`,
+    `WITH updated AS (
+       UPDATE app_user
+       SET first_name = COALESCE($2, first_name),
+           last_name = COALESCE($3, last_name),
+           email = COALESCE($4, email),
+           password_hash = COALESCE($5, password_hash),
+           password_changed_at = CASE
+             WHEN $5 IS NOT NULL THEN CURRENT_TIMESTAMP
+             ELSE password_changed_at
+           END,
+           role_id = COALESCE($6, role_id),
+           institution_id = COALESCE($7, institution_id),
+           invitation_token = CASE WHEN $9 = 1 THEN $8 ELSE invitation_token END,
+           invitation_expires = CASE WHEN $11 = 1 THEN $10 ELSE invitation_expires END,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1
+       RETURNING *
+     )
+     SELECT 
+       u.id,
+       u.first_name AS "firstName",
+       u.last_name AS "lastName",
+       u.email,
+       u.is_active AS "isActive",
+       u.role_id AS "roleId",
+       r.role_name AS "roleName",
+       u.institution_id AS "institutionId",
+       u.invitation_token AS "invitationToken",
+       u.invitation_expires AS "invitationExpires",
+       u.created_at AS "createdAt",
+       u.updated_at AS "updatedAt"
+     FROM updated u
+     JOIN roles r ON u.role_id = r.id`,
     [
       id,
       firstName,

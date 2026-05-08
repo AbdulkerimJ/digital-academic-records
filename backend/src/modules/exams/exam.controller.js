@@ -65,7 +65,7 @@ export const listExamRecords = catchAsync(async (req, res) => {
     filters: {
       examLevelCode: req.query.examLevelCode,
       year: req.query.year,
-      studentId: req.query.studentId,
+      search: req.query.search,
     },
     pagination: {
       page: Number(req.query.page) || 1,

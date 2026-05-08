@@ -7,6 +7,7 @@ export const getSuperAdminStats = async () => {
       (SELECT COUNT(*) FROM student) AS "totalStudents",
       (SELECT COUNT(*) FROM exams) AS "totalExams",
       (SELECT COUNT(*) FROM degrees) AS "totalDegrees",
+      (SELECT COUNT(*) FROM app_user) AS "totalUsers",
       (SELECT COUNT(*) FROM correction_request WHERE status = 'PENDING') AS "pendingCorrections"
   `);
   return stats.rows[0];
@@ -21,6 +22,7 @@ export const getInstitutionAdminStats = async (institutionId) => {
       ) AS "totalStudents",
       (SELECT COUNT(*) FROM exams WHERE institution_id = $1) AS "totalExams",
       (SELECT COUNT(*) FROM degrees WHERE institution_id = $1) AS "totalDegrees",
+      (SELECT COUNT(*) FROM app_user WHERE institution_id = $1) AS "totalUsers",
       (SELECT COUNT(*) FROM correction_request cr
        JOIN student s ON cr.student_id = s.id
        WHERE cr.status = 'PENDING' 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { listDegrees, deleteDegree, uploadBulkDegrees } from "../../api/degrees.api"
 import { useAuth } from "../../context/AuthContext"
@@ -38,7 +38,7 @@ export default function DegreeRecordsTable() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["degrees", page, limit, searchQuery],
-    queryFn: () => listDegrees({ page, limit, studentId: searchQuery }), // studentId in query refers to search input which could be nationalId or ID
+    queryFn: () => listDegrees({ page, limit, search: searchQuery }),
   })
 
   const deleteMutation = useMutation({
@@ -50,13 +50,21 @@ export default function DegreeRecordsTable() {
     onError: (err) => toast.error(err.response?.data?.message || "Failed to delete degree"),
   })
 
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const newParams = new URLSearchParams(searchParams)
+      if (searchInput) newParams.set("search", searchInput)
+      else newParams.delete("search")
+      newParams.set("page", "1")
+      setSearchParams(newParams)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchInput, setSearchParams, searchParams])
+
   const handleSearch = (e) => {
-    e.preventDefault()
-    const newParams = new URLSearchParams(searchParams)
-    if (searchInput) newParams.set("search", searchInput)
-    else newParams.delete("search")
-    newParams.set("page", "1")
-    setSearchParams(newParams)
+    e.preventDefault() // Form submission still works but is handled by the effect
   }
 
   const setPage = (newPage) => {
@@ -81,7 +89,7 @@ export default function DegreeRecordsTable() {
     setIsModalOpen(true)
   }
 
-  const records = data?.data?.records || []
+  const records = data?.data?.degrees || []
   const totalCount = data?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 
@@ -89,18 +97,15 @@ export default function DegreeRecordsTable() {
     <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-card border border-border/60 p-4 rounded-2xl shadow-sm relative overflow-hidden">
         <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto relative z-10">
-          <div className="relative w-full md:w-[300px]">
+          <div className="relative w-full md:w-[400px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <Input
-              placeholder="Search by Student ID..."
+              placeholder="Search by student name or National ID..."
               className="pl-9 rounded-xl bg-background border-border/60 focus-visible:ring-primary/20 h-10 font-medium"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
-          <Button type="submit" variant="secondary" className="rounded-xl h-10 font-bold px-6 border border-border/50 shadow-sm hover:bg-muted/80">
-            Search
-          </Button>
         </form>
 
         <div className="flex gap-2 w-full md:w-auto relative z-10">

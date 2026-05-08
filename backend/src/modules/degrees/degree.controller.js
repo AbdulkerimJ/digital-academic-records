@@ -120,7 +120,7 @@ export const listDegrees = catchAsync(async (req, res) => {
     filters: {
       degreeLevelCode: req.query.degreeLevelCode,
       graduationYear: req.query.graduationYear,
-      studentId: req.query.studentId,
+      search: req.query.search,
     },
     pagination: {
       page: Number(req.query.page) || 1,

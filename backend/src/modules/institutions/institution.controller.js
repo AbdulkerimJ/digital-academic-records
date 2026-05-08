@@ -6,6 +6,7 @@ import {
   listInstitutionsService,
   updateInstitutionService,
   getInstitutionTypesService,
+  deleteInstitutionService,
 } from "./institution.service.js";
 
 export const getInstitutionTypes = catchAsync(async (req, res) => {
@@ -76,4 +77,12 @@ export const updateInstitution = catchAsync(async (req, res) => {
   return sendSuccess(res, "Institution updated successfully", {
     institution,
   });
+});
+
+export const deleteInstitution = catchAsync(async (req, res) => {
+  await deleteInstitutionService({
+    institutionId: req.params.institutionId,
+  });
+
+  return sendSuccess(res, "Institution deleted successfully");
 });

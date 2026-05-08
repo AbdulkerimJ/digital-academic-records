@@ -146,7 +146,7 @@ export default function UserTable({
                 </TableRow>
               ) : (
                 users.map((user) => (
-                  <TableRow key={user.id} className="group transition-colors hover:bg-muted/40 cursor-default border-muted/60">
+                  <TableRow key={user.id} className="group transition-colors hover:bg-muted/40 cursor-pointer border-muted/60">
                     <TableCell className="py-4 pl-8">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/10 shadow-sm shrink-0">

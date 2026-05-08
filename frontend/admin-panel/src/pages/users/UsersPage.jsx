@@ -175,7 +175,20 @@ export default function UsersPage() {
     }
   }
 
-  const resendMutation = useMutation({ mutationFn: resendInvite, ...mutationOptions })
+  const resendMutation = useMutation({ 
+    mutationFn: resendInvite, 
+    onSuccess: (data) => {
+      if (data.data?.emailSent) {
+        toast.success(data.message || "Invitation resent successfully")
+      } else {
+        toast.warning("Invitation token was regenerated, but the email failed to send. You can try resending again later.")
+      }
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to resend invitation")
+    }
+  })
   const revokeMutation = useMutation({ mutationFn: revokeInvite, ...mutationOptions })
   const suspendMutation = useMutation({ mutationFn: suspendUser, ...mutationOptions })
   const unsuspendMutation = useMutation({ mutationFn: unsuspendUser, ...mutationOptions })

@@ -16,9 +16,11 @@ import {
 export const activateInvite = catchAsync(async (req, res) => {
   const activatedUser = await activateInviteService(req.body || {});
 
-  return sendSuccess(res, "Account activated successfully", {
-    user: activatedUser,
-  });
+  return createAndSendUserToken(
+    activatedUser, 
+    res, 
+    "Account activated successfully. Welcome!"
+  );
 });
 
 export const login = catchAsync(async (req, res) => {

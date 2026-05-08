@@ -119,8 +119,7 @@ export const findDegrees = async (query = {}, pagination = {}) => {
 
   const conditions = [];
   const params = [];
-
-  const { institutionId, degreeLevelCode, studentId, graduationYear } = query;
+  const { institutionId, degreeLevelCode, search, graduationYear, studentId } = query;
   const { page = 1, limit = 10 } = pagination;
 
   const offset = (page - 1) * limit;
@@ -130,14 +129,19 @@ export const findDegrees = async (query = {}, pagination = {}) => {
     conditions.push(`d.institution_id = $${params.length}`);
   }
 
+  if (studentId) {
+    params.push(studentId);
+    conditions.push(`d.student_id = $${params.length}`);
+  }
+
   if (degreeLevelCode) {
     params.push(degreeLevelCode);
     conditions.push(`dl.code = $${params.length}`);
   }
 
-  if (studentId) {
-    params.push(studentId);
-    conditions.push(`d.student_id = $${params.length}`);
+  if (search) {
+    params.push(`%${search}%`);
+    conditions.push(`(s.national_id ILIKE $${params.length} OR s.first_name ILIKE $${params.length} OR s.last_name ILIKE $${params.length})`);
   }
 
   if (graduationYear) {

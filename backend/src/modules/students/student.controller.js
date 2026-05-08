@@ -48,7 +48,7 @@ export const getStudentById = catchAsync(async (req, res) => {
 });
 
 export const getStudentRecords = catchAsync(async (req, res) => {
-  const data = await getStudentFullRecordsService(req.params.id);
+  const data = await getStudentFullRecordsService(req.params.id, req.user);
   return sendSuccess(res, "Student records fetched successfully", data);
 });
 

@@ -25,34 +25,6 @@ async function seed() {
       ON CONFLICT (code) DO NOTHING;
     `);
 
-    // ================= INSTITUTION =================
-    await pool.query(`
-      INSERT INTO institution (name, code, type)
-      VALUES 
-      ('Ministry of Education', 'MOE', 'EXAM_BOARD'),
-      ('Regional Exam Board', 'REB', 'EXAM_BOARD'),
-      ('Central University', 'CU', 'COLLEGE')
-      ON CONFLICT (code) DO NOTHING;
-      `);
-
-    // ================= COLLEGES =================
-    await pool.query(`
-      INSERT INTO colleges (institution_id, name, code)
-      VALUES
-        ((SELECT id FROM institution WHERE code = 'CU'), 'College of Engineering', 'COE'),
-        ((SELECT id FROM institution WHERE code = 'CU'), 'College of Business and Economics', 'CBE')
-      ON CONFLICT (institution_id, code) DO NOTHING;
-    `);
-
-    // ================= DEPARTMENTS =================
-    await pool.query(`
-      INSERT INTO departments (college_id, name, code)
-      VALUES
-        ((SELECT id FROM colleges WHERE code = 'COE'), 'Department of Computer Science', 'CS'),
-        ((SELECT id FROM colleges WHERE code = 'COE'), 'Department of Civil Engineering', 'CE')
-      ON CONFLICT (college_id, code) DO NOTHING;
-    `);
-
     // ================= EXAM LEVELS =================
     await pool.query(`
       INSERT INTO exam_levels (code, name)
@@ -144,30 +116,6 @@ async function seed() {
     updated_at = CURRENT_TIMESTAMP;
   `,
       ["Super", "Admin", superAdminEmail, passwordHash, roleId],
-    );
-
-    // =================INSERT REGISTRAR =================
-    await pool.query(
-      `
-  INSERT INTO app_user (
-    first_name,
-    last_name,
-    email,
-    password_hash,
-    is_active,
-    role_id,
-    institution_id
-  )
-  VALUES ($1, $2, $3, $4, TRUE, (SELECT id FROM roles WHERE role_name = 'REGISTRAR'), (SELECT id FROM institution WHERE code = 'REB'))
-  ON CONFLICT (email) DO UPDATE
-  SET
-    password_hash = EXCLUDED.password_hash,
-    role_id = EXCLUDED.role_id,
-    is_active = TRUE,
-    institution_id = EXCLUDED.institution_id,
-    updated_at = CURRENT_TIMESTAMP;
-  `,
-      ["Abdulkerim", "Jemal", "abdulkerimjemal.dev@gmail.com", passwordHash],
     );
 
     console.log("Seeding completed!");

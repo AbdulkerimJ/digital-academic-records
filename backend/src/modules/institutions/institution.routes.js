@@ -5,6 +5,7 @@ import {
   listInstitutions,
   updateInstitution,
   getInstitutionTypes,
+  deleteInstitution,
 } from "./institution.controller.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
 import collegeRoutes from "./college.routes.js";
@@ -25,6 +26,12 @@ router.patch(
   protectUser,
   restrictTo("SUPER_ADMIN"),
   updateInstitution,
+);
+router.delete(
+  "/:institutionId",
+  protectUser,
+  restrictTo("SUPER_ADMIN"),
+  deleteInstitution,
 );
 
 router.use("/:institutionId/colleges", collegeRoutes);

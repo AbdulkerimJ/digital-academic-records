@@ -62,7 +62,11 @@ export default function UserInviteModal({ isOpen, onClose }) {
   const inviteMutation = useMutation({
     mutationFn: createUser,
     onSuccess: (data) => {
-      toast.success(data.message || "Invitation sent successfully")
+      if (data.data?.emailSent) {
+        toast.success(data.message || "Invitation sent successfully")
+      } else {
+        toast.warning("User created, but the invitation email failed to send. You can resend it later from the user list.")
+      }
       queryClient.invalidateQueries({ queryKey: ["users"] })
       reset()
       onClose()

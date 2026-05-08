@@ -91,7 +91,7 @@ export default function EditUserModal({ isOpen, onClose, user }) {
       lastName: data.lastName,
       email: data.email,
       roleId: parseInt(data.roleId, 10),
-      institutionId: data.institutionId === "null" ? null : parseInt(data.institutionId, 10)
+      institutionId: data.institutionId === "null" ? null : data.institutionId
     }
 
     editMutation.mutate({ userId: user.id, data: payload })

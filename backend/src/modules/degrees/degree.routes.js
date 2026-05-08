@@ -40,7 +40,7 @@ router.get("/", listDegrees);
 router.get("/:degreeId", getDegreeById);
 router.patch("/:degreeId", updateDegree);
 
-router.post("/upload", createDegree);
+router.post("/", createDegree);
 router.post(
   "/upload-bulk",
   restrictTo("SUPER_ADMIN", "REGISTRAR"),

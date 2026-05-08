@@ -41,6 +41,29 @@ export const AuthProvider = ({ children }) => {
     checkAuth()
   }, [])
 
+  // Synchronize auth state across tabs
+  useEffect(() => {
+    const syncLogout = (e) => {
+      if (e.key === "accessToken" && !e.newValue) {
+        setUser(null)
+        setIsAuthenticated(false)
+        // Only redirect if we're not already on the login page to avoid loops
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/activate-account") {
+          window.location.href = "/login"
+        }
+      }
+      
+      // Optionally handle login in another tab
+      if (e.key === "accessToken" && e.newValue) {
+        // Just reload to get the fresh state from the new token
+        window.location.reload()
+      }
+    }
+
+    window.addEventListener("storage", syncLogout)
+    return () => window.removeEventListener("storage", syncLogout)
+  }, [])
+
   const login = async (email, password) => {
     try {
       const response = await api.post("/api/users/login", { email, password })
@@ -57,15 +80,33 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const logout = async () => {
+  const activate = async (token, password) => {
     try {
-      await api.post("/api/users/logout")
+      const response = await api.post("/api/users/activate-invite", { token, password })
+      if (response.data.success || response.data.status === "success") {
+        const { accessToken, user } = response.data.data
+        localStorage.setItem("accessToken", accessToken)
+
+        setUser(user)
+        setIsAuthenticated(true)
+        return response.data
+      }
     } catch (error) {
-      console.error("Logout failed:", error)
+      throw error.response?.data || error
+    }
+  }
+
+  const logout = async () => {
+    // Clear local state immediately for instant feedback
+    localStorage.removeItem("accessToken")
+    setUser(null)
+    setIsAuthenticated(false)
+    
+    // Perform server-side logout in the background
+    try {
+      api.post("/api/users/logout").catch(err => console.error("Background logout failed:", err))
     } finally {
-      localStorage.removeItem("accessToken")
-      setUser(null)
-      setIsAuthenticated(false)
+      // Immediate redirect
       window.location.href = "/login"
     }
   }
@@ -75,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isLoading,
     login,
+    activate,
     logout,
   }
   

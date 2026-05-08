@@ -15,6 +15,11 @@ export const updateInstitution = async (id, data) => {
   return response.data
 }
 
+export const deleteInstitution = async (id) => {
+  const response = await api.delete(`/api/institutions/${id}`)
+  return response.data
+}
+
 export const listInstitutionTypes = async () => {
   const response = await api.get("/api/institutions/types")
   return response.data

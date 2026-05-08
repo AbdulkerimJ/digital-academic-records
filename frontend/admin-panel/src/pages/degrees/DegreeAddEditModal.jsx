@@ -181,20 +181,20 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
               {isSuperAdmin && (
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Institution</label>
-                  <Select
-                    value={formData.institutionId}
-                    onValueChange={(v) => handleSelectChange("institutionId", v)}
-                    required
-                  >
-                    <SelectTrigger className="rounded-xl h-12 bg-muted/30 border-muted/60">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {institutionsData?.data?.institutions?.map((inst) => (
-                        <SelectItem key={inst.id} value={inst.id}>{inst.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={formData.institutionId?.toString()}
+                      onValueChange={(v) => handleSelectChange("institutionId", v)}
+                      required
+                    >
+                      <SelectTrigger className="rounded-xl h-12 bg-muted/30 border-muted/60">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {institutionsData?.data?.institutions?.map((inst) => (
+                          <SelectItem key={inst.id} value={inst.id.toString()}>{inst.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                 </div>
               )}
             </div>
@@ -204,7 +204,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Degree Level</label>
               <Select
-                value={formData.degreeLevelId}
+                value={formData.degreeLevelId?.toString()}
                 onValueChange={(v) => handleSelectChange("degreeLevelId", v)}
                 required
               >
@@ -212,8 +212,8 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
                   <SelectValue placeholder="Select Level" />
                 </SelectTrigger>
                 <SelectContent>
-                  {levelsData?.data?.levels?.filter(l => l.isActive).map((level) => (
-                    <SelectItem key={level.id} value={level.id}>{level.name}</SelectItem>
+                  {levelsData?.data?.degreeLevels?.filter(l => l.isActive).map((level) => (
+                    <SelectItem key={level.id} value={level.id.toString()}>{level.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -222,7 +222,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Degree Title</label>
               <Select
-                value={formData.degreeTitleId}
+                value={formData.degreeTitleId?.toString()}
                 onValueChange={(v) => handleSelectChange("degreeTitleId", v)}
                 disabled={!formData.degreeLevelId}
                 required
@@ -231,8 +231,8 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
                   <SelectValue placeholder="Select Title" />
                 </SelectTrigger>
                 <SelectContent>
-                  {titlesData?.data?.titles?.filter(t => t.isActive).map((title) => (
-                    <SelectItem key={title.id} value={title.id}>{title.title}</SelectItem>
+                  {titlesData?.data?.degreeTitles?.filter(t => t.isActive).map((title) => (
+                    <SelectItem key={title.id} value={title.id.toString()}>{title.title}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -243,7 +243,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">College</label>
               <Select
-                value={formData.collegeId}
+                value={formData.collegeId?.toString()}
                 onValueChange={(v) => handleSelectChange("collegeId", v)}
                 disabled={!formData.institutionId}
                 required
@@ -253,7 +253,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
                 </SelectTrigger>
                 <SelectContent>
                   {collegesData?.data?.colleges?.filter(c => c.isActive).map((college) => (
-                    <SelectItem key={college.id} value={college.id}>{college.name}</SelectItem>
+                    <SelectItem key={college.id} value={college.id.toString()}>{college.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -262,7 +262,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Department</label>
               <Select
-                value={formData.departmentId}
+                value={formData.departmentId?.toString()}
                 onValueChange={(v) => handleSelectChange("departmentId", v)}
                 disabled={!formData.collegeId}
                 required
@@ -272,7 +272,7 @@ export default function DegreeAddEditModal({ isOpen, onClose, initialData = null
                 </SelectTrigger>
                 <SelectContent>
                   {departmentsData?.data?.departments?.filter(d => d.isActive).map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    <SelectItem key={dept.id} value={dept.id.toString()}>{dept.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

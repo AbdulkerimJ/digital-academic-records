@@ -138,7 +138,7 @@ export default function Sidebar() {
             end={item.end}
             className={({ isActive }) =>
               cn(
-                "group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-200",
+                "group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -164,29 +164,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-4 pt-0">
-        <div className="rounded-3xl border border-border bg-muted/40 p-4 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Avatar className="h-11 w-11 border border-border bg-background">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {getInitials(user)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Logged in as
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                {user?.institutionName || "Digital Academic Records"}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Secure access for student records, qualifications, and
-                institutional workflows.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

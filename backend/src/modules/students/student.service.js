@@ -47,17 +47,34 @@ export const getStudentByIdService = async (id) => {
   return student;
 };
 
-export const getStudentFullRecordsService = async (id) => {
+export const getStudentFullRecordsService = async (id, user) => {
   // 1. Verify student exists
   const student = await findStudentById(id);
   if (!student) {
     throw new AppError("Student not found", 404);
   }
 
-  // 2. Fetch records in parallel
+  // 2. Prepare filter logic based on role
+  let examFilter = { studentId: id };
+  let degreeFilter = { studentId: id };
+
+  if (user.roleName === "REGISTRAR") {
+    // If college admin, they only see their own degrees and NO exams
+    if (user.institutionType === "COLLEGE") {
+      degreeFilter.institutionId = user.institutionId;
+      examFilter = null; // Mark as restricted
+    } 
+    // If exam board admin, they only see their own exams and NO degrees
+    else if (user.institutionType === "EXAM_BOARD") {
+      examFilter.institutionId = user.institutionId;
+      degreeFilter = null; // Mark as restricted
+    }
+  }
+
+  // 3. Fetch records in parallel (conditionally)
   const [exams, degrees] = await Promise.all([
-    findExamRecords({ studentId: id }),
-    findDegrees({ studentId: id }),
+    examFilter ? findExamRecords(examFilter) : Promise.resolve([]),
+    degreeFilter ? findDegrees(degreeFilter) : Promise.resolve([]),
   ]);
 
   return {

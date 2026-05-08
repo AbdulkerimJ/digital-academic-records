@@ -15,8 +15,10 @@ import {
   unsuspendUserById,
   updateUserById,
 } from "./user.repository.js";
+import { sendInvitationEmail } from "../../common/services/email.service.js";
 
-const INVITATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+const INVITATION_TOKEN_TTL_HOURS = parseInt(process.env.INVITATION_TOKEN_TTL_HOURS || "24", 10);
+const INVITATION_TOKEN_TTL_MS = INVITATION_TOKEN_TTL_HOURS * 60 * 60 * 1000;
 
 const buildInvitation = () => {
   const token = randomBytes(32).toString("hex");
@@ -85,11 +87,26 @@ export const inviteUserService = async ({
     invitationExpires,
   });
 
+  let emailSent = false;
+  try {
+    await sendInvitationEmail({
+      to: normalizedEmail,
+      firstName: firstName.trim(),
+      inviteLink,
+    });
+    emailSent = true;
+  } catch (err) {
+    console.error("Invitation email sending failed:", err);
+    // We don't throw here because the user record IS created successfully.
+    // Instead, we let the caller know it failed.
+  }
+
   return {
     user,
     invitationToken,
     invitationExpires,
     inviteLink,
+    emailSent,
   };
 };
 
@@ -253,6 +270,14 @@ export const updateUserService = async ({
     throw new AppError("Failed to update user", 500);
   }
 
+  if (inviteLink) {
+    sendInvitationEmail({
+      to: normalizedEmail || currentUser.email,
+      firstName: trimmedFirstName || currentUser.firstName,
+      inviteLink,
+    }).catch((err) => console.error("Background email sending failed:", err));
+  }
+
   return {
     user: updatedUser,
     inviteLink,
@@ -374,10 +399,23 @@ export const resendInviteService = async ({ userId }) => {
   });
   const inviteLink = getInviteLink(invitationToken);
 
+  let emailSent = false;
+  try {
+    await sendInvitationEmail({
+      to: user.email,
+      firstName: user.firstName,
+      inviteLink,
+    });
+    emailSent = true;
+  } catch (err) {
+    console.error("Resend invitation email sending failed:", err);
+  }
+
   return {
     user: updatedUser,
     inviteLink,
     invitationExpires,
+    emailSent,
   };
 };
 

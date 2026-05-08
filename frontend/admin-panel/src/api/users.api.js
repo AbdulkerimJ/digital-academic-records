@@ -54,3 +54,8 @@ export const changePassword = async (data) => {
   const response = await api.patch("/api/users/change-password", data)
   return response.data
 }
+
+export const activateAccount = async (data) => {
+  const response = await api.post("/api/users/activate-invite", data)
+  return response.data
+}

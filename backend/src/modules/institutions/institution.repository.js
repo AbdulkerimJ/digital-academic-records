@@ -161,3 +161,11 @@ export const getInstitutionTypes = async () => {
   );
   return result.rows;
 };
+
+export const deleteInstitutionRecord = async (id) => {
+  const result = await pool.query(
+    `DELETE FROM institution WHERE id = $1 RETURNING id`,
+    [id],
+  );
+  return result.rows[0] || null;
+};

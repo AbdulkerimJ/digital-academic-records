@@ -53,18 +53,28 @@ export const translateDatabaseError = (err) => {
 
   // 3. FOREIGN KEY VIOLATIONS (23503)
   if (code === "23503") {
-    if (constraint === "app_user_role_id_fkey") {
-      return new AppError("The specified role does not exist.", 400);
-    }
-    if (constraint === "app_user_institution_id_fkey") {
-      return new AppError("The specified institution does not exist.", 400);
-    }
+    // If we're trying to DELETE a record that is still being used elsewhere
     if (err.detail?.includes("is still referenced")) {
+      if (constraint.includes("app_user")) return new AppError("This record cannot be deleted because it is linked to one or more Users.", 400);
+      if (constraint.includes("exams")) return new AppError("This record cannot be deleted because it has associated Exam records.", 400);
+      if (constraint.includes("degrees")) return new AppError("This record cannot be deleted because it has associated Degree records.", 400);
+      if (constraint.includes("colleges")) return new AppError("This record cannot be deleted because it has associated Colleges.", 400);
+      if (constraint.includes("departments")) return new AppError("This record cannot be deleted because it has associated Departments.", 400);
+      
       return new AppError("This record cannot be deleted because it is being used by other parts of the system.", 400);
     }
+
+    // If we're trying to INSERT/UPDATE a record with a non-existent reference
     if (err.detail?.includes("is not present")) {
+      if (constraint === "app_user_role_id_fkey") {
+        return new AppError("The specified role does not exist.", 400);
+      }
+      if (constraint === "app_user_institution_id_fkey") {
+        return new AppError("The specified institution does not exist.", 400);
+      }
       return new AppError("The referenced record (Student, Institution, or Level) does not exist.", 400);
     }
+
     return new AppError("This action cannot be completed because of a linked record issue.", 400);
   }
 

@@ -23,8 +23,13 @@ export const create = catchAsync(async (req, res) => {
 
   return sendSuccess(
     res,
-    "User invited successfully. Invitation link sent to email.",
-    { user: result.user },
+    result.emailSent 
+      ? "User invited successfully. Invitation link sent to email."
+      : "User created, but the invitation email failed to send.",
+    { 
+      user: result.user,
+      emailSent: result.emailSent
+    },
     201,
   );
 });
@@ -127,6 +132,7 @@ export const resendInvite = catchAsync(async (req, res) => {
 
   return sendSuccess(res, "Invitation resent successfully", {
     user: result.user,
+    emailSent: result.emailSent
   });
 });
 

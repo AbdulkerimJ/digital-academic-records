@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import LoginPage from "../pages/auth/LoginPage"
+import ActivateAccountPage from "../pages/auth/ActivateAccountPage"
 import DashboardPage from "../pages/dashboard/DashboardPage"
 import UsersPage from "../pages/users/UsersPage"
 import InstitutionsPage from "../pages/institutions/InstitutionsPage"
@@ -51,6 +52,11 @@ const router = createBrowserRouter([
         <LoginPage />
       </PublicRoute>
     ),
+  },
+  {
+    path: "/activate-account",
+    errorElement: <GlobalErrorPage />,
+    element: <ActivateAccountPage />,
   },
   {
     path: "/",

@@ -8,7 +8,8 @@ import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  Hash
+  Hash,
+  Trash
 } from "lucide-react"
 import { 
   Table, 
@@ -52,6 +53,7 @@ export default function InstitutionTable({
   isFiltered, 
   isFetching,
   onEdit, 
+  onDelete,
   onAdd,
   onClearFilters 
 }) {
@@ -129,7 +131,7 @@ export default function InstitutionTable({
                 </TableRow>
               ) : (
                 institutions.map((inst) => (
-                  <TableRow key={inst.id} className="group transition-colors hover:bg-muted/40 cursor-default border-muted/60">
+                  <TableRow key={inst.id} className="group transition-colors hover:bg-muted/40 cursor-pointer border-muted/60">
                     <TableCell className="py-4 pl-8">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/10 shadow-sm shrink-0">
@@ -170,6 +172,12 @@ export default function InstitutionTable({
                             className="gap-2 cursor-pointer"
                           >
                             <Pencil size={14} className="text-muted-foreground" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => onDelete(inst)}
+                            className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                          >
+                            <Trash size={14} /> Delete Institution
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

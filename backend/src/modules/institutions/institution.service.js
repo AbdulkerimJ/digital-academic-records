@@ -7,6 +7,7 @@ import {
   findInstitutions,
   updateInstitutionById,
   getInstitutionTypes,
+  deleteInstitutionRecord,
 } from "./institution.repository.js";
 
 export const getInstitutionTypesService = async () => {
@@ -221,4 +222,23 @@ export const updateInstitutionService = async ({
   }
 
   return updatedInstitution;
+};
+
+export const deleteInstitutionService = async ({ institutionId }) => {
+  if (!institutionId) {
+    throw new AppError("institutionId is required", 400);
+  }
+
+  const institution = await findInstitutionById(institutionId);
+  if (!institution) {
+    throw new AppError("Institution not found", 404);
+  }
+
+  // Deletion will fail automatically due to ON DELETE RESTRICT if there are users, exams, or degrees.
+  const deleted = await deleteInstitutionRecord(institutionId);
+  if (!deleted) {
+    throw new AppError("Failed to delete institution. It might have linked records (users, exams, or degrees).", 400);
+  }
+
+  return deleted;
 };

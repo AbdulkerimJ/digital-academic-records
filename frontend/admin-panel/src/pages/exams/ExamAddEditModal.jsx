@@ -147,7 +147,7 @@ export default function ExamAddEditModal({ isOpen, onClose, initialData = null, 
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Exam Level</label>
                 <Select
-                  value={formData.examLevelCode}
+                  value={formData.examLevelCode?.toString()}
                   onValueChange={(value) => handleSelectChange("examLevelCode", value)}
                   disabled={isLoadingLevels}
                   required
@@ -156,8 +156,8 @@ export default function ExamAddEditModal({ isOpen, onClose, initialData = null, 
                     <SelectValue placeholder="Select Exam Level" />
                   </SelectTrigger>
                   <SelectContent>
-                    {levelsData?.data?.levels?.filter(l => l.isActive).map((level) => (
-                      <SelectItem key={level.id} value={level.code}>
+                    {levelsData?.data?.examLevels?.filter(l => l.isActive).map((level) => (
+                      <SelectItem key={level.id} value={level.code.toString()}>
                         {level.name} ({level.code})
                       </SelectItem>
                     ))}
@@ -169,7 +169,7 @@ export default function ExamAddEditModal({ isOpen, onClose, initialData = null, 
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Institution Code</label>
                   <Select
-                    value={formData.institutionCode}
+                    value={formData.institutionCode?.toString()}
                     onValueChange={(value) => handleSelectChange("institutionCode", value)}
                     disabled={isLoadingInstitutions}
                     required
@@ -179,7 +179,7 @@ export default function ExamAddEditModal({ isOpen, onClose, initialData = null, 
                     </SelectTrigger>
                     <SelectContent>
                       {institutionsData?.data?.institutions?.map((inst) => (
-                        <SelectItem key={inst.id} value={inst.code}>
+                        <SelectItem key={inst.id} value={inst.code.toString()}>
                           {inst.name} ({inst.code})
                         </SelectItem>
                       ))}
@@ -220,7 +220,7 @@ export default function ExamAddEditModal({ isOpen, onClose, initialData = null, 
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Result Status</label>
               <Select
-                value={formData.resultStatus}
+                value={formData.resultStatus?.toString()}
                 onValueChange={(value) => handleSelectChange("resultStatus", value)}
                 required
               >

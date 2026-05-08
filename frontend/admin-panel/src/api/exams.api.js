@@ -46,7 +46,7 @@ export const uploadBulkExams = async (file, institutionCode) => {
 }
 
 export const createExam = async (data) => {
-  const response = await api.post("/api/exams/upload", data)
+  const response = await api.post("/api/exams", data)
   return response.data
 }
 
