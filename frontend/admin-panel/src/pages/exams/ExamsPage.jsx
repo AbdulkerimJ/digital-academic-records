@@ -18,6 +18,14 @@ export default function ExamsPage() {
     setSearchParams(newParams)
   }
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="space-y-6">
+        <ExamRecordsTable />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
@@ -26,11 +34,9 @@ export default function ExamsPage() {
             <TabsTrigger value="records" className="gap-2 px-6">
               <LayoutGrid size={16} /> Results
             </TabsTrigger>
-            {isSuperAdmin && (
-              <TabsTrigger value="levels" className="gap-2 px-6">
-                <BookOpen size={16} /> Levels
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="levels" className="gap-2 px-6">
+              <BookOpen size={16} /> Levels
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -38,11 +44,9 @@ export default function ExamsPage() {
           <ExamRecordsTable />
         </TabsContent>
 
-        {isSuperAdmin && (
-          <TabsContent value="levels" className="mt-6 outline-none">
-            <ExamLevelsTable />
-          </TabsContent>
-        )}
+        <TabsContent value="levels" className="mt-6 outline-none">
+          <ExamLevelsTable />
+        </TabsContent>
       </Tabs>
     </div>
   )

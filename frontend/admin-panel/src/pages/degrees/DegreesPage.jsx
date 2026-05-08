@@ -20,6 +20,14 @@ export default function DegreesPage() {
     setSearchParams(newParams)
   }
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="space-y-6">
+        <DegreeRecordsTable />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
@@ -28,16 +36,12 @@ export default function DegreesPage() {
             <TabsTrigger value="records" className="gap-2 px-6">
               <LayoutGrid size={16} /> Records
             </TabsTrigger>
-            {isSuperAdmin && (
-              <>
-                <TabsTrigger value="levels" className="gap-2 px-6">
-                  <GraduationCap size={16} /> Levels
-                </TabsTrigger>
-                <TabsTrigger value="titles" className="gap-2 px-6">
-                  <Settings2 size={16} /> Titles
-                </TabsTrigger>
-              </>
-            )}
+            <TabsTrigger value="levels" className="gap-2 px-6">
+              <GraduationCap size={16} /> Levels
+            </TabsTrigger>
+            <TabsTrigger value="titles" className="gap-2 px-6">
+              <Settings2 size={16} /> Titles
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -45,16 +49,12 @@ export default function DegreesPage() {
           <DegreeRecordsTable />
         </TabsContent>
 
-        {isSuperAdmin && (
-          <>
-            <TabsContent value="levels" className="mt-6 outline-none">
-              <DegreeLevelsTable />
-            </TabsContent>
-            <TabsContent value="titles" className="mt-6 outline-none">
-              <DegreeTitlesTable />
-            </TabsContent>
-          </>
-        )}
+        <TabsContent value="levels" className="mt-6 outline-none">
+          <DegreeLevelsTable />
+        </TabsContent>
+        <TabsContent value="titles" className="mt-6 outline-none">
+          <DegreeTitlesTable />
+        </TabsContent>
       </Tabs>
     </div>
   )
