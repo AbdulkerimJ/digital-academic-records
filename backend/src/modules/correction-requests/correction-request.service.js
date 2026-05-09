@@ -8,6 +8,7 @@ import {
   deleteCorrectionRequestsByRecord,
   deleteCorrectionRequestById,
 } from "./correction-request.repository.js";
+import { logActionService } from "../audit/audit.service.js";
 
 
 import { findExamRecordById } from "../exams/exam.repository.js";
@@ -17,7 +18,7 @@ import { findDegreeById } from "../degrees/degree.repository.js";
 
 // ===================== STUDENT ACTIONS =====================
 
-export const submitCorrectionRequestService = async ({ studentId, recordId, recordType, requestText }) => {
+export const submitCorrectionRequestService = async ({ studentId, recordId, recordType, requestText, req }) => {
   if (!requestText) {
     throw new AppError("Request text is required.", 400);
   }
@@ -65,13 +66,24 @@ export const submitCorrectionRequestService = async ({ studentId, recordId, reco
 
 
 
-  return await createCorrectionRequestRecord({
+  const request = await createCorrectionRequestRecord({
     studentId,
     institutionId: derivedInstitutionId,
     requestText: requestText.trim(),
     recordId,
     recordType,
   });
+
+  await logActionService({
+    user: { id: studentId, roleName: "STUDENT" },
+    action: "SUBMIT_CORRECTION",
+    entityType: "CORRECTION_REQUEST",
+    entityId: request.id,
+    newValues: request,
+    req,
+  });
+
+  return request;
 };
 
 
@@ -110,7 +122,7 @@ export const getCorrectionRequestDetailService = async ({ user, id }) => {
   return request;
 };
 
-export const approveCorrectionRequestService = async ({ id, user }) => {
+export const approveCorrectionRequestService = async ({ id, user, req }) => {
   const request = await findCorrectionRequestById(id);
   if (!request) {
     throw new AppError("Correction request not found.", 404);
@@ -126,15 +138,27 @@ export const approveCorrectionRequestService = async ({ id, user }) => {
     throw new AppError(`Cannot approve a request that is already ${request.status}.`, 400);
   }
 
-  return await updateCorrectionRequestStatus({
+  const updated = await updateCorrectionRequestStatus({
     id,
     status: "APPROVED",
     reviewedBy: user.id,
   });
+
+  await logActionService({
+    user,
+    action: "APPROVE_CORRECTION",
+    entityType: "CORRECTION_REQUEST",
+    entityId: id,
+    oldValues: request,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };
 
 
-export const rejectCorrectionRequestService = async ({ id, user, reason }) => {
+export const rejectCorrectionRequestService = async ({ id, user, reason, req }) => {
   if (!reason) {
     throw new AppError("Rejection reason is required.", 400);
   }
@@ -154,10 +178,22 @@ export const rejectCorrectionRequestService = async ({ id, user, reason }) => {
     throw new AppError(`Cannot reject a request that is already ${request.status}.`, 400);
   }
 
-  return await updateCorrectionRequestStatus({
+  const updated = await updateCorrectionRequestStatus({
     id,
     status: "REJECTED",
     reviewedBy: user.id,
     rejectionReason: reason.trim(),
   });
+
+  await logActionService({
+    user,
+    action: "REJECT_CORRECTION",
+    entityType: "CORRECTION_REQUEST",
+    entityId: id,
+    oldValues: request,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };

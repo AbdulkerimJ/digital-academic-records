@@ -11,6 +11,7 @@ import CorrectionsPage from "../pages/corrections/CorrectionsPage"
 import CorrectionDetailPage from "../pages/corrections/CorrectionDetailPage"
 import ProfilePage from "../pages/profile/ProfilePage"
 import AcademicStructurePage from "../pages/structure/AcademicStructurePage"
+import AuditLogsPage from "../pages/audit/AuditLogsPage"
 import GlobalErrorPage from "../pages/error/GlobalErrorPage"
 import AppShell from "../components/layout/AppShell"
 import { useAuth } from "../context/AuthContext"
@@ -127,8 +128,16 @@ const router = createBrowserRouter([
         path: "profile",
         element: <ProfilePage />,
       },
+      {
+        path: "audit-logs",
+        element: (
+          <ProtectedRoute roles={["SUPER_ADMIN", "REGISTRAR"]}>
+            <AuditLogsPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
-])
+]);
 
 export default router

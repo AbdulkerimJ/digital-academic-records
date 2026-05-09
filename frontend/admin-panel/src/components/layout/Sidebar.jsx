@@ -9,6 +9,7 @@ import {
   BookOpen,
   ClipboardCheck,
   Network,
+  History,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -67,6 +68,12 @@ const navItems = [
     icon: Network,
     roles: ["SUPER_ADMIN", "REGISTRAR"],
     institutionTypes: ["COLLEGE"],
+  },
+  {
+    title: "Activity Logs",
+    href: "/audit-logs",
+    icon: History,
+    roles: ["SUPER_ADMIN", "REGISTRAR"],
   },
 ];
 

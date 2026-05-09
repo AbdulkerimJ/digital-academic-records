@@ -13,14 +13,11 @@ import {
 
 export const submitRequest = catchAsync(async (req, res) => {
   const { recordId } = req.params;
-  const { requestText, recordType } = req.body || {};
-  
-  // req.user is populated by protectStudent
   const request = await submitCorrectionRequestService({
     studentId: req.user.id,
     recordId,
-    recordType,
-    requestText,
+    ...req.body,
+    req,
   });
 
   return sendSuccess(res, "Correction request submitted successfully", { request }, 201);
@@ -63,17 +60,18 @@ export const getRequestDetail = catchAsync(async (req, res) => {
 export const approveRequest = catchAsync(async (req, res) => {
   const request = await approveCorrectionRequestService({
     id: req.params.id,
-    user: req.user, // req.user is populated by protectUser (admin)
+    user: req.user,
+    req,
   });
   return sendSuccess(res, "Correction request approved successfully", { request });
 });
 
 export const rejectRequest = catchAsync(async (req, res) => {
-  const { reason } = req.body || {};
   const request = await rejectCorrectionRequestService({
     id: req.params.id,
+    ...req.body,
     user: req.user,
-    reason,
+    req,
   });
 
   return sendSuccess(res, "Correction request rejected successfully", { request });

@@ -17,11 +17,12 @@ import { findInstitutionById, findInstitutionByCode } from "../institutions/inst
 import { findStudentById, findStudentByNationalId } from "../students/student.repository.js";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { logActionService } from "../audit/audit.service.js";
 
 const normalizeString = (value) =>
   value === undefined || value === null ? null : String(value).trim();
 
-export const createExamLevelService = async ({ code, name, isActive }) => {
+export const createExamLevelService = async ({ code, name, isActive, user, req }) => {
   if (!code || !name) {
     throw new AppError("Exam level code and name are required.", 400);
   }
@@ -39,6 +40,17 @@ export const createExamLevelService = async ({ code, name, isActive }) => {
     name: normalizedName,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
+
+  await logActionService({
+    user,
+    action: "CREATE_EXAM_LEVEL",
+    entityType: "EXAM_LEVEL",
+    entityId: level.id,
+    newValues: level,
+    req,
+  });
+
+  return level;
 };
 
 export const listExamLevelsService = async () => {
@@ -50,6 +62,8 @@ export const updateExamLevelService = async ({
   code,
   name,
   isActive,
+  user,
+  req,
 }) => {
   if (!examLevelId) {
     throw new AppError("Exam level is required.", 400);
@@ -78,9 +92,21 @@ export const updateExamLevelService = async ({
     name: normalizedName,
     isActive: normalizedIsActive,
   });
+
+  await logActionService({
+    user,
+    action: "UPDATE_EXAM_LEVEL",
+    entityType: "EXAM_LEVEL",
+    entityId: examLevelId,
+    oldValues: existingType,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };
 
-export const createExamRecordService = async ({ user, data = {} }) => {
+export const createExamRecordService = async ({ user, data = {}, req }) => {
   let {
     studentId,
     nationalId,
@@ -172,7 +198,7 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     throw new AppError("Result status must be PASS or FAIL.", 400);
   }
 
-  return createExamRecordRecord({
+  const created = await createExamRecordRecord({
     studentId,
     examLevelId,
     institutionId,
@@ -182,6 +208,19 @@ export const createExamRecordService = async ({ user, data = {} }) => {
     percentile: parsedPercentile,
     resultStatus: normalizedResultStatus.toUpperCase(),
   });
+
+  const record = await findExamRecordById(created.id);
+
+  await logActionService({
+    user,
+    action: "ISSUE_EXAM",
+    entityType: "EXAM",
+    entityId: record.id,
+    newValues: record,
+    req,
+  });
+
+  return record;
 };
 
 export const uploadBulkExamsService = async ({
@@ -190,6 +229,7 @@ export const uploadBulkExamsService = async ({
   onProgress,
   institutionId,
   institutionCode,
+  req,
 }) => {
   if (!fileBuffer) {
     throw new AppError("No file provided", 400);
@@ -243,6 +283,7 @@ export const uploadBulkExamsService = async ({
           institutionId: mappedData.institutionId || institutionId,
           institutionCode: mappedData.institutionCode || institutionCode,
         },
+        req,
       });
       results.successful.push({
         id: mappedData.nationalId,
@@ -273,6 +314,15 @@ export const uploadBulkExamsService = async ({
   results.successRate = results.total > 0
     ? `${Math.round((results.successful.length / results.total) * 100)}%`
     : "0%";
+
+  await logActionService({
+    user,
+    action: "BULK_ISSUE_EXAMS",
+    entityType: "EXAM",
+    entityId: "BULK",
+    newValues: { successful: results.successful.length, failed: results.failed.length },
+    req,
+  });
 
   return results;
 };
@@ -337,6 +387,7 @@ export const updateExamRecordService = async ({
   averageScore,
   percentile,
   resultStatus,
+  req,
 }) => {
   if (!examId) {
     throw new AppError("Exam ID is required.", 400);
@@ -400,9 +451,21 @@ export const updateExamRecordService = async ({
     resultStatus: normalizedResultStatus,
   });
 
-  return findExamRecordById(examId);
+  const updated = await findExamRecordById(examId);
+
+  await logActionService({
+    user,
+    action: "UPDATE_EXAM",
+    entityType: "EXAM",
+    entityId: examId,
+    oldValues: currentRecord,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };
-export const deleteExamRecordService = async ({ user, examId }) => {
+export const deleteExamRecordService = async ({ user, examId, req }) => {
   if (!examId) {
     throw new AppError("Exam ID is required.", 400);
   }
@@ -425,6 +488,14 @@ export const deleteExamRecordService = async ({ user, examId }) => {
       404,
     );
   }
+
+  await logActionService({
+    user,
+    action: "DELETE_EXAM",
+    entityType: "EXAM",
+    entityId: examId,
+    req,
+  });
 
   return deleted;
 };

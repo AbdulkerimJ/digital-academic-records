@@ -16,14 +16,20 @@ import {
 
 //Super admin only functions
 export const createExamLevel = catchAsync(async (req, res) => {
-  const examLevel = await createExamLevelService(req.body || {});
+  const examLevel = await createExamLevelService({
+    ...req.body,
+    user: req.user,
+    req,
+  });
   return sendSuccess(res, "Exam level created successfully", { examLevel }, 201);
 });
 
 export const updateExamLevel = catchAsync(async (req, res) => {
   const examLevel = await updateExamLevelService({
     examLevelId: req.params.examLevelId,
-    ...(req.body || {}),
+    ...req.body,
+    user: req.user,
+    req,
   });
   return sendSuccess(res, "Exam level updated successfully", { examLevel });
 });
@@ -48,7 +54,8 @@ export const listExamLevels = catchAsync(async (req, res) => {
 export const createExamRecord = catchAsync(async (req, res) => {
   const examRecord = await createExamRecordService({
     user: req.user,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
 
   return sendSuccess(
@@ -91,7 +98,8 @@ export const updateExamRecord = catchAsync(async (req, res) => {
   const examRecord = await updateExamRecordService({
     user: req.user,
     examId: req.params.examId,
-    ...(req.body || {}),
+    ...req.body,
+    req,
   });
   return sendSuccess(res, "Exam record updated successfully", { examRecord });
 });
@@ -101,6 +109,7 @@ export const deleteExamRecord = catchAsync(async (req, res) => {
   await deleteExamRecordService({
     user: req.user,
     examId: req.params.examId,
+    req,
   });
 
   return sendSuccess(res, "Exam record deleted successfully");
@@ -124,8 +133,9 @@ export const uploadBulkExams = catchAsync(async (req, res) => {
       user: req.user,
       fileBuffer: req.file.buffer,
       onProgress,
-      institutionId: (req.body || {}).institutionId || req.query.institutionId,
-      institutionCode: (req.body || {}).institutionCode || req.query.institutionCode,
+      institutionId: req.body?.institutionId || req.query.institutionId,
+      institutionCode: req.body?.institutionCode || req.query.institutionCode,
+      req,
     });
 
 

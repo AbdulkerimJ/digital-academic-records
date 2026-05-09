@@ -65,12 +65,14 @@ export const findAuditLogs = async ({
       al.ip_address AS "ipAddress",
       al.user_agent AS "userAgent",
       al.created_at AS "createdAt",
-      u.first_name AS "userFirstName",
-      u.last_name AS "userLastName",
-      u.email AS "userEmail",
+      al.user_id AS "rawUserId",
+      COALESCE(u.first_name, s.first_name, 'Unknown') AS "actorFirstName",
+      COALESCE(u.last_name, s.last_name, 'User') AS "actorLastName",
+      COALESCE(u.email, s.national_id, 'no-email@internal') AS "actorEmail",
       inst.name AS "institutionName"
     FROM audit_logs al
     LEFT JOIN app_user u ON al.user_id = u.id
+    LEFT JOIN student s ON al.user_id = s.id
     LEFT JOIN institution inst ON al.institution_id = inst.id
     WHERE 1=1
   `;
