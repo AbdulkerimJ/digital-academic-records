@@ -1,0 +1,84 @@
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import AppShell from '../components/layout/AppShell'
+import LoginPage from '../pages/auth/LoginPage'
+import DashboardPage from '../pages/dashboard/DashboardPage'
+import RecordsPage from '../pages/records/RecordsPage'
+import QRCodesPage from '../pages/qr/QRCodesPage'
+import RequestsPage from '../pages/requests/RequestsPage'
+import Spinner from '../components/ui/Spinner'
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-sm font-semibold text-muted-foreground animate-pulse">Verifying session...</p>
+      </div>
+    </div>
+  )
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+
+  return children
+}
+
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-sm font-semibold text-muted-foreground animate-pulse">Verifying session...</p>
+      </div>
+    </div>
+  )
+  if (isAuthenticated) return <Navigate to="/" replace />
+
+  return children
+}
+
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/',
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      {
+        path: 'records',
+        element: <RecordsPage />,
+      },
+      {
+        path: 'qr-codes',
+        element: <QRCodesPage />,
+      },
+      {
+        path: 'requests',
+        element: <RequestsPage />,
+      },
+      {
+        path: 'profile',
+        element: <div className="p-8"><h1 className="text-2xl font-bold">Profile Page</h1><p className="text-muted-foreground mt-2">Coming soon...</p></div>,
+      }
+    ],
+  },
+])
+
+export default router
