@@ -8,7 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { getMainUrl } from "@/lib/domain";
 import { useNavigate } from "react-router-dom";
 
-export function DashboardLayout({ children, menuItems, activeTab, userRole, basePath }) {
+export function DashboardLayout({ children, menuItems, activeTab, userRole, userName, basePath }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
 
@@ -52,8 +52,14 @@ export function DashboardLayout({ children, menuItems, activeTab, userRole, base
              <div className="absolute top-2.5 right-2.5 h-2 w-2 bg-accent rounded-full border-2 border-background" />
           </button>
           <ThemeToggle />
-          <div className="h-10 w-10 bg-secondary rounded-sm flex items-center justify-center border border-border">
-             <User className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3 pl-4 border-l border-border">
+            <div className="text-right hidden sm:block">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-primary leading-none mb-0.5">{userName || "Verified User"}</div>
+              <div className="text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">Portal Access</div>
+            </div>
+            <div className="h-10 w-10 bg-secondary rounded-sm flex items-center justify-center border border-border">
+               <User className="h-5 w-5 text-primary" />
+            </div>
           </div>
         </div>
       </header>

@@ -11,193 +11,154 @@ const api = axios.create({
   },
 });
 
-/* ---------------- MOCK DATA PERSISTENCE HELPERS ---------------- */
-const getStored = (key, initial) => {
-  const stored = localStorage.getItem(key);
-  if (stored) return JSON.parse(stored);
-  localStorage.setItem(key, JSON.stringify(initial));
-  return initial;
+// --- Mock Data & Helpers ---
+const MOCK_DELAY = 800;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const MOCK_USER = {
+  id: "mock-123",
+  first_name: "Samuel",
+  last_name: "Kebede",
+  national_id: "ETH-1234-5678",
+  email: "student@test.com",
+  date_of_birth: "1998-05-12",
+  gender: "Male",
+  role: "STUDENT"
 };
 
-const saveStored = (key, data) => {
-  localStorage.setItem(key, JSON.stringify(data));
+const MOCK_DEGREES = [
+  {
+    id: "deg-1",
+    institutionName: "Addis Ababa University",
+    field_of_study: "Software Engineering",
+    gpa: "3.85",
+    year: "2022",
+    type: "DEGREE"
+  }
+];
+
+const MOCK_EXAMS = [
+  {
+    id: "ex-1",
+    institution: "National Educational Assessment and Examinations Agency",
+    titleName: "Grade 12 National Exam",
+    score: "582/700",
+    examYear: "2018",
+    type: "EXAM"
+  }
+];
+
+// Persistent Mock Corrections in Session Storage
+const getMockCorrections = () => {
+  const saved = sessionStorage.getItem("mock-corrections");
+  return saved ? JSON.parse(saved) : [
+    {
+      id: "corr-1",
+      description: "My graduation year is incorrectly listed as 2021 instead of 2022.",
+      status: "APPROVED",
+      createdAt: new Date().toISOString()
+    }
+  ];
 };
 
-/* ---------------- INITIAL MOCK DATA ---------------- */
-const INITIAL_INSTITUTIONS = [
-  { id: "1", name: "Arba Minch University", code: "AMU", type: "PUBLIC_UNIVERSITY", isActive: true, createdAt: new Date().toISOString() },
-  { id: "2", name: "Addis Ababa University", code: "AAU", type: "PUBLIC_UNIVERSITY", isActive: true, createdAt: new Date().toISOString() },
-  { id: "3", name: "Jimma University", code: "JU", type: "PUBLIC_UNIVERSITY", isActive: true, createdAt: new Date().toISOString() },
-];
+const saveMockCorrection = (desc) => {
+  const current = getMockCorrections();
+  const newItem = {
+    id: `corr-${Date.now()}`,
+    description: desc,
+    status: "PENDING",
+    createdAt: new Date().toISOString()
+  };
+  sessionStorage.setItem("mock-corrections", JSON.stringify([newItem, ...current]));
+  return newItem;
+};
 
-const INITIAL_REGISTRARS = [
-  { id: "r1", name: "Dr. Bekele Mekonnen", institution: "Arba Minch University", username: "registrar@amu.edu.et" },
-  { id: "r2", name: "Abebech Tadesse", institution: "Addis Ababa University", username: "registrar@aau.edu.et" },
-];
+// --- API Implementation ---
 
-const INITIAL_RECORDS = [
-  { id: "rec1", name: "Samuel Kebede", nationalId: "ETH-1234-5678", gpa: "3.85", year: "2023", field_of_study: "Software Engineering", level: "Undergraduate", institution: "Arba Minch University" },
-  { id: "rec2", name: "Helen Tesfaye", nationalId: "ETH-8765-4321", gpa: "3.92", year: "2024", field_of_study: "Computer Science", level: "Undergraduate", institution: "Addis Ababa University" },
-];
-
-const INITIAL_CORRECTIONS = [
-  { id: "c1", student: "Samuel Kebede", nationalId: "ETH-1234-5678", description: "GPA should be 3.88 instead of 3.85", status: "PENDING" },
-  { id: "c2", student: "Helen Tesfaye", nationalId: "ETH-8765-4321", description: "Graduation year is incorrect, should be 2024.", status: "PENDING" },
-  { id: "c3", student: "Abebe Bikila", nationalId: "ETH-1111-2222", description: "Missing 'Introduction to Programming' course on transcript.", status: "APPROVED" },
-];
-
-/* ---------------- INTERCEPTORS (MOCK MODE) ---------------- */
-if (USE_MOCK_DATA) {
-  api.interceptors.request.use((config) => {
-    const method = config.method?.toLowerCase();
-    const url = config.url;
-
-    console.log(`[NAR-MOCK-API] ${method.toUpperCase()} ${url}`, config.data);
-
-    // 1. AUTHENTICATION (Institutional Login)
-    if (method === "post" && url === "/users/login") {
-      const { email, password, intendedRole } = config.data;
-      
-      // Assign roles based on intendedRole or email keywords
-      let role = "REGISTRAR";
-      let firstName = "Institutional";
-      let lastName = "Registrar";
-
-      if (intendedRole === "admin" || email === "admin@nilarvs.gov.et") {
-        role = "SUPER_ADMIN";
-        firstName = "System";
-        lastName = "Admin";
-      } else if (intendedRole === "registrar" || email.includes("registrar")) {
-        role = "REGISTRAR";
-      }
-
-      throw { 
-        isMock: true, 
-        data: { 
-          success: true, 
-          data: { 
-            token: "mock-token-" + Math.random().toString(36).substr(2), 
-            user: { 
-              id: Math.floor(Math.random() * 1000), 
-              email, 
-              first_name: firstName, 
-              last_name: lastName, 
-              role_name: role,
-              institution: role === "REGISTRAR" ? "Arba Minch University" : null
-            } 
-          } 
-        } 
-      };
-    }
-
-    // 2. STUDENT AUTH (Fayda)
-    if (method === "post" && url.includes("/auth/login")) {
-      throw { isMock: true, data: { success: true, message: "OTP sent successfully", data: null } };
-    }
-
-    if (method === "post" && url.includes("/auth/verify")) {
-      const { faydaId } = config.data;
-      throw { isMock: true, data: { success: true, data: { token: "mock-student-token", user: { id: 501, national_id: faydaId, first_name: "Verified", last_name: "Student", role_name: "STUDENT" } } } };
-    }
-
-    if (method === "post" && url.includes("/auth/register")) {
-      throw { isMock: true, data: { success: true, message: "Registration successful" } };
-    }
-
-    // 3. INSTITUTIONS
-    if (url.includes("/institutions")) {
-      if (method === "get") {
-        throw { isMock: true, data: { success: true, data: getStored("nar-mock-institutions", INITIAL_INSTITUTIONS) } };
-      }
-      if (method === "post") {
-        const current = getStored("nar-mock-institutions", INITIAL_INSTITUTIONS);
-        const newItem = { id: Math.random().toString(36).substr(2, 9), ...config.data, createdAt: new Date().toISOString() };
-        saveStored("nar-mock-institutions", [...current, newItem]);
-        throw { isMock: true, data: { success: true, data: { institution: newItem } } };
-      }
-    }
-
-    // 4. REGISTRARS
-    if (url.includes("/registrars")) {
-      throw { isMock: true, data: { success: true, data: getStored("nar-mock-registrars", INITIAL_REGISTRARS) } };
-    }
-
-    // 5. RECORDS
-    if (url.includes("/records") || url.includes("/upload")) {
-      const current = getStored("nar-mock-records", INITIAL_RECORDS);
-      if (method === "get") {
-        throw { isMock: true, data: { success: true, data: current } };
-      }
-      if (method === "post") {
-        const newItem = { id: Math.random().toString(36).substr(2, 9), ...config.data, createdAt: new Date().toISOString() };
-        saveStored("nar-mock-records", [...current, newItem]);
-        throw { isMock: true, data: { success: true, data: newItem } };
-      }
-    }
-
-    // 6. CORRECTIONS
-    if (url.includes("/corrections") || url.includes("/correction")) {
-      const current = getStored("nar-mock-corrections-v2", INITIAL_CORRECTIONS);
-      if (method === "get") {
-        throw { isMock: true, data: { success: true, data: current } };
-      }
-      if (method === "post") {
-        const newItem = { id: Math.random().toString(36).substr(2, 9), ...config.data, status: "PENDING", createdAt: new Date().toISOString() };
-        saveStored("nar-mock-corrections-v2", [...current, newItem]);
-        throw { isMock: true, data: { success: true, data: newItem } };
-      }
-      if (method === "patch") {
-        const id = url.split("/").pop();
-        const updated = current.map(c => c.id === id ? { ...c, ...config.data } : c);
-        saveStored("nar-mock-corrections-v2", updated);
-        throw { isMock: true, data: { success: true, message: "Status updated" } };
-      }
-    }
-
-    // 7. STUDENT PROFILE
-    if (url.includes("/student/profile")) {
-      throw { isMock: true, data: { success: true, data: { 
-        id: 501, 
-        national_id: localStorage.getItem("nar-current-student-id") || "ETH-1234-5678", 
-        first_name: "Samuel", 
-        last_name: "Kebede", 
-        date_of_birth: "1998-05-12", 
-        gender: "MALE",
-        role_name: "STUDENT" 
-      } } };
-    }
-
-    throw { isMock: true, data: { success: true, message: "Demo mode catch-all", data: {} } };
-  });
-
-  api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.isMock) return Promise.resolve({ data: error.data });
-      return Promise.reject(error);
-    }
-  );
-}
-
-// Global Headers Interceptor
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("nar-token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-export default {
+const realApi = {
+  // Auth
   login: (data) => api.post("/users/login", data),
+  studentLogin: (data) => api.post("/students/login", data),
+  verifyStudent: (data) => api.post("/students/verify", data),
+  getMe: () => api.get("/users/me"),
+  getStudentMe: () => api.get("/students/me"),
+  changePassword: (data) => api.patch("/users/change-password", data),
+
+  // Institutions (Admin)
   getInstitutions: () => api.get("/institutions"),
   createInstitution: (data) => api.post("/institutions", data),
-  getRegistrars: () => api.get("/registrars"),
-  getProfile: () => api.get("/student/profile"),
-  getStudentRecords: () => api.get("/student/records"),
-  submitCorrection: (data) => api.post("/student/correction", data),
-  getRecords: () => api.get("/registrar/records"),
-  uploadRecord: (data) => api.post("/registrar/upload", data),
-  getCorrections: () => api.get("/registrar/corrections"),
-  updateCorrection: (id, data) => api.patch(`/registrar/corrections/${id}`, data),
+  updateInstitution: (id, data) => api.patch(`/institutions/${id}`, data),
+
+  // Users/Registrars (Admin)
+  getUsers: () => api.get("/users"),
+  createUser: (data) => api.post("/users", data),
+  updateUser: (id, data) => api.patch(`/users/${id}`, data),
+
+  // Degrees (University Registrar)
+  getDegrees: () => api.get("/degrees"),
+  uploadDegree: (data) => api.post("/degrees", data),
+  updateDegree: (id, data) => api.patch(`/degrees/${id}`, data),
+
+  // Exams (Exam Board Registrar)
+  getExams: () => api.get("/exams"),
+  uploadExam: (data) => api.post("/exams", data),
+  updateExam: (id, data) => api.patch(`/exams/${id}`, data),
+
+  // Correction Requests
+  getCorrections: () => api.get("/correction-requests"),
+  getStudentCorrections: () => api.get("/students/correction-requests"),
+  submitCorrection: (data) => api.post("/students/correction-requests", data),
+  updateCorrectionStatus: (id, status) => api.patch(`/correction-requests/${id}/${status}`),
+
+  // Generic
   get: (url) => api.get(url),
   post: (url, data) => api.post(url, data),
+  patch: (url, data) => api.patch(url, data),
+  delete: (url) => api.delete(url),
 };
+
+const mockApi = {
+  ...realApi,
+  studentLogin: async (data) => {
+    await sleep(MOCK_DELAY);
+    return { data: { success: true, message: "OTP Sent" } };
+  },
+  verifyStudent: async (data) => {
+    await sleep(MOCK_DELAY);
+    return { 
+      data: { 
+        success: true, 
+        data: { accessToken: "mock-token", user: MOCK_USER } 
+      } 
+    };
+  },
+  getStudentMe: async () => {
+    await sleep(MOCK_DELAY);
+    return { data: { success: true, data: MOCK_USER } };
+  },
+  getDegrees: async () => {
+    await sleep(MOCK_DELAY);
+    return { data: { success: true, data: MOCK_DEGREES } };
+  },
+  getExams: async () => {
+    await sleep(MOCK_DELAY);
+    return { data: { success: true, data: MOCK_EXAMS } };
+  },
+  getStudentCorrections: async () => {
+    await sleep(MOCK_DELAY);
+    return { data: { success: true, data: getMockCorrections() } };
+  },
+  submitCorrection: async (data) => {
+    await sleep(MOCK_DELAY);
+    const newItem = saveMockCorrection(data.description);
+    return { data: { success: true, data: newItem } };
+  },
+  post: (url, data) => {
+    if (url === "/student/correction") return mockApi.submitCorrection(data);
+    return realApi.post(url, data);
+  }
+};
+
+console.log("[NAR-DEBUG] Mock Mode Active:", USE_MOCK_DATA);
+export default USE_MOCK_DATA ? mockApi : realApi;
+

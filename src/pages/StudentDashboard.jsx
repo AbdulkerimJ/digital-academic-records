@@ -70,19 +70,24 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pRes, rRes, aRes] = await Promise.all([
-          api.get("/student/profile"),
-          api.get("/student/records"),
-          api.get("/student/corrections") // Fetches from the shared mock endpoint
+        const [pRes, dRes, eRes, cRes] = await Promise.all([
+          api.getStudentMe(),
+          api.getDegrees(),
+          api.getExams(),
+          api.getStudentCorrections()
         ]);
-        setProfile(pRes.data?.data ?? pRes.data);
-        setRecords(rRes.data?.data ?? rRes.data ?? []);
         
-        // Filter activity log for the current student mock
-        const allCorrections = aRes.data?.data ?? aRes.data ?? [];
-        setActivityLog(allCorrections);
+        setProfile(pRes.data?.data?.user ?? pRes.data?.data);
+        
+        // Combine or separate? Let's label them.
+        const degrees = (dRes.data?.data ?? []).map(d => ({ ...d, type: "DEGREE" }));
+        const exams = (eRes.data?.data ?? []).map(e => ({ ...e, type: "EXAM" }));
+        
+        setRecords([...degrees, ...exams]);
+        setActivityLog(cRes.data?.data ?? []);
       } catch (err) {
         console.error(err);
+        toast.error("Failed to sync with National Student Ledger.");
       } finally {
         setLoading(false);
       }
@@ -98,6 +103,7 @@ export default function StudentDashboard() {
     { id: "correction", label: "Record Dispute", icon: AlertCircle, sub: "Report Discrepancy" },
     { id: "qrcode", label: "Generate QR", icon: QrCode, sub: "Share Record" },
     { id: "activity", label: "Activity Log", icon: Activity, sub: "Request History" },
+    { id: "security", label: "Security", icon: ShieldCheck, sub: "Account Safety" },
   ];
 
   return (
@@ -151,39 +157,47 @@ export default function StudentDashboard() {
           {activeTab === "academic" && (
             <div className="space-y-8">
               <h2 className="text-3xl font-display font-bold text-primary">Verified Academic Records</h2>
-              {records.map((record) => (
-                <div key={record.id} className="bg-card border border-border p-8 rounded-sm shadow-md academic-border relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <GraduationCap className="h-32 w-32" />
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-8 relative z-10">
-                    <div className="space-y-6">
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">Official Institution</div>
-                        <div className="text-2xl font-display font-bold text-primary">{record.institution}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Field of Study</div>
-                        <div className="text-xl font-display font-semibold text-foreground">{record.field_of_study}</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 h-fit">
-                      <div className="p-4 bg-secondary rounded-sm border border-border">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Final Result</div>
-                        <div className="text-lg font-bold text-primary">{record.result}</div>
-                      </div>
-                      <div className="p-4 bg-secondary rounded-sm border border-border">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Completion</div>
-                        <div className="text-lg font-bold text-primary">{record.year}</div>
-                      </div>
-                      <div className="p-4 bg-primary/5 rounded-sm border border-primary/10 col-span-2 flex items-center justify-between">
-                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Record Level</span>
-                         <span className="text-xs font-bold text-foreground">{record.level}</span>
-                      </div>
-                    </div>
-                  </div>
+              {records.length === 0 ? (
+                <div className="p-10 text-center border border-dashed border-border rounded-sm bg-secondary/20">
+                  <GraduationCap className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-50" />
+                  <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">No verified records found</p>
                 </div>
-              ))}
+              ) : (
+                records.map((record) => (
+                  <div key={record.id} className="bg-card border border-border p-8 rounded-sm shadow-md academic-border relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <GraduationCap className="h-32 w-32" />
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-8 relative z-10">
+                      <div className="space-y-6">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2 py-0.5 text-[8px] font-bold uppercase rounded-sm border ${record.type === 'EXAM' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
+                              {record.type === 'EXAM' ? 'National Exam' : 'Higher Education'}
+                            </span>
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Official Institution</div>
+                          </div>
+                          <div className="text-2xl font-display font-bold text-primary">{record.institutionName || record.institution}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{record.type === 'EXAM' ? 'Exam Level' : 'Field of Study'}</div>
+                          <div className="text-xl font-display font-semibold text-foreground">{record.field_of_study || record.levelName || record.titleName}</div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 h-fit">
+                        <div className="p-4 bg-secondary rounded-sm border border-border">
+                          <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{record.type === 'EXAM' ? 'Score' : 'GPA / Result'}</div>
+                          <div className="text-lg font-bold text-primary">{record.score || record.gpa || record.result}</div>
+                        </div>
+                        <div className="p-4 bg-secondary rounded-sm border border-border">
+                          <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Completion</div>
+                          <div className="text-lg font-bold text-primary">{record.year || record.examYear}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
@@ -291,6 +305,52 @@ export default function StudentDashboard() {
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "security" && (
+            <div className="space-y-8">
+              <h2 className="text-3xl font-display font-bold text-primary">Security Settings</h2>
+              <div className="bg-card border border-border p-8 rounded-sm shadow-sm academic-border max-w-md">
+                 <div className="flex items-center gap-3 mb-6">
+                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-bold text-foreground uppercase tracking-tight">Change Password</h3>
+                 </div>
+                 <form className="space-y-4" onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const currentPassword = formData.get("currentPassword");
+                    const newPassword = formData.get("newPassword");
+                    const confirmPassword = formData.get("confirmPassword");
+
+                    if (newPassword !== confirmPassword) {
+                      toast.error("New passwords do not match.");
+                      return;
+                    }
+
+                    try {
+                      await api.changePassword({ currentPassword, newPassword });
+                      toast.success("Security credentials updated successfully.");
+                      e.target.reset();
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || "Failed to update password.");
+                    }
+                 }}>
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Current Password</label>
+                       <input name="currentPassword" type="password" required className="w-full bg-background border border-border h-11 px-4 rounded-sm outline-none focus:ring-1 focus:ring-primary text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">New Password</label>
+                       <input name="newPassword" type="password" required className="w-full bg-background border border-border h-11 px-4 rounded-sm outline-none focus:ring-1 focus:ring-primary text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Confirm New Password</label>
+                       <input name="confirmPassword" type="password" required className="w-full bg-background border border-border h-11 px-4 rounded-sm outline-none focus:ring-1 focus:ring-primary text-sm" />
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-primary-foreground h-11 rounded-sm font-bold uppercase tracking-widest text-xs mt-4 shadow-lg">Update Security Ledger</button>
+                 </form>
               </div>
             </div>
           )}
