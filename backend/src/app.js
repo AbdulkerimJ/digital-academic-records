@@ -21,6 +21,8 @@ import auditRoutes from "./modules/audit/audit.routes.js";
 
 const app = express();
 
+app.set("trust proxy", 1); // Enable proxy trust so req.ip has the real client IP
+
 app.use(cors({
   origin: [
     "http://localhost:5173",

@@ -20,7 +20,9 @@ export const logActionService = async ({
     let userAgent = null;
 
     if (req) {
-      ipAddress = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+      const forwarded = req.headers["x-forwarded-for"];
+      const clientIp = forwarded ? forwarded.split(",")[0].trim() : null;
+      ipAddress = clientIp || req.ip || req.connection?.remoteAddress;
       userAgent = req.headers["user-agent"];
     }
 
