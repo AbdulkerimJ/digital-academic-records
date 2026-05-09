@@ -9,7 +9,7 @@ export const findCollegeById = async (id) => {
       is_active AS "isActive",
       created_at AS "createdAt"
      FROM colleges
-     WHERE id = $1
+     WHERE id = $1 AND is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -25,11 +25,12 @@ export const findColleges = async (institutionId) => {
                     code,
                     is_active AS "isActive",
                     created_at AS "createdAt"
-             FROM colleges`;
+             FROM colleges
+             WHERE is_deleted = false`;
 
   if (institutionId) {
     params.push(institutionId);
-    sql += ` WHERE institution_id = $1`;
+    sql += ` AND institution_id = $1`;
   }
 
   sql += ` ORDER BY name ASC`;
@@ -52,7 +53,7 @@ export const findCollegeByCodeAll = async (code, institutionId) => {
 export const findCollegeByCode = async (code, institutionId) => {
   const result = await pool.query(
     `SELECT id, name, code, is_active AS "isActive" FROM colleges 
-     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND institution_id = $2
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND institution_id = $2 AND is_deleted = false
      LIMIT 1`,
     [code, institutionId],
   );

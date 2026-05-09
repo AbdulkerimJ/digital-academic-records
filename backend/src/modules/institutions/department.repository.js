@@ -9,7 +9,7 @@ export const findDepartmentById = async (id) => {
             is_active AS "isActive",
             created_at AS "createdAt"
      FROM departments
-     WHERE id = $1
+     WHERE id = $1 AND is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -25,11 +25,12 @@ export const findDepartments = async (collegeId) => {
                     code,
                     is_active AS "isActive",
                     created_at AS "createdAt"
-             FROM departments`;
+             FROM departments
+             WHERE is_deleted = false`;
 
   if (collegeId) {
     params.push(collegeId);
-    sql += ` WHERE college_id = $1`;
+    sql += ` AND college_id = $1`;
   }
 
   sql += ` ORDER BY name ASC`;
@@ -52,7 +53,7 @@ export const findDepartmentByCodeAll = async (code, collegeId) => {
 export const findDepartmentByCode = async (code, collegeId) => {
   const result = await pool.query(
     `SELECT id, name, code, is_active AS "isActive" FROM departments 
-     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND college_id = $2
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND college_id = $2 AND is_deleted = false
      LIMIT 1`,
     [code, collegeId],
   );

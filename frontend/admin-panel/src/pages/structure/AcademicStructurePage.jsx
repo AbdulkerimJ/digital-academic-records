@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../../context/AuthContext"
-import { listColleges, listDepartments, deleteCollege, deleteDepartment, listInstitutions } from "../../api/institutions.api"
+import { listColleges, listDepartments, deleteCollege, deleteDepartment, listInstitutions, updateCollege, updateDepartment } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
 import { Card } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
@@ -322,33 +322,40 @@ export default function AcademicStructurePage() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-white/20 text-white" : "hover:bg-primary/10 text-muted-foreground"}`}
-                        onClick={(e) => { e.stopPropagation(); setCollegeToEdit(college); setIsCollegeModalOpen(true); }}
-                      >
-                        <Edit2 size={14} />
-                      </Button>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-white/20 text-white" : "hover:bg-primary/10 text-muted-foreground"}`}
-                        onClick={(e) => { e.stopPropagation(); toggleCollegeStatusMutation.mutate({ collegeId: college.id, isActive: college.isActive }); }}
-                        title={college.isActive ? "Deactivate College" : "Activate College"}
-                      >
-                        <Power size={14} className={college.isActive ? (selectedCollegeId === college.id ? "text-white/60" : "text-amber-500") : "text-emerald-500"} />
-                      </Button>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-destructive/20 text-white" : "hover:bg-destructive/10 text-destructive"}`}
-                        onClick={(e) => { e.stopPropagation(); handleDeleteCollegeRequest(college); }}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                      <ChevronRight size={16} className={selectedCollegeId === college.id ? "text-white" : "text-muted-foreground"} />
+                    <div className="flex items-center gap-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-white/20 text-white" : "hover:bg-primary/10 text-muted-foreground"}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical size={14} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl border-border/40">
+                          <DropdownMenuItem 
+                            onClick={(e) => { e.stopPropagation(); setCollegeToEdit(college); setIsCollegeModalOpen(true); }}
+                            className="rounded-lg font-bold text-xs gap-2"
+                          >
+                            <Edit2 size={12} /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => { e.stopPropagation(); toggleCollegeStatusMutation.mutate({ collegeId: college.id, isActive: college.isActive }); }}
+                            className="rounded-lg font-bold text-xs gap-2"
+                          >
+                            <Power size={12} className={college.isActive ? "text-amber-500" : "text-emerald-500"} /> 
+                            {college.isActive ? "Deactivate" : "Activate"} College
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteCollegeRequest(college); }}
+                            className="rounded-lg font-bold text-xs gap-2 text-destructive focus:text-destructive"
+                          >
+                            <Trash2 size={12} /> Delete College
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))

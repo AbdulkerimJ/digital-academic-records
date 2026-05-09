@@ -19,7 +19,7 @@ export const findInstitutionByCode = async (code) => {
             is_active AS "isActive",
             created_at AS "createdAt"
      FROM institution
-     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND is_deleted = false
      LIMIT 1`,
     [code],
   );
