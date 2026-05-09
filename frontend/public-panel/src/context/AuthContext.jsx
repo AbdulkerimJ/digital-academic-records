@@ -39,8 +39,8 @@ export function AuthProvider({ children }) {
       if (e.key === 'studentAccessToken' && !e.newValue) {
         setStudent(null)
         setIsAuth(false)
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login'
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+          window.location.href = '/'
         }
       }
     }
@@ -50,12 +50,12 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     localStorage.removeItem('studentAccessToken')
-    setStudent(null)
-    setIsAuth(false)
     try {
-      api.post('/api/students/logout').catch(() => {})
+      await api.post('/api/students/logout')
+    } catch {
+      // ignore
     } finally {
-      window.location.href = '/login'
+      window.location.href = '/'
     }
   }
 

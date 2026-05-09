@@ -8,6 +8,9 @@ import QRCodesPage from '../pages/qr/QRCodesPage'
 import RequestsPage from '../pages/requests/RequestsPage'
 import Spinner from '../components/ui/Spinner'
 
+import LandingPage from '../pages/landing/LandingPage'
+import VerifyPage from '../pages/verify/VerifyPage'
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth()
 
@@ -35,12 +38,20 @@ const PublicRoute = ({ children }) => {
       </div>
     </div>
   )
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />
 
   return children
 }
 
 const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />,
+  },
+  {
+    path: '/verify/:token',
+    element: <VerifyPage />,
+  },
   {
     path: '/login',
     element: (
@@ -50,7 +61,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/',
+    path: '/dashboard',
     element: (
       <ProtectedRoute>
         <AppShell />

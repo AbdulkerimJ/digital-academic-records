@@ -21,13 +21,13 @@ export const getMe = catchAsync(async (req, res) => {
 });
 
 export const getMyExams = catchAsync(async (req, res) => {
-  const exams = await getMyExamsService(req.user.id);
-  return sendSuccess(res, "Your exam records fetched successfully", { count: exams.length, exams });
+  const { examRecords, count } = await getMyExamsService(req.user.id);
+  return sendSuccess(res, "Your exam records fetched successfully", { count, exams: examRecords });
 });
 
 export const getMyDegrees = catchAsync(async (req, res) => {
-  const degrees = await getMyDegreesService(req.user.id);
-  return sendSuccess(res, "Your degree records fetched successfully", { count: degrees.length, degrees });
+  const { degrees, count } = await getMyDegreesService(req.user.id);
+  return sendSuccess(res, "Your degree records fetched successfully", { count, degrees });
 });
 
 // ===================== ADMIN AND REGISTRAR HANDLERS =====================

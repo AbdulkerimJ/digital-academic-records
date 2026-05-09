@@ -8,10 +8,10 @@ import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 
 const navItems = [
-  { to: '/',           label: 'Dashboard',  icon: LayoutDashboard, end: true },
-  { to: '/records',    label: 'Records',    icon: FileText },
-  { to: '/qr-codes',   label: 'QR Codes',   icon: QrCode },
-  { to: '/requests',   label: 'Requests',   icon: ClipboardList },
+  { to: '/dashboard',           label: 'Dashboard',  icon: LayoutDashboard, end: true },
+  { to: '/dashboard/records',    label: 'Records',    icon: FileText },
+  { to: '/dashboard/qr-codes',   label: 'QR Codes',   icon: QrCode },
+  { to: '/dashboard/requests',   label: 'Requests',   icon: ClipboardList },
 ]
 
 function getInitials(s) {
@@ -55,7 +55,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <nav className="flex items-center justify-between h-16 px-4 md:px-8 max-w-7xl mx-auto w-full gap-4">
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-3 shrink-0 group">
+        <Link to="/dashboard" className="flex items-center gap-3 shrink-0 group">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
             <GraduationCap size={20} />
           </div>

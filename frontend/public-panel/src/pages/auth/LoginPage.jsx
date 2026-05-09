@@ -45,7 +45,7 @@ export default function LoginPage() {
       setStudent(student)
       setIsAuth(true)
       toast.success(`Welcome back, ${student.firstName}!`)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
