@@ -17,11 +17,15 @@ import correctionRequestRoutes from "./modules/correction-requests/correction-re
 import qrRoutes from "./modules/qr/qr.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import auditRoutes from "./modules/audit/audit.routes.js";
+import { globalLimiter } from "./common/middlewares/rateLimiter.js";
 
 
 const app = express();
 
 app.set("trust proxy", 1); // Enable proxy trust so req.ip has the real client IP
+
+// Apply rate limiting to all /api routes
+app.use("/api", globalLimiter);
 
 app.use(cors({
   origin: [

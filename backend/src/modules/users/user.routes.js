@@ -21,13 +21,14 @@ import {
   update,
 } from "./user.controller.js";
 import { protectUser, restrictTo } from "./user.middleware.js";
+import { authLimiter } from "../../common/middlewares/rateLimiter.js";
 
 const router = express.Router();
 
-router.post("/login", login);
+router.post("/login", authLimiter, login);
 router.post("/refresh", refresh);
 router.post("/logout", protectUser, logout);
-router.post("/activate-invite", activateInvite);
+router.post("/activate-invite", authLimiter, activateInvite);
 router.get("/roles", protectUser, restrictTo("SUPER_ADMIN"), listRoles);
 router.get("/", protectUser, restrictTo("SUPER_ADMIN"), list);
 router.post("/", protectUser, restrictTo("SUPER_ADMIN"), create);
