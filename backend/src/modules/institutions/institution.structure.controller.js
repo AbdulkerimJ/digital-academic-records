@@ -27,6 +27,7 @@ export const createCollege = catchAsync(async (req, res) => {
     user: req.user,
     institutionId,
     data: req.body,
+    req,
   });
   return sendSuccess(res, "College created successfully", { college }, 201);
 });
@@ -44,13 +45,14 @@ export const updateCollege = catchAsync(async (req, res) => {
     institutionId,
     collegeId,
     data: req.body,
+    req,
   });
   return sendSuccess(res, "College updated successfully", { college });
 });
 
 export const deleteCollege = catchAsync(async (req, res) => {
   const { institutionId, collegeId } = req.params;
-  await deleteCollegeService({ user: req.user, institutionId, collegeId });
+  await deleteCollegeService({ user: req.user, institutionId, collegeId, req });
   return sendSuccess(res, "College deleted successfully");
 });
 
@@ -69,6 +71,7 @@ export const createDepartment = catchAsync(async (req, res) => {
     institutionId,
     collegeId,
     data: req.body,
+    req,
   });
   return sendSuccess(res, "Department created successfully", { department }, 201);
 });
@@ -87,12 +90,13 @@ export const updateDepartment = catchAsync(async (req, res) => {
     collegeId,
     departmentId,
     data: req.body,
+    req,
   });
   return sendSuccess(res, "Department updated successfully", { department });
 });
 
 export const deleteDepartment = catchAsync(async (req, res) => {
   const { institutionId, collegeId, departmentId } = req.params;
-  await deleteDepartmentService({ user: req.user, institutionId, collegeId, departmentId });
+  await deleteDepartmentService({ user: req.user, institutionId, collegeId, departmentId, req });
   return sendSuccess(res, "Department deleted successfully");
 });

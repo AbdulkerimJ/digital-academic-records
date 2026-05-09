@@ -14,8 +14,11 @@ import {
   suspendUserById,
   unsuspendUserById,
   updateUserById,
+  findUserByEmailAll,
+  restoreUserById,
 } from "./user.repository.js";
 import { sendInvitationEmail } from "../../common/services/email.service.js";
+import { logActionService } from "../audit/audit.service.js";
 
 const INVITATION_TOKEN_TTL_HOURS = parseInt(process.env.INVITATION_TOKEN_TTL_HOURS || "24", 10);
 const INVITATION_TOKEN_TTL_MS = INVITATION_TOKEN_TTL_HOURS * 60 * 60 * 1000;
@@ -40,6 +43,8 @@ export const inviteUserService = async ({
   email,
   roleId,
   institutionId,
+  user: actor,
+  req,
 }) => {
   if (!firstName || !lastName || !email || roleId === undefined || roleId === null || roleId === "") {
     throw new AppError("firstName, lastName, email, and roleId are required", 400);
@@ -68,8 +73,8 @@ export const inviteUserService = async ({
     throw new AppError("role does not exist", 400);
   }
 
-  const existingUser = await findUserByEmail(normalizedEmail);
-  if (existingUser) {
+  const allUser = await findUserByEmailAll(normalizedEmail);
+  if (allUser && !allUser.isDeleted) {
     throw new AppError("User already exists with this email", 400);
   }
 
@@ -77,15 +82,50 @@ export const inviteUserService = async ({
     buildInvitation();
   const inviteLink = getInviteLink(invitationToken);
 
-  const user = await createUserRecord({
-    firstName: firstName.trim(),
-    lastName: lastName.trim(),
-    email: normalizedEmail,
-    roleId: numericRoleId,
-    institutionId: finalInstitutionId,
-    invitationToken,
-    invitationExpires,
-  });
+  let user;
+  if (allUser && allUser.isDeleted) {
+    // RESTORE logic
+    await restoreUserById(allUser.id);
+    user = await updateUserById({
+      id: allUser.id,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      roleId: numericRoleId,
+      institutionId: finalInstitutionId,
+      invitationToken,
+      invitationExpires,
+      isActive: false, // reset to inactive for new invite
+    });
+
+    await logActionService({
+      user: actor,
+      action: "RESTORE_USER",
+      entityType: "USER",
+      entityId: allUser.id,
+      newValues: user,
+      req,
+    });
+  } else {
+    // Normal CREATE logic
+    user = await createUserRecord({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: normalizedEmail,
+      roleId: numericRoleId,
+      institutionId: finalInstitutionId,
+      invitationToken,
+      invitationExpires,
+    });
+
+    await logActionService({
+      user: actor,
+      action: "INVITE_USER",
+      entityType: "USER",
+      entityId: user.id,
+      newValues: user,
+      req,
+    });
+  }
 
   let emailSent = false;
   try {
@@ -199,6 +239,8 @@ export const updateUserService = async ({
   lastName,
   email,
   institutionId,
+  user: actor,
+  req,
 }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
@@ -270,6 +312,16 @@ export const updateUserService = async ({
     throw new AppError("Failed to update user", 500);
   }
 
+  await logActionService({
+    user: actor,
+    action: "UPDATE_USER",
+    entityType: "USER",
+    entityId: userId,
+    oldValues: currentUser,
+    newValues: updatedUser,
+    req,
+  });
+
   if (inviteLink) {
     sendInvitationEmail({
       to: normalizedEmail || currentUser.email,
@@ -289,6 +341,7 @@ export const updateMyProfileService = async ({
   userId,
   firstName,
   lastName,
+  req,
 }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
@@ -335,10 +388,20 @@ export const updateMyProfileService = async ({
     throw new AppError("Failed to update profile", 500);
   }
 
+  await logActionService({
+    user: updatedUser,
+    action: "UPDATE_PROFILE",
+    entityType: "USER",
+    entityId: userId,
+    oldValues: currentUser,
+    newValues: updatedUser,
+    req,
+  });
+
   return updatedUser;
 };
 
-export const deleteUserService = async ({ userId }) => {
+export const deleteUserService = async ({ userId, user: actor, req }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -353,10 +416,19 @@ export const deleteUserService = async ({ userId }) => {
     throw new AppError("Failed to delete user", 500);
   }
 
+  await logActionService({
+    user: actor,
+    action: "DELETE_USER",
+    entityType: "USER",
+    entityId: userId,
+    oldValues: currentUser,
+    req,
+  });
+
   return deletedUser;
 };
 
-export const revokeInviteService = async ({ userId }) => {
+export const revokeInviteService = async ({ userId, user: actor, req }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -371,10 +443,20 @@ export const revokeInviteService = async ({ userId }) => {
     throw new AppError("Cannot revoke invite for an active user", 400);
   }
 
-  return revokeInvitationByUserId(userId);
+  const updated = await revokeInvitationByUserId(userId);
+  
+  await logActionService({
+    user: actor,
+    action: "REVOKE_INVITE",
+    entityType: "USER",
+    entityId: userId,
+    req,
+  });
+
+  return updated;
 };
 
-export const resendInviteService = async ({ userId }) => {
+export const resendInviteService = async ({ userId, user: actor, req }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -411,6 +493,14 @@ export const resendInviteService = async ({ userId }) => {
     console.error("Resend invitation email sending failed:", err);
   }
 
+  await logActionService({
+    user: actor,
+    action: "RESEND_INVITE",
+    entityType: "USER",
+    entityId: userId,
+    req,
+  });
+
   return {
     user: updatedUser,
     inviteLink,
@@ -423,6 +513,8 @@ export const suspendUserService = async ({
   userId,
   requesterUserId,
   reason,
+  user: actor,
+  req,
 }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
@@ -453,14 +545,26 @@ export const suspendUserService = async ({
   const suspensionReason =
     reason === undefined || reason === null ? null : String(reason).trim();
 
-  return suspendUserById({
+  const suspended = await suspendUserById({
     id: userId,
     suspendedBy: requesterUserId,
     suspensionReason,
   });
+
+  await logActionService({
+    user: actor,
+    action: "SUSPEND_USER",
+    entityType: "USER",
+    entityId: userId,
+    oldValues: user,
+    newValues: { isSuspended: true, suspensionReason },
+    req,
+  });
+
+  return suspended;
 };
 
-export const unsuspendUserService = async ({ userId, requesterUserId }) => {
+export const unsuspendUserService = async ({ userId, requesterUserId, user: actor, req }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -479,5 +583,17 @@ export const unsuspendUserService = async ({ userId, requesterUserId }) => {
     throw new AppError("User is not suspended", 400);
   }
 
-  return unsuspendUserById({ id: userId });
+  const unsuspended = await unsuspendUserById({ id: userId });
+
+  await logActionService({
+    user: actor,
+    action: "UNSUSPEND_USER",
+    entityType: "USER",
+    entityId: userId,
+    oldValues: user,
+    newValues: { isSuspended: false },
+    req,
+  });
+
+  return unsuspended;
 };

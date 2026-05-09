@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import FetchingIndicator from "../../components/common/FetchingIndicator"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { listInstitutions, listInstitutionTypes, deleteInstitution } from "../../api/institutions.api"
+import { listInstitutions, listInstitutionTypes, deleteInstitution, updateInstitution } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
 import { Plus, Building2, GraduationCap, AlertTriangle } from "lucide-react"
 import { Card } from "../../components/ui/card"
@@ -42,6 +42,16 @@ export default function InstitutionsPage() {
       toast.error(err.response?.data?.message || "Failed to delete institution")
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleToggleStatus = async (institution) => {
+    try {
+      await updateInstitution(institution.id, { isActive: !institution.isActive })
+      toast.success(`Institution ${institution.isActive ? 'deactivated' : 'activated'} successfully`)
+      queryClient.invalidateQueries(["institutions"])
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update institution status")
     }
   }
   
@@ -222,6 +232,7 @@ export default function InstitutionsPage() {
           setInstitutionToDelete(inst)
           setIsDeleteModalOpen(true)
         }}
+        onToggleStatus={handleToggleStatus}
         onAdd={() => setIsModalOpen(true)}
         onClearFilters={clearFilters}
       />

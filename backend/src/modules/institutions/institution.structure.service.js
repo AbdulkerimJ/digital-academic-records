@@ -3,7 +3,8 @@ import {
   findCollegeById,
   findColleges,
   findCollegeByCode,
-  findCollegeByName,
+  findCollegeByCodeAll,
+  restoreCollegeById,
   createCollegeRecord,
   updateCollegeById,
   deleteCollegeById,
@@ -12,12 +13,14 @@ import {
   findDepartmentById,
   findDepartments,
   findDepartmentByCode,
-  findDepartmentByName,
+  findDepartmentByCodeAll,
+  restoreDepartmentById,
   createDepartmentRecord,
   updateDepartmentById,
   deleteDepartmentById,
 } from "./department.repository.js";
 import { findInstitutionById } from "./institution.repository.js";
+import { logActionService } from "../audit/audit.service.js";
 
 /**
  * Ensures that an institution is of type 'COLLEGE'.
@@ -35,6 +38,11 @@ const ensureIsCollegeInstitution = async (institutionId) => {
       400
     );
   }
+
+  if (!institution.isActive) {
+    throw new AppError("This institution is currently inactive. Academic structure changes are disabled.", 400);
+  }
+
   return institution;
 };
 
@@ -56,7 +64,7 @@ export const listCollegesService = async ({ user, institutionId }) => {
   return findColleges(institutionId);
 };
 
-export const createCollegeService = async ({ user, institutionId, data }) => {
+export const createCollegeService = async ({ user, institutionId, data, req }) => {
   const { name, code, isActive } = data;
 
   if (user.roleName !== "SUPER_ADMIN") {
@@ -74,23 +82,49 @@ export const createCollegeService = async ({ user, institutionId, data }) => {
 
   await ensureIsCollegeInstitution(institutionId);
 
-  // Check uniqueness per institution
-  const existingName = await findCollegeByName(normalizedName, institutionId);
-  if (existingName) {
-    throw new AppError("A college with this name already exists in this institution.", 400);
+  // Check uniqueness per institution (including deleted)
+  const allCollege = await findCollegeByCodeAll(normalizedCode, institutionId);
+  if (allCollege) {
+    if (!allCollege.isDeleted) {
+      throw new AppError("A college with this code already exists in this institution.", 400);
+    }
+    // RESTORE logic
+    await restoreCollegeById(allCollege.id);
+    const restored = await updateCollegeById({
+      id: allCollege.id,
+      name: normalizedName,
+      isActive: isActive === undefined ? true : Boolean(isActive),
+    });
+
+    await logActionService({
+      user,
+      action: "RESTORE_COLLEGE",
+      entityType: "COLLEGE",
+      entityId: allCollege.id,
+      newValues: restored,
+      req,
+    });
+
+    return restored;
   }
 
-  const existingCode = await findCollegeByCode(normalizedCode, institutionId);
-  if (existingCode) {
-    throw new AppError("A college with this code already exists in this institution.", 400);
-  }
-
-  return createCollegeRecord({
+  const college = await createCollegeRecord({
     institutionId,
     name: normalizedName,
     code: normalizedCode,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
+
+  await logActionService({
+    user,
+    action: "CREATE_COLLEGE",
+    entityType: "COLLEGE",
+    entityId: college.id,
+    newValues: college,
+    req,
+  });
+
+  return college;
 };
 
 export const getCollegeByIdService = async ({ user, institutionId, collegeId }) => {
@@ -108,7 +142,7 @@ export const getCollegeByIdService = async ({ user, institutionId, collegeId }) 
   return college;
 };
 
-export const updateCollegeService = async ({ user, institutionId, collegeId, data }) => {
+export const updateCollegeService = async ({ user, institutionId, collegeId, data, req }) => {
   const { name, code, isActive } = data;
 
   if (user.roleName !== "SUPER_ADMIN") {
@@ -125,13 +159,6 @@ export const updateCollegeService = async ({ user, institutionId, collegeId, dat
   const normalizedName = name !== undefined ? String(name).trim() : null;
   const normalizedCode = code !== undefined ? String(code).trim().toUpperCase() : null;
 
-  if (normalizedName) {
-    const existing = await findCollegeByName(normalizedName, institutionId);
-    if (existing && existing.id !== collegeId) {
-      throw new AppError("A college with this name already exists in this institution.", 400);
-    }
-  }
-
   if (normalizedCode) {
     const existing = await findCollegeByCode(normalizedCode, institutionId);
     if (existing && existing.id !== collegeId) {
@@ -139,15 +166,27 @@ export const updateCollegeService = async ({ user, institutionId, collegeId, dat
     }
   }
 
-  return updateCollegeById({
+  const updatedCollege = await updateCollegeById({
     id: collegeId,
     name: normalizedName,
     code: normalizedCode,
     isActive: isActive === undefined ? null : Boolean(isActive),
   });
+
+  await logActionService({
+    user,
+    action: "UPDATE_COLLEGE",
+    entityType: "COLLEGE",
+    entityId: collegeId,
+    oldValues: currentCollege,
+    newValues: updatedCollege,
+    req,
+  });
+
+  return updatedCollege;
 };
 
-export const deleteCollegeService = async ({ user, institutionId, collegeId }) => {
+export const deleteCollegeService = async ({ user, institutionId, collegeId, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to delete colleges for this institution.", 403);
@@ -164,6 +203,15 @@ export const deleteCollegeService = async ({ user, institutionId, collegeId }) =
     throw new AppError("Failed to delete college.", 500);
   }
 
+  await logActionService({
+    user,
+    action: "DELETE_COLLEGE",
+    entityType: "COLLEGE",
+    entityId: collegeId,
+    oldValues: college,
+    req,
+  });
+
   return deleted;
 };
 
@@ -179,6 +227,11 @@ const validateCollegeParent = async (collegeId, institutionId) => {
   if (!college || college.institutionId !== institutionId) {
     throw new AppError("College not found in this institution.", 404);
   }
+
+  if (!college.isActive) {
+    throw new AppError("This college is currently inactive. Department changes are disabled.", 400);
+  }
+
   return college;
 };
 
@@ -194,7 +247,7 @@ export const listDepartmentsService = async ({ user, institutionId, collegeId })
   return findDepartments(collegeId);
 };
 
-export const createDepartmentService = async ({ user, institutionId, collegeId, data }) => {
+export const createDepartmentService = async ({ user, institutionId, collegeId, data, req }) => {
   const { name, code, isActive } = data;
 
   if (user.roleName !== "SUPER_ADMIN") {
@@ -212,23 +265,49 @@ export const createDepartmentService = async ({ user, institutionId, collegeId, 
 
   await validateCollegeParent(collegeId, institutionId);
 
-  // Check uniqueness per college
-  const existingName = await findDepartmentByName(normalizedName, collegeId);
-  if (existingName) {
-    throw new AppError("A department with this name already exists in this college.", 400);
+  // Check uniqueness per college (including deleted)
+  const allDept = await findDepartmentByCodeAll(normalizedCode, collegeId);
+  if (allDept) {
+    if (!allDept.isDeleted) {
+      throw new AppError("A department with this code already exists in this college.", 400);
+    }
+    // RESTORE logic
+    await restoreDepartmentById(allDept.id);
+    const restored = await updateDepartmentById({
+      id: allDept.id,
+      name: normalizedName,
+      isActive: isActive === undefined ? true : Boolean(isActive),
+    });
+
+    await logActionService({
+      user,
+      action: "RESTORE_DEPARTMENT",
+      entityType: "DEPARTMENT",
+      entityId: allDept.id,
+      newValues: restored,
+      req,
+    });
+
+    return restored;
   }
 
-  const existingCode = await findDepartmentByCode(normalizedCode, collegeId);
-  if (existingCode) {
-    throw new AppError("A department with this code already exists in this college.", 400);
-  }
-
-  return createDepartmentRecord({
+  const department = await createDepartmentRecord({
     collegeId,
     name: normalizedName,
     code: normalizedCode,
     isActive: isActive === undefined ? true : Boolean(isActive),
   });
+
+  await logActionService({
+    user,
+    action: "CREATE_DEPARTMENT",
+    entityType: "DEPARTMENT",
+    entityId: department.id,
+    newValues: department,
+    req,
+  });
+
+  return department;
 };
 
 export const getDepartmentByIdService = async ({ user, institutionId, collegeId, departmentId }) => {
@@ -248,7 +327,7 @@ export const getDepartmentByIdService = async ({ user, institutionId, collegeId,
   return department;
 };
 
-export const updateDepartmentService = async ({ user, institutionId, collegeId, departmentId, data }) => {
+export const updateDepartmentService = async ({ user, institutionId, collegeId, departmentId, data, req }) => {
   const { name, code, isActive } = data;
 
   if (user.roleName !== "SUPER_ADMIN") {
@@ -267,13 +346,6 @@ export const updateDepartmentService = async ({ user, institutionId, collegeId, 
   const normalizedName = name !== undefined ? String(name).trim() : null;
   const normalizedCode = code !== undefined ? String(code).trim().toUpperCase() : null;
 
-  if (normalizedName) {
-    const existing = await findDepartmentByName(normalizedName, collegeId);
-    if (existing && existing.id !== departmentId) {
-      throw new AppError("A department with this name already exists in this college.", 400);
-    }
-  }
-
   if (normalizedCode) {
     const existing = await findDepartmentByCode(normalizedCode, collegeId);
     if (existing && existing.id !== departmentId) {
@@ -281,15 +353,27 @@ export const updateDepartmentService = async ({ user, institutionId, collegeId, 
     }
   }
 
-  return updateDepartmentById({
+  const updatedDept = await updateDepartmentById({
     id: departmentId,
     name: normalizedName,
     code: normalizedCode,
     isActive: isActive === undefined ? null : Boolean(isActive),
   });
+
+  await logActionService({
+    user,
+    action: "UPDATE_DEPARTMENT",
+    entityType: "DEPARTMENT",
+    entityId: departmentId,
+    oldValues: currentDept,
+    newValues: updatedDept,
+    req,
+  });
+
+  return updatedDept;
 };
 
-export const deleteDepartmentService = async ({ user, institutionId, collegeId, departmentId }) => {
+export const deleteDepartmentService = async ({ user, institutionId, collegeId, departmentId, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     if (user.institutionId !== institutionId) {
       throw new AppError("You do not have permission to delete departments for this institution.", 403);
@@ -307,6 +391,15 @@ export const deleteDepartmentService = async ({ user, institutionId, collegeId, 
   if (!deleted) {
     throw new AppError("Failed to delete department.", 500);
   }
+
+  await logActionService({
+    user,
+    action: "DELETE_DEPARTMENT",
+    entityType: "DEPARTMENT",
+    entityId: departmentId,
+    oldValues: department,
+    req,
+  });
 
   return deleted;
 };

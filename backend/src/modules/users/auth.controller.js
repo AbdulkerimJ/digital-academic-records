@@ -14,7 +14,7 @@ import {
 } from "./auth.service.js";
 
 export const activateInvite = catchAsync(async (req, res) => {
-  const activatedUser = await activateInviteService(req.body || {});
+  const activatedUser = await activateInviteService({ ...(req.body || {}), req });
 
   return createAndSendUserToken(
     activatedUser, 
@@ -24,13 +24,13 @@ export const activateInvite = catchAsync(async (req, res) => {
 });
 
 export const login = catchAsync(async (req, res) => {
-  const user = await loginUserService(req.body || {});
+  const user = await loginUserService({ ...(req.body || {}), req });
 
   return createAndSendUserToken(user, res);
 });
 
 export const logout = catchAsync(async (req, res) => {
-  await revokeUserSessionService(req.user.id);
+  await revokeUserSessionService({ userId: req.user.id, req });
   clearUserAuthCookie(res);
 
   return sendSuccess(res, "Logged out successfully");
@@ -38,7 +38,7 @@ export const logout = catchAsync(async (req, res) => {
 
 export const refresh = catchAsync(async (req, res) => {
   const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
-  const user = await refreshUserSessionService(refreshToken);
+  const user = await refreshUserSessionService({ refreshToken, req });
 
   return createAndSendUserToken(user, res, "Token refreshed successfully");
 });
@@ -53,6 +53,7 @@ export const changePassword = catchAsync(async (req, res) => {
   const refreshedUser = await changeUserPasswordService({
     userId: req.user.id,
     ...(req.body || {}),
+    req,
   });
 
   return createAndSendUserToken(

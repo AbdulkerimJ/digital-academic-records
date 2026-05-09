@@ -15,7 +15,11 @@ import {
 } from "./user.service.js";
 
 export const create = catchAsync(async (req, res) => {
-  const result = await inviteUserService(req.body || {});
+  const result = await inviteUserService({ 
+    ...req.body, 
+    user: req.user, 
+    req 
+  });
 
   console.log(
     `[Invitation Link - simulated] email=${result.user.email} inviteLink=${result.inviteLink} expiresAt=${result.invitationExpires.toISOString()}`,
@@ -85,7 +89,9 @@ export const getUserById = catchAsync(async (req, res) => {
 export const update = catchAsync(async (req, res) => {
   const result = await updateUserService({
     userId: req.params.userId,
-    ...(req.body || {}),
+    ...req.body,
+    user: req.user,
+    req,
   });
 
   if (result.inviteLink) {
@@ -98,25 +104,27 @@ export const update = catchAsync(async (req, res) => {
 });
 
 export const updateMe = catchAsync(async (req, res) => {
-  const { firstName, lastName } = req.body || {};
-
   const user = await updateMyProfileService({
     userId: req.user.id,
-    firstName,
-    lastName,
+    ...req.body,
+    req,
   });
 
   return sendSuccess(res, "Profile updated successfully", { user });
 });
 
 export const remove = catchAsync(async (req, res) => {
-  const user = await deleteUserService({ userId: req.params.userId });
+  const user = await deleteUserService({ userId: req.params.userId, user: req.user, req });
 
   return sendSuccess(res, "User deleted successfully", { user });
 });
 
 export const revokeInvite = catchAsync(async (req, res) => {
-  const updatedUser = await revokeInviteService(req.params || {});
+  const updatedUser = await revokeInviteService({ 
+    userId: req.params.userId, 
+    user: req.user, 
+    req 
+  });
 
   return sendSuccess(res, "Invitation revoked successfully", {
     user: updatedUser,
@@ -124,7 +132,11 @@ export const revokeInvite = catchAsync(async (req, res) => {
 });
 
 export const resendInvite = catchAsync(async (req, res) => {
-  const result = await resendInviteService(req.params || {});
+  const result = await resendInviteService({ 
+    userId: req.params.userId, 
+    user: req.user, 
+    req 
+  });
 
   console.log(
     `[Invitation Link - simulated] email=${result.user.email} inviteLink=${result.inviteLink} expiresAt=${result.invitationExpires.toISOString()}`,
@@ -141,6 +153,8 @@ export const suspend = catchAsync(async (req, res) => {
     userId: req.params.userId,
     requesterUserId: req.user.id,
     reason: req.body?.reason,
+    user: req.user,
+    req,
   });
 
   return sendSuccess(res, "User suspended successfully", { user });
@@ -150,6 +164,8 @@ export const unsuspend = catchAsync(async (req, res) => {
   const user = await unsuspendUserService({
     userId: req.params.userId,
     requesterUserId: req.user.id,
+    user: req.user,
+    req,
   });
 
   return sendSuccess(res, "User unsuspended successfully", { user });

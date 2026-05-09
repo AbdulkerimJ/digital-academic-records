@@ -18,7 +18,11 @@ export const getInstitutionTypes = catchAsync(async (req, res) => {
 });
 
 export const createInstitution = catchAsync(async (req, res) => {
-  const institution = await createInstitutionService(req.body || {});
+  const institution = await createInstitutionService({ 
+    ...req.body, 
+    user: req.user,
+    req 
+  });
 
   return sendSuccess(
     res,
@@ -71,7 +75,9 @@ export const getInstitutionById = catchAsync(async (req, res) => {
 export const updateInstitution = catchAsync(async (req, res) => {
   const institution = await updateInstitutionService({
     institutionId: req.params.institutionId,
-    ...(req.body || {}),
+    ...req.body,
+    user: req.user,
+    req,
   });
 
   return sendSuccess(res, "Institution updated successfully", {
@@ -82,6 +88,8 @@ export const updateInstitution = catchAsync(async (req, res) => {
 export const deleteInstitution = catchAsync(async (req, res) => {
   await deleteInstitutionService({
     institutionId: req.params.institutionId,
+    user: req.user,
+    req,
   });
 
   return sendSuccess(res, "Institution deleted successfully");

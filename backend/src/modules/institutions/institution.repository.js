@@ -1,19 +1,12 @@
 import pool from "../../common/config/pool.js";
 
-export const findInstitutionByName = async (name) => {
+export const findInstitutionByCodeAll = async (code) => {
   const result = await pool.query(
-    `SELECT id,
-            name,
-            code,
-            type,
-            is_active AS "isActive",
-            created_at AS "createdAt"
+    `SELECT id, name, code, is_deleted AS "isDeleted"
      FROM institution
-     WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))
-     LIMIT 1`,
-    [name],
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))`,
+    [code],
   );
-
   return result.rows[0] || null;
 };
 
@@ -64,7 +57,7 @@ export const findInstitutionById = async (id) => {
             is_active AS "isActive",
             created_at AS "createdAt"
      FROM institution
-     WHERE id = $1
+     WHERE id = $1 AND is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -93,7 +86,7 @@ export const findInstitutions = async ({
            COUNT(*) OVER() AS "totalCount"
     FROM institution i
     LEFT JOIN institution_types it ON i.type = it.code
-    WHERE 1=1
+    WHERE is_deleted = false
   `;
 
   if (search && search.trim()) {
@@ -164,7 +157,23 @@ export const getInstitutionTypes = async () => {
 
 export const deleteInstitutionRecord = async (id) => {
   const result = await pool.query(
-    `DELETE FROM institution WHERE id = $1 RETURNING id`,
+    `UPDATE institution 
+     SET is_deleted = true, 
+         deleted_at = CURRENT_TIMESTAMP 
+     WHERE id = $1 
+     RETURNING id`,
+    [id],
+  );
+  return result.rows[0] || null;
+};
+
+export const restoreInstitutionById = async (id) => {
+  const result = await pool.query(
+    `UPDATE institution 
+     SET is_deleted = false, 
+         deleted_at = NULL 
+     WHERE id = $1 
+     RETURNING id, name, code`,
     [id],
   );
   return result.rows[0] || null;

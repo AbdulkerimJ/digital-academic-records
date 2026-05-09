@@ -113,6 +113,12 @@ export const createExamRecordService = async ({ user, data = {} }) => {
       throw new AppError("Institution ID or Code is required for super admin.", 400);
     }
   }
+  
+  // Verify Institution is Active
+  const institution = await findInstitutionById(institutionId);
+  if (!institution || !institution.isActive) {
+    throw new AppError("Institution not found or is currently inactive.", 400);
+  }
 
   // 2. Resolve Student
   let student;
@@ -349,6 +355,13 @@ export const updateExamRecordService = async ({
   const currentRecord = await findExamRecordById(examId, institutionId);
   if (!currentRecord) {
     throw new AppError("Exam record not found.", 404);
+  }
+
+  // Validate Institution is Active
+  const effectiveInstitutionId = institutionId || currentRecord.institutionId;
+  const institution = await findInstitutionById(effectiveInstitutionId);
+  if (!institution || !institution.isActive) {
+    throw new AppError("Institution is currently inactive. Updates are disabled.", 400);
   }
 
   const parsedYear = year === undefined ? null : parseNumber(year, "Year");

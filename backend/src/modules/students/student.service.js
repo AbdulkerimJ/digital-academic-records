@@ -1,12 +1,13 @@
 import AppError from "../../common/utils/appError.js";
 import { translateDatabaseError } from "../../common/utils/dbErrorHelper.js";
-import { findStudentById, findStudents, findStudentByNationalId, createStudentFromCitizen } from "./student.repository.js";
+import { findStudentById, findStudents, findStudentByNationalId, findStudentByNationalIdAll, restoreStudentById, createStudentFromCitizen, deleteStudentById } from "./student.repository.js";
 
 import { findExamRecords } from "../exams/exam.repository.js";
 import { findDegrees } from "../degrees/degree.repository.js";
 import { getCitizen } from "../citizens/fayda.client.js";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { logActionService } from "../audit/audit.service.js";
 
 export const getStudentProfileService = async (id) => {
   const student = await findStudentById(id);
@@ -85,15 +86,31 @@ export const getStudentFullRecordsService = async (id, user) => {
 };
 
 
-export const registerStudentService = async (faydaId) => {
+export const registerStudentService = async ({ faydaId, user, req }) => {
   if (!faydaId) {
     throw new AppError("Fayda ID is required", 400);
   }
 
-  // 1. Check if already registered
-  const existing = await findStudentByNationalId(faydaId);
-  if (existing) {
-    throw new AppError("Student is already registered in our system.", 400);
+  // 1. Check if already registered (including deleted)
+  const allStudent = await findStudentByNationalIdAll(faydaId);
+  if (allStudent) {
+    if (!allStudent.isDeleted) {
+      throw new AppError("Student is already registered in our system.", 400);
+    }
+    // RESTORE logic: if they exist but are deleted, we un-delete them
+    await restoreStudentById(allStudent.id);
+    const restored = await findStudentById(allStudent.id);
+
+    await logActionService({
+      user,
+      action: "RESTORE_STUDENT",
+      entityType: "STUDENT",
+      entityId: allStudent.id,
+      newValues: restored,
+      req,
+    });
+
+    return restored;
   }
 
   // 2. Fetch from Fayda
@@ -106,10 +123,21 @@ export const registerStudentService = async (faydaId) => {
   }
 
   // 3. Create local record
-  return await createStudentFromCitizen(faydaId, citizenRes.data);
+  const student = await createStudentFromCitizen(faydaId, citizenRes.data);
+
+  await logActionService({
+    user,
+    action: "REGISTER_STUDENT",
+    entityType: "STUDENT",
+    entityId: student.id,
+    newValues: student,
+    req,
+  });
+
+  return student;
 };
 
-export const registerBulkStudentsService = async (fileBuffer, onProgress) => {
+export const registerBulkStudentsService = async ({ fileBuffer, onProgress, user, req }) => {
   if (!fileBuffer) {
     throw new AppError("No file provided", 400);
   }
@@ -145,7 +173,7 @@ export const registerBulkStudentsService = async (fileBuffer, onProgress) => {
   for (let i = 0; i < faydaIds.length; i++) {
     const id = faydaIds[i];
     try {
-      const student = await registerStudentService(id);
+      const student = await registerStudentService({ faydaId: id, user, req });
       results.successful.push({
         id,
         name: `${student.firstName} ${student.lastName}`,
@@ -178,6 +206,37 @@ export const registerBulkStudentsService = async (fileBuffer, onProgress) => {
     ? `${Math.round((results.successful.length / results.total) * 100)}%`
     : "0%";
 
+  await logActionService({
+    user,
+    action: "BULK_REGISTER_STUDENTS",
+    entityType: "STUDENT",
+    entityId: "BULK",
+    newValues: { successful: results.successful.length, failed: results.failed.length },
+    req,
+  });
+
   return results;
 };
 
+export const deleteStudentService = async ({ studentId, user, req }) => {
+  const student = await findStudentById(studentId);
+  if (!student) {
+    throw new AppError("Student not found", 404);
+  }
+
+  const result = await deleteStudentById(studentId);
+  if (!result) {
+    throw new AppError("Failed to delete student.", 500);
+  }
+
+  await logActionService({
+    user,
+    action: "DELETE_STUDENT",
+    entityType: "STUDENT",
+    entityId: studentId,
+    oldValues: student,
+    req,
+  });
+
+  return result;
+};

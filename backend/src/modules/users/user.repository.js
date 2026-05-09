@@ -45,15 +45,26 @@ export const findUserByEmail = async (email) => {
             institution.name AS "institutionName",
             institution.code AS "institutionCode",
             institution.type AS "institutionType",
+            institution.is_active AS "isInstitutionActive",
             app_user.password_changed_at AS "passwordChangedAt",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt"
      FROM app_user
      LEFT JOIN institution ON institution.id = app_user.institution_id
-     WHERE app_user.email = $1`,
+     WHERE app_user.email = $1 AND app_user.is_deleted = false`,
     [email],
   );
 
+  return result.rows[0] || null;
+};
+
+export const findUserByEmailAll = async (email) => {
+  const result = await pool.query(
+    `SELECT id, email, is_active AS "isActive", is_deleted AS "isDeleted"
+     FROM app_user
+     WHERE email = $1`,
+    [email],
+  );
   return result.rows[0] || null;
 };
 
@@ -79,6 +90,7 @@ export const findUserByEmailWithRole = async (email) => {
                  institution.name AS "institutionName",
                  institution.code AS "institutionCode",
                  institution.type AS "institutionType",
+                 institution.is_active AS "isInstitutionActive",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
@@ -86,7 +98,7 @@ export const findUserByEmailWithRole = async (email) => {
      FROM app_user
      INNER JOIN roles ON roles.id = app_user.role_id
                LEFT JOIN institution ON institution.id = app_user.institution_id
-     WHERE app_user.email = $1`,
+     WHERE app_user.email = $1 AND app_user.is_deleted = false`,
     [email],
   );
 
@@ -115,6 +127,7 @@ export const findUserByIdWithRole = async (id) => {
               institution.name AS "institutionName",
               institution.code AS "institutionCode",
               institution.type AS "institutionType",
+              institution.is_active AS "isInstitutionActive",
             app_user.created_at AS "createdAt",
             app_user.updated_at AS "updatedAt",
             app_user.password_changed_at AS "passwordChangedAt",
@@ -127,7 +140,7 @@ export const findUserByIdWithRole = async (id) => {
      INNER JOIN roles ON roles.id = app_user.role_id
                LEFT JOIN institution ON institution.id = app_user.institution_id
                LEFT JOIN app_user AS suspender ON suspender.id = app_user.suspended_by
-     WHERE app_user.id = $1`,
+     WHERE app_user.id = $1 AND app_user.is_deleted = false`,
     [id],
   );
 
@@ -166,7 +179,7 @@ export const findUsersWithRole = async ({
     FROM app_user
     INNER JOIN roles ON roles.id = app_user.role_id
     LEFT JOIN institution ON institution.id = app_user.institution_id
-    WHERE 1=1
+    WHERE app_user.is_deleted = false
   `;
 
   if (excludeUserId) {
@@ -454,7 +467,9 @@ export const updateUserById = async ({
 
 export const deleteUserById = async (id) => {
   const result = await pool.query(
-    `DELETE FROM app_user
+    `UPDATE app_user
+     SET is_deleted = true,
+         deleted_at = CURRENT_TIMESTAMP
      WHERE id = $1
      RETURNING id,
                first_name AS "firstName",
@@ -463,6 +478,18 @@ export const deleteUserById = async (id) => {
     [id],
   );
 
+  return result.rows[0] || null;
+};
+
+export const restoreUserById = async (id) => {
+  const result = await pool.query(
+    `UPDATE app_user 
+     SET is_deleted = false, 
+         deleted_at = NULL 
+     WHERE id = $1 
+     RETURNING id, email, first_name AS "firstName"`,
+    [id],
+  );
   return result.rows[0] || null;
 };
 

@@ -8,8 +8,8 @@ import {
   getStudentById,
   getStudentRecords,
   registerStudent,
-
   registerBulkStudents,
+  removeStudent,
 } from "./student.controller.js";
 
 import {
@@ -61,6 +61,12 @@ router.post(
 );
 
 router.get("/:id", protectUser, getStudentById);
+router.delete(
+  "/:id", 
+  protectUser, 
+  restrictTo("SUPER_ADMIN", "REGISTRAR"), 
+  removeStudent
+);
 router.get("/:id/records", protectUser, getStudentRecords);
 
 

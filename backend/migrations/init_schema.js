@@ -34,6 +34,8 @@ async function migrate() {
         code TEXT UNIQUE NOT NULL,
         type TEXT NOT NULL,
         is_active BOOLEAN DEFAULT true,
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         
         FOREIGN KEY (type) REFERENCES institution_types(code)
@@ -48,14 +50,15 @@ async function migrate() {
         name TEXT NOT NULL,
         code TEXT NOT NULL,
         is_active BOOLEAN DEFAULT true,
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (institution_id)
           REFERENCES institution(id)
           ON DELETE CASCADE,
 
-        UNIQUE (institution_id, code),
-        UNIQUE (institution_id, name)
+        UNIQUE (institution_id, code)
       );
     `);
 
@@ -67,14 +70,15 @@ async function migrate() {
         name TEXT NOT NULL,
         code TEXT NOT NULL,
         is_active BOOLEAN DEFAULT true,
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (college_id)
           REFERENCES colleges(id)
           ON DELETE CASCADE,
 
-        UNIQUE (college_id, code),
-        UNIQUE (college_id, name)
+        UNIQUE (college_id, code)
       );
     `);
 
@@ -141,6 +145,9 @@ async function migrate() {
         date_of_birth DATE NOT NULL,
         token_version INT NOT NULL DEFAULT 0,
 
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
+
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -163,6 +170,9 @@ async function migrate() {
         result_status TEXT NOT NULL CHECK (
           result_status IN ('PASS', 'FAIL')
       ),
+
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -205,6 +215,9 @@ async function migrate() {
   department_id UUID NOT NULL,
   cgpa FLOAT,
   graduation_date DATE NOT NULL,
+
+  is_deleted BOOLEAN DEFAULT false,
+  deleted_at TIMESTAMP,
 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -268,6 +281,9 @@ async function migrate() {
     password_changed_at TIMESTAMP,
     token_version INT NOT NULL DEFAULT 0,
 
+    is_deleted BOOLEAN DEFAULT false,
+    deleted_at TIMESTAMP,
+
     role_id INT NOT NULL,
     institution_id UUID,
 
@@ -327,25 +343,30 @@ async function migrate() {
           REFERENCES institution(id)
           ON DELETE CASCADE
       );
-
-
     `);
 
-    // ===================== AUDIT LOG =====================
+    // ===================== AUDIT LOGS =====================
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS audit_log (
+      CREATE TABLE IF NOT EXISTS audit_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-        actor_id UUID,
+        user_id UUID,
+        institution_id UUID,
+        
         action TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT,
 
-        target_table TEXT,
-        target_id UUID,
+        old_values JSONB,
+        new_values JSONB,
 
         ip_address TEXT,
         user_agent TEXT,
+        
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE SET NULL,
+        FOREIGN KEY (institution_id) REFERENCES institution(id) ON DELETE CASCADE
       );
     `);
 

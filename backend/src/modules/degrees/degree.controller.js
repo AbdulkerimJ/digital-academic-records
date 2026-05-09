@@ -39,7 +39,8 @@ export const getDegreeLevelById = catchAsync(async (req, res) => {
 export const createDegreeLevel = catchAsync(async (req, res) => {
   const degreeLevel = await createDegreeLevelService({
     user: req.user,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
   return sendSuccess(res, "Degree level created successfully", { degreeLevel }, 201);
 });
@@ -50,7 +51,8 @@ export const updateDegreeLevel = catchAsync(async (req, res) => {
   const degreeLevel = await updateDegreeLevelService({
     user: req.user,
     id: degreeLevelId,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
   return sendSuccess(res, "Degree level updated successfully", { degreeLevel });
 });
@@ -80,7 +82,8 @@ export const getDegreeTitleById = catchAsync(async (req, res) => {
 export const createDegreeTitle = catchAsync(async (req, res) => {
   const degreeTitle = await createDegreeTitleService({
     user: req.user,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
   return sendSuccess(res, "Degree title created successfully", { degreeTitle }, 201);
 });
@@ -91,7 +94,8 @@ export const updateDegreeTitle = catchAsync(async (req, res) => {
   const degreeTitle = await updateDegreeTitleService({
     user: req.user,
     id: degreeTitleId,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
   return sendSuccess(res, "Degree title updated successfully", { degreeTitle });
 });
@@ -103,7 +107,8 @@ export const updateDegreeTitle = catchAsync(async (req, res) => {
 export const createDegree = catchAsync(async (req, res) => {
   const degree = await createDegreeService({
     user: req.user,
-    data: req.body || {},
+    data: req.body,
+    req,
   });
 
   return sendSuccess(
@@ -146,7 +151,8 @@ export const updateDegree = catchAsync(async (req, res) => {
   const degreeRecord = await updateDegreeService({
     user: req.user,
     degreeId: req.params.degreeId,
-    ...(req.body || {}),
+    ...req.body,
+    req,
   });
   return sendSuccess(res, "Degree record updated successfully", { degreeRecord });
 });
@@ -156,6 +162,7 @@ export const deleteDegree = catchAsync(async (req, res) => {
   await deleteDegreeService({
     user: req.user,
     degreeId: req.params.degreeId,
+    req,
   });
 
   return sendSuccess(res, "Degree record deleted successfully");
@@ -179,8 +186,9 @@ export const uploadBulkDegrees = catchAsync(async (req, res) => {
       user: req.user,
       fileBuffer: req.file.buffer,
       onProgress,
-      institutionId: (req.body || {}).institutionId || req.query.institutionId,
-      institutionCode: (req.body || {}).institutionCode || req.query.institutionCode,
+      institutionId: req.body?.institutionId || req.query.institutionId,
+      institutionCode: req.body?.institutionCode || req.query.institutionCode,
+      req,
     });
 
 

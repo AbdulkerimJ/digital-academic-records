@@ -16,6 +16,7 @@ import degreeRoutes from "./modules/degrees/degree.routes.js";
 import correctionRequestRoutes from "./modules/correction-requests/correction-request.routes.js";
 import qrRoutes from "./modules/qr/qr.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import auditRoutes from "./modules/audit/audit.routes.js";
 
 
 const app = express();
@@ -49,6 +50,7 @@ app.use("/api/degrees", degreeRoutes);
 app.use("/api/correction-requests", correctionRequestRoutes);
 app.use("/api/qr", qrRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/audit-logs", auditRoutes);
 
 
 // unmatched routes

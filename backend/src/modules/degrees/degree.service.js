@@ -30,6 +30,7 @@ import { findInstitutionById, findInstitutionByCode } from "../institutions/inst
 import { findStudentById, findStudentByNationalId } from "../students/student.repository.js";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { logActionService } from "../audit/audit.service.js";
 
 // ===================== DEGREE LEVEL LOOKUPS =====================
 
@@ -49,7 +50,7 @@ export const getDegreeLevelByIdService = async ({ degreeLevelId }) => {
   return degreeLevel;
 };
 
-export const createDegreeLevelService = async ({ user, data }) => {
+export const createDegreeLevelService = async ({ user, data, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can create degree levels.", 403);
   }
@@ -59,10 +60,21 @@ export const createDegreeLevelService = async ({ user, data }) => {
     throw new AppError("Code, name, and rank are required.", 400);
   }
 
-  return await createDegreeLevelRecord({ code, name, rank, isActive });
+  const level = await createDegreeLevelRecord({ code, name, rank, isActive });
+
+  await logActionService({
+    user,
+    action: "CREATE_DEGREE_LEVEL",
+    entityType: "DEGREE_LEVEL",
+    entityId: level.id,
+    newValues: level,
+    req,
+  });
+
+  return level;
 };
 
-export const updateDegreeLevelService = async ({ user, id, data }) => {
+export const updateDegreeLevelService = async ({ user, id, data, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can update degree levels.", 403);
   }
@@ -72,7 +84,19 @@ export const updateDegreeLevelService = async ({ user, id, data }) => {
     throw new AppError("Degree level not found.", 404);
   }
 
-  return await updateDegreeLevelById({ id, ...data });
+  const updated = await updateDegreeLevelById({ id, ...data });
+
+  await logActionService({
+    user,
+    action: "UPDATE_DEGREE_LEVEL",
+    entityType: "DEGREE_LEVEL",
+    entityId: id,
+    oldValues: level,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };
 
 // ===================== DEGREE TITLE LOOKUPS =====================
@@ -96,7 +120,7 @@ export const getDegreeTitleByIdService = async ({ degreeTitleId }) => {
   return degreeTitle;
 };
 
-export const createDegreeTitleService = async ({ user, data }) => {
+export const createDegreeTitleService = async ({ user, data, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can create degree titles.", 403);
   }
@@ -111,10 +135,21 @@ export const createDegreeTitleService = async ({ user, data }) => {
     throw new AppError("Associated degree level not found.", 404);
   }
 
-  return await createDegreeTitleRecord({ degreeLevelId, code, title, isActive });
+  const titleRecord = await createDegreeTitleRecord({ degreeLevelId, code, title, isActive });
+
+  await logActionService({
+    user,
+    action: "CREATE_DEGREE_TITLE",
+    entityType: "DEGREE_TITLE",
+    entityId: titleRecord.id,
+    newValues: titleRecord,
+    req,
+  });
+
+  return titleRecord;
 };
 
-export const updateDegreeTitleService = async ({ user, id, data }) => {
+export const updateDegreeTitleService = async ({ user, id, data, req }) => {
   if (user.roleName !== "SUPER_ADMIN") {
     throw new AppError("Only super admins can update degree titles.", 403);
   }
@@ -131,12 +166,24 @@ export const updateDegreeTitleService = async ({ user, id, data }) => {
     }
   }
 
-  return await updateDegreeTitleById({ id, ...data });
+  const updated = await updateDegreeTitleById({ id, ...data });
+
+  await logActionService({
+    user,
+    action: "UPDATE_DEGREE_TITLE",
+    entityType: "DEGREE_TITLE",
+    entityId: id,
+    oldValues: existingTitle,
+    newValues: updated,
+    req,
+  });
+
+  return updated;
 };
 
 // ===================== DEGREE RECORD CRUD =====================
 
-export const createDegreeService = async ({ user, data = {} }) => {
+export const createDegreeService = async ({ user, data = {}, req }) => {
   let {
     studentId,
     nationalId,
@@ -171,6 +218,12 @@ export const createDegreeService = async ({ user, data = {} }) => {
     if (!institutionId) {
       throw new AppError("Institution ID or Code is required for super admin.", 400);
     }
+  }
+
+  // Verify Institution is Active
+  const institution = await findInstitutionById(institutionId);
+  if (!institution || !institution.isActive) {
+    throw new AppError("Institution not found or is currently inactive.", 400);
   }
 
   // 2. Resolve Student
@@ -268,7 +321,18 @@ export const createDegreeService = async ({ user, data = {} }) => {
     graduationDate,
   });
 
-  return findDegreeById(created.id);
+  const result = await findDegreeById(created.id);
+
+  await logActionService({
+    user,
+    action: "ISSUE_DEGREE",
+    entityType: "DEGREE",
+    entityId: result.id,
+    newValues: result,
+    req,
+  });
+
+  return result;
 };
 
 export const uploadBulkDegreesService = async ({
@@ -277,6 +341,7 @@ export const uploadBulkDegreesService = async ({
   onProgress,
   institutionId,
   institutionCode,
+  req,
 }) => {
   if (!fileBuffer) {
     throw new AppError("No file provided", 400);
@@ -324,6 +389,7 @@ export const uploadBulkDegreesService = async ({
           institutionId: mappedData.institutionId || institutionId,
           institutionCode: mappedData.institutionCode || institutionCode,
         },
+        req,
       });
       results.successful.push({
         id: mappedData.nationalId,
@@ -354,6 +420,15 @@ export const uploadBulkDegreesService = async ({
   results.successRate = results.total > 0
     ? `${Math.round((results.successful.length / results.total) * 100)}%`
     : "0%";
+
+  await logActionService({
+    user,
+    action: "BULK_ISSUE_DEGREES",
+    entityType: "DEGREE",
+    entityId: "BULK",
+    newValues: { successful: results.successful.length, failed: results.failed.length },
+    req,
+  });
 
   return results;
 };
@@ -407,6 +482,7 @@ export const updateDegreeService = async ({
   departmentId,
   cgpa,
   graduationDate,
+  req,
 }) => {
   if (!degreeId) {
     throw new AppError("Degree ID is required.", 400);
@@ -433,6 +509,12 @@ export const updateDegreeService = async ({
   const effectiveCollegeId = collegeId !== undefined ? collegeId : currentRecord.collegeId;
   const effectiveDepartmentId = departmentId !== undefined ? departmentId : currentRecord.departmentId;
   const effectiveInstitutionId = institutionId || currentRecord.institutionId;
+
+  // Validate Institution is Active
+  const institution = await findInstitutionById(effectiveInstitutionId);
+  if (!institution || !institution.isActive) {
+    throw new AppError("Institution is currently inactive. Updates are disabled.", 400);
+  }
 
   // Validate degree level if changed
   if (degreeLevelId !== undefined) {
@@ -521,10 +603,22 @@ export const updateDegreeService = async ({
     graduationDate,
   });
 
-  return findDegreeById(degreeId);
+  const result = await findDegreeById(degreeId);
+
+  await logActionService({
+    user,
+    action: "UPDATE_DEGREE",
+    entityType: "DEGREE",
+    entityId: degreeId,
+    oldValues: currentRecord,
+    newValues: result,
+    req,
+  });
+
+  return result;
 };
 
-export const deleteDegreeService = async ({ user, degreeId }) => {
+export const deleteDegreeService = async ({ user, degreeId, req }) => {
   if (!degreeId) {
     throw new AppError("Degree ID is required.", 400);
   }
@@ -547,6 +641,14 @@ export const deleteDegreeService = async ({ user, degreeId }) => {
       404,
     );
   }
+
+  await logActionService({
+    user,
+    action: "DELETE_DEGREE",
+    entityType: "DEGREE",
+    entityId: degreeId,
+    req,
+  });
 
   return deleted;
 };

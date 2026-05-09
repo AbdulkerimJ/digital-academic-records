@@ -9,8 +9,8 @@ import {
   getStudentByIdService,
   getStudentFullRecordsService,
   registerStudentService,
-
   registerBulkStudentsService,
+  deleteStudentService,
 } from "./student.service.js";
 
 // ===================== STUDENT HANDLERS =====================
@@ -55,8 +55,14 @@ export const getStudentRecords = catchAsync(async (req, res) => {
 
 export const registerStudent = catchAsync(async (req, res) => {
   const { faydaId } = req.body || {};
-  const student = await registerStudentService(faydaId);
+  const student = await registerStudentService({ faydaId, user: req.user, req });
   return sendSuccess(res, "Student registered successfully", { student });
+});
+
+export const removeStudent = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const student = await deleteStudentService({ studentId: id, user: req.user, req });
+  return sendSuccess(res, "Student deleted successfully", { student });
 });
 
 export const registerBulkStudents = catchAsync(async (req, res) => {

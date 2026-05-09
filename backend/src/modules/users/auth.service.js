@@ -9,8 +9,9 @@ import {
   incrementUserTokenVersionById,
   updateUserById,
 } from "./user.repository.js";
+import { logActionService } from "../audit/audit.service.js";
 
-export const activateInviteService = async ({ token, password }) => {
+export const activateInviteService = async ({ token, password, req }) => {
   if (!token || !password) {
     throw new AppError("token and password are required", 400);
   }
@@ -48,10 +49,18 @@ export const activateInviteService = async ({ token, password }) => {
     throw new AppError("Failed to activate account", 500);
   }
 
+  await logActionService({
+    user: activatedUser,
+    action: "ACCOUNT_ACTIVATED",
+    entityType: "USER",
+    entityId: activatedUser.id,
+    req,
+  });
+
   return activatedUser;
 };
 
-export const loginUserService = async ({ email, password }) => {
+export const loginUserService = async ({ email, password, req }) => {
   if (!email || !password) {
     throw new AppError("email and password are required", 400);
   }
@@ -74,11 +83,27 @@ export const loginUserService = async ({ email, password }) => {
     throw new AppError("Account is suspended. Please contact support.", 403);
   }
 
+  // Block login if institution is inactive (exclude Super Admins)
+  if (user.roleName !== "SUPER_ADMIN" && user.isInstitutionActive === false) {
+    throw new AppError(
+      "Your institution is currently inactive. Please contact support.",
+      403,
+    );
+  }
+
   const isMatch = await comparePassword(password, user.passwordHash);
 
   if (!isMatch) {
     throw new AppError("Invalid email or password", 401);
   }
+
+  await logActionService({
+    user,
+    action: "LOGIN_SUCCESS",
+    entityType: "USER",
+    entityId: user.id,
+    req,
+  });
 
   return user;
 };
@@ -105,6 +130,14 @@ export const getUserAuthContextService = async (decoded) => {
     throw new AppError("Account is suspended. Please contact support.", 403);
   }
 
+  // Block session if institution is inactive (exclude Super Admins)
+  if (user.roleName !== "SUPER_ADMIN" && user.isInstitutionActive === false) {
+    throw new AppError(
+      "Your institution is currently inactive. Please contact support.",
+      403,
+    );
+  }
+
   if (decoded.tokenVersion !== user.tokenVersion) {
     throw new AppError("Session is no longer valid. Please log in again.", 401);
   }
@@ -124,7 +157,7 @@ export const getUserAuthContextService = async (decoded) => {
   return user;
 };
 
-export const refreshUserSessionService = async (refreshToken) => {
+export const refreshUserSessionService = async ({ refreshToken, req }) => {
   if (!refreshToken) {
     throw new AppError("Refresh token is required", 401);
   }
@@ -157,14 +190,30 @@ export const refreshUserSessionService = async (refreshToken) => {
     throw new AppError("Account is suspended. Please contact support.", 403);
   }
 
+  // Block refresh if institution is inactive (exclude Super Admins)
+  if (user.roleName !== "SUPER_ADMIN" && user.isInstitutionActive === false) {
+    throw new AppError(
+      "Your institution is currently inactive. Please contact support.",
+      403,
+    );
+  }
+
   if (decoded.tokenVersion !== user.tokenVersion) {
     throw new AppError("Session is no longer valid. Please log in again.", 401);
   }
 
+  await logActionService({
+    user,
+    action: "SESSION_REFRESH",
+    entityType: "USER",
+    entityId: user.id,
+    req,
+  });
+
   return user;
 };
 
-export const revokeUserSessionService = async (userId) => {
+export const revokeUserSessionService = async ({ userId, req }) => {
   if (!userId) {
     throw new AppError("userId is required", 400);
   }
@@ -175,6 +224,14 @@ export const revokeUserSessionService = async (userId) => {
     throw new AppError("User not found", 404);
   }
 
+  await logActionService({
+    user: { id: userId }, // Minimal user object for logout
+    action: "LOGOUT",
+    entityType: "USER",
+    entityId: userId,
+    req,
+  });
+
   return updated;
 };
 
@@ -182,6 +239,7 @@ export const changeUserPasswordService = async ({
   userId,
   currentPassword,
   newPassword,
+  req,
 }) => {
   if (!currentPassword || !newPassword) {
     throw new AppError("Current password and new password are required", 400);
@@ -225,6 +283,14 @@ export const changeUserPasswordService = async ({
   if (!refreshedUser) {
     throw new AppError("User not found after password change", 404);
   }
+
+  await logActionService({
+    user: refreshedUser,
+    action: "PASSWORD_CHANGED",
+    entityType: "USER",
+    entityId: userId,
+    req,
+  });
 
   return refreshedUser;
 };

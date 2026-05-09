@@ -3,12 +3,14 @@ import {
   createInstitutionRecord,
   findInstitutionById,
   findInstitutionByCode,
-  findInstitutionByName,
+  findInstitutionByCodeAll,
+  restoreInstitutionById,
   findInstitutions,
   updateInstitutionById,
   getInstitutionTypes,
   deleteInstitutionRecord,
 } from "./institution.repository.js";
+import { logActionService } from "../audit/audit.service.js";
 
 export const getInstitutionTypesService = async () => {
   return getInstitutionTypes();
@@ -32,6 +34,8 @@ export const createInstitutionService = async ({
   code,
   type,
   isActive,
+  user,
+  req,
 }) => {
   if (!name || !code || !type) {
     throw new AppError("name, code and type are required", 400);
@@ -66,16 +70,32 @@ export const createInstitutionService = async ({
     throw new AppError("isActive must be a boolean", 400);
   }
 
-  const existingInstitution = await findInstitutionByName(normalizedName);
+  // Check for existing code (including deleted)
+  const allInstitution = await findInstitutionByCodeAll(normalizedCode);
+  
+  if (allInstitution) {
+    if (!allInstitution.isDeleted) {
+      throw new AppError("Institution already exists with this code", 400);
+    }
+    // RESTORE logic
+    await restoreInstitutionById(allInstitution.id);
+    const restored = await updateInstitutionById({
+      id: allInstitution.id,
+      name: normalizedName,
+      type: normalizedType,
+      isActive: parsedIsActive,
+    });
 
-  if (existingInstitution) {
-    throw new AppError("Institution already exists with this name", 400);
-  }
+    await logActionService({
+      user,
+      action: "RESTORE_INSTITUTION",
+      entityType: "INSTITUTION",
+      entityId: allInstitution.id,
+      newValues: restored,
+      req,
+    });
 
-  const existingInstitutionByCode = await findInstitutionByCode(normalizedCode);
-
-  if (existingInstitutionByCode) {
-    throw new AppError("Institution already exists with this code", 400);
+    return restored;
   }
 
   const institution = await createInstitutionRecord({
@@ -83,6 +103,15 @@ export const createInstitutionService = async ({
     code: normalizedCode,
     type: normalizedType,
     isActive: parsedIsActive,
+  });
+
+  await logActionService({
+    user,
+    action: "CREATE_INSTITUTION",
+    entityType: "INSTITUTION",
+    entityId: institution.id,
+    newValues: institution,
+    req,
   });
 
   return institution;
@@ -128,6 +157,8 @@ export const updateInstitutionService = async ({
   code,
   type,
   isActive,
+  user,
+  req,
 }) => {
   if (!institutionId) {
     throw new AppError("institutionId is required", 400);
@@ -187,16 +218,7 @@ export const updateInstitutionService = async ({
     );
   }
 
-  if (normalizedName !== null) {
-    const existingInstitutionByName =
-      await findInstitutionByName(normalizedName);
-    if (
-      existingInstitutionByName &&
-      existingInstitutionByName.id !== institutionId
-    ) {
-      throw new AppError("Institution already exists with this name", 400);
-    }
-  }
+  // Name check removed as per user request (name uniqueness no longer enforced)
 
   if (normalizedCode !== null) {
     const existingInstitutionByCode =
@@ -221,10 +243,20 @@ export const updateInstitutionService = async ({
     throw new AppError("Failed to update institution", 500);
   }
 
+  await logActionService({
+    user,
+    action: "UPDATE_INSTITUTION",
+    entityType: "INSTITUTION",
+    entityId: institutionId,
+    oldValues: currentInstitution,
+    newValues: updatedInstitution,
+    req,
+  });
+
   return updatedInstitution;
 };
 
-export const deleteInstitutionService = async ({ institutionId }) => {
+export const deleteInstitutionService = async ({ institutionId, user, req }) => {
   if (!institutionId) {
     throw new AppError("institutionId is required", 400);
   }
@@ -234,11 +266,19 @@ export const deleteInstitutionService = async ({ institutionId }) => {
     throw new AppError("Institution not found", 404);
   }
 
-  // Deletion will fail automatically due to ON DELETE RESTRICT if there are users, exams, or degrees.
   const deleted = await deleteInstitutionRecord(institutionId);
   if (!deleted) {
-    throw new AppError("Failed to delete institution. It might have linked records (users, exams, or degrees).", 400);
+    throw new AppError("Failed to delete institution.", 500);
   }
+
+  await logActionService({
+    user,
+    action: "DELETE_INSTITUTION",
+    entityType: "INSTITUTION",
+    entityId: institutionId,
+    oldValues: institution,
+    req,
+  });
 
   return deleted;
 };

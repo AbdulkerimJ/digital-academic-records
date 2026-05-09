@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Hash,
-  Trash
+  Trash,
+  Power
 } from "lucide-react"
 import { 
   Table, 
@@ -54,6 +55,7 @@ export default function InstitutionTable({
   isFetching,
   onEdit, 
   onDelete,
+  onToggleStatus,
   onAdd,
   onClearFilters 
 }) {
@@ -172,6 +174,13 @@ export default function InstitutionTable({
                             className="gap-2 cursor-pointer"
                           >
                             <Pencil size={14} className="text-muted-foreground" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => onToggleStatus(inst)}
+                            className="gap-2 cursor-pointer"
+                          >
+                            <Power size={14} className={inst.isActive ? "text-amber-500" : "text-emerald-500"} /> 
+                            {inst.isActive ? "Deactivate" : "Activate"} Institution
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => onDelete(inst)}

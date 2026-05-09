@@ -38,12 +38,13 @@ export const findColleges = async (institutionId) => {
   return result.rows;
 };
 
-export const findCollegeByName = async (name, institutionId) => {
+export const findCollegeByCodeAll = async (code, institutionId) => {
   const result = await pool.query(
-    `SELECT id, name, code, is_active AS "isActive" FROM colleges 
-     WHERE LOWER(TRIM(name)) = LOWER(TRIM($1)) AND institution_id = $2
+    `SELECT id, institution_id AS "institutionId", name, code, is_deleted AS "isDeleted" 
+     FROM colleges 
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND institution_id = $2
      LIMIT 1`,
-    [name, institutionId],
+    [code, institutionId],
   );
   return result.rows[0] || null;
 };
@@ -93,7 +94,23 @@ export const updateCollegeById = async ({ id, name = null, code = null, isActive
 
 export const deleteCollegeById = async (id) => {
   const result = await pool.query(
-    `DELETE FROM colleges WHERE id = $1 RETURNING id`,
+    `UPDATE colleges 
+     SET is_deleted = true, 
+         deleted_at = CURRENT_TIMESTAMP 
+     WHERE id = $1 
+     RETURNING id`,
+    [id],
+  );
+  return result.rows[0] || null;
+};
+
+export const restoreCollegeById = async (id) => {
+  const result = await pool.query(
+    `UPDATE colleges 
+     SET is_deleted = false, 
+         deleted_at = NULL 
+     WHERE id = $1 
+     RETURNING id, name, code`,
     [id],
   );
   return result.rows[0] || null;

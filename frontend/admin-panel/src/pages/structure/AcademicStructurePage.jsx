@@ -18,7 +18,8 @@ import {
   Building2,
   ChevronRight,
   AlertCircle,
-  Network
+  Network,
+  Power
 } from "lucide-react"
 import FetchingIndicator from "../../components/common/FetchingIndicator"
 import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
@@ -174,6 +175,24 @@ export default function AcademicStructurePage() {
     onError: (err) => toast.error(err.response?.data?.message || "Failed to delete department"),
   })
 
+  const toggleCollegeStatusMutation = useMutation({
+    mutationFn: ({ collegeId, isActive }) => updateCollege(selectedInstitutionId, collegeId, { isActive: !isActive }),
+    onSuccess: () => {
+      toast.success("College status updated")
+      queryClient.invalidateQueries({ queryKey: ["colleges", selectedInstitutionId] })
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to update college status"),
+  })
+
+  const toggleDepartmentStatusMutation = useMutation({
+    mutationFn: ({ deptId, isActive }) => updateDepartment(selectedInstitutionId, selectedCollegeId, deptId, { isActive: !isActive }),
+    onSuccess: () => {
+      toast.success("Department status updated")
+      queryClient.invalidateQueries({ queryKey: ["departments", selectedCollegeId] })
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to update department status"),
+  })
+
   const handleDeleteCollegeRequest = (college) => {
     setDeleteConfirm({
       isOpen: true,
@@ -315,6 +334,15 @@ export default function AcademicStructurePage() {
                       <Button 
                         size="icon" 
                         variant="ghost" 
+                        className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-white/20 text-white" : "hover:bg-primary/10 text-muted-foreground"}`}
+                        onClick={(e) => { e.stopPropagation(); toggleCollegeStatusMutation.mutate({ collegeId: college.id, isActive: college.isActive }); }}
+                        title={college.isActive ? "Deactivate College" : "Activate College"}
+                      >
+                        <Power size={14} className={college.isActive ? (selectedCollegeId === college.id ? "text-white/60" : "text-amber-500") : "text-emerald-500"} />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
                         className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-destructive/20 text-white" : "hover:bg-destructive/10 text-destructive"}`}
                         onClick={(e) => { e.stopPropagation(); handleDeleteCollegeRequest(college); }}
                       >
@@ -417,6 +445,13 @@ export default function AcademicStructurePage() {
                               className="rounded-lg font-bold text-xs gap-2"
                             >
                               <Edit2 size={12} /> Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => toggleDepartmentStatusMutation.mutate({ deptId: dept.id, isActive: dept.isActive })}
+                              className="rounded-lg font-bold text-xs gap-2"
+                            >
+                              <Power size={12} className={dept.isActive ? "text-amber-500" : "text-emerald-500"} /> 
+                              {dept.isActive ? "Deactivate" : "Activate"} Dept
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDeleteDepartmentRequest(dept)}

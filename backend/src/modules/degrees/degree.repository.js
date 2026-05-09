@@ -71,7 +71,7 @@ export const findDegreeById = async (id, institutionId = null) => {
     JOIN departments dep ON d.department_id = dep.id
     JOIN institution i ON d.institution_id = i.id
     JOIN student s ON d.student_id = s.id
-    WHERE d.id = $1
+    WHERE d.id = $1 AND d.is_deleted = false
   `;
 
   if (institutionId) {
@@ -115,6 +115,7 @@ export const findDegrees = async (query = {}, pagination = {}) => {
     JOIN departments dep ON d.department_id = dep.id
     JOIN institution i ON d.institution_id = i.id
     JOIN student s ON d.student_id = s.id
+    WHERE d.is_deleted = false
   `;
 
   const conditions = [];
@@ -150,7 +151,7 @@ export const findDegrees = async (query = {}, pagination = {}) => {
   }
 
   if (conditions.length > 0) {
-    sql += ` WHERE ` + conditions.join(" AND ");
+    sql += ` AND ` + conditions.join(" AND ");
   }
 
   // 1. Get Total Count
@@ -159,7 +160,7 @@ export const findDegrees = async (query = {}, pagination = {}) => {
     FROM degrees d
     JOIN degree_levels dl ON d.degree_level_id = dl.id
     JOIN student s ON d.student_id = s.id
-    ${conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : ""}
+    WHERE d.is_deleted = false ${conditions.length > 0 ? " AND " + conditions.join(" AND ") : ""}
   `;
   const countRes = await pool.query(countSql, params.slice(0, conditions.length));
   const totalCount = parseInt(countRes.rows[0].count, 10);
@@ -255,13 +256,13 @@ export const updateDegreeById = async ({
 };
 
 export const deleteDegreeById = async (id, institutionId = null) => {
-  let sql = `DELETE FROM degrees WHERE id = $1`;
+  let sql = `UPDATE degrees SET is_deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = $1`;
   const params = [id];
 
   // enforce institution scope if provided
   if (institutionId) {
     params.push(institutionId);
-    sql += ` AND institution_id = $2`;
+    sql += ` AND institution_id = $${params.length}`;
   }
 
   sql += ` RETURNING id`;

@@ -11,7 +11,7 @@ export const findStudentById = async (id) => {
             token_version AS "tokenVersion",
             created_at AS "createdAt"
      FROM student
-     WHERE id = $1
+     WHERE id = $1 AND is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -30,10 +30,20 @@ export const findStudentByNationalId = async (faydaId) => {
             token_version AS "tokenVersion",
             created_at AS "createdAt"
      FROM student
-     WHERE national_id = $1`,
+     WHERE national_id = $1 AND is_deleted = false`,
     [faydaId],
   );
 
+  return result.rows[0] || null;
+};
+
+export const findStudentByNationalIdAll = async (faydaId) => {
+  const result = await pool.query(
+    `SELECT id, national_id AS "nationalId", is_deleted AS "isDeleted"
+     FROM student
+     WHERE national_id = $1`,
+    [faydaId],
+  );
   return result.rows[0] || null;
 };
 
@@ -88,6 +98,7 @@ export const findStudents = async ({
            date_of_birth AS "dateOfBirth",
            created_at AS "createdAt"
     FROM student
+    WHERE is_deleted = false
   `;
 
   const conditions = [];
@@ -122,11 +133,11 @@ export const findStudents = async ({
   }
 
   if (conditions.length > 0) {
-    sql += ` WHERE ` + conditions.join(" AND ");
+    sql += ` AND ` + conditions.join(" AND ");
   }
 
   // 1. Get Total Count
-  const countSql = `SELECT COUNT(*) FROM student ${conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : ""}`;
+  const countSql = `SELECT COUNT(*) FROM student WHERE is_deleted = false ${conditions.length > 0 ? " AND " + conditions.join(" AND ") : ""}`;
   const countRes = await pool.query(countSql, params);
   const totalCount = parseInt(countRes.rows[0].count, 10);
 
@@ -148,3 +159,26 @@ export const findStudents = async ({
 
 
 
+export const deleteStudentById = async (id) => {
+  const result = await pool.query(
+    `UPDATE student 
+     SET is_deleted = true, 
+         deleted_at = CURRENT_TIMESTAMP 
+     WHERE id = $1 
+     RETURNING id`,
+    [id],
+  );
+  return result.rows[0] || null;
+};
+
+export const restoreStudentById = async (id) => {
+  const result = await pool.query(
+    `UPDATE student 
+     SET is_deleted = false, 
+         deleted_at = NULL 
+     WHERE id = $1 
+     RETURNING id, national_id AS "nationalId"`,
+    [id],
+  );
+  return result.rows[0] || null;
+};
