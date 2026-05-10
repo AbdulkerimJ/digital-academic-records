@@ -102,7 +102,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
-            Admin <span className="text-primary">Dashboard</span>
+            Welcome, <span className="text-primary">{user?.firstName || 'Admin'}</span>
           </h2>
         </div>
       </div>
