@@ -25,6 +25,9 @@ import { Badge } from "../ui/badge"
 import { toast } from "sonner"
 import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { listInstitutions } from "../../api/institutions.api"
+import { useAuth } from "../../context/AuthContext"
+import { Building2 } from "lucide-react"
+import { Label } from "../ui/label"
 
 export default function BulkUploadModal({ 
   isOpen, 
@@ -33,8 +36,12 @@ export default function BulkUploadModal({
   description, 
   uploadFunction, 
   queryKeyToInvalidate,
-  templateUrl
+  templateUrl,
+  institutionType = null // "EXAM_BOARD" or "COLLEGE"
 }) {
+  const { user } = useAuth()
+  const isSuperAdmin = user?.roleName === "SUPER_ADMIN"
+  const [institutionCode, setInstitutionCode] = useState("")
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -46,10 +53,19 @@ export default function BulkUploadModal({
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
-    if (selectedFile && selectedFile.type === "text/csv") {
+    if (!selectedFile) return
+
+    // More robust CSV check (mime types vary by OS/Browser)
+    const isCsv = 
+      selectedFile.type === "text/csv" || 
+      selectedFile.type === "application/vnd.ms-excel" ||
+      selectedFile.name.toLowerCase().endsWith(".csv")
+
+    if (isCsv) {
       setFile(selectedFile)
     } else {
       toast.error("Please select a valid CSV file.")
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 
@@ -58,6 +74,7 @@ export default function BulkUploadModal({
     setIsUploading(false)
     setProgress(null)
     setResults(null)
+    setInstitutionCode("")
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
@@ -68,14 +85,23 @@ export default function BulkUploadModal({
   }
 
   const startUpload = async () => {
-    if (!file) return
+    if (!file) {
+      toast.error("No file selected.")
+      return
+    }
+
+    if (isSuperAdmin && institutionType && !institutionCode) {
+      toast.error(`Please select an ${institutionType === "EXAM_BOARD" ? "exam body" : "academic institution"}.`)
+      return
+    }
 
     setIsUploading(true)
     setResults(null)
     
     try {
+      console.log("Starting bulk upload with file:", file.name, "size:", file.size, "type:", file.type)
       // The uploadFunction must be one that uses fetch and returns a stream response
-      const response = await uploadFunction(file)
+      const response = await uploadFunction(file, institutionCode)
 
       if (!response.body) {
         // Fallback for non-streaming response (e.g. standard axios post)
@@ -210,6 +236,12 @@ export default function BulkUploadModal({
     }
   }
 
+  const { data: institutionsData } = useQuery({
+    queryKey: ["institutions-list", institutionType],
+    queryFn: () => listInstitutions({ type: institutionType }),
+    enabled: isOpen && isSuperAdmin && !!institutionType,
+  })
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] flex flex-col rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -235,6 +267,32 @@ export default function BulkUploadModal({
         <div className="p-6 space-y-6 overflow-y-auto">
           {!isUploading && !results && (
             <>
+              {isSuperAdmin && institutionType && (
+                <div className="space-y-3 mb-6">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 text-left block">
+                    {institutionType === "EXAM_BOARD" ? "Exam Body" : "Academic Institution"}
+                  </Label>
+                  <Select value={institutionCode} onValueChange={setInstitutionCode}>
+                    <SelectTrigger className="h-14 rounded-2xl bg-muted/10 border-border px-4 transition-all hover:bg-muted/20">
+                      <div className="flex items-center gap-3">
+                        <Building2 size={16} className="text-muted-foreground/40" />
+                        <SelectValue placeholder={`Select ${institutionType === "EXAM_BOARD" ? "exam body" : "institution"}`} />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border-border shadow-2xl">
+                      {institutionsData?.data?.institutions?.map((inst) => (
+                        <SelectItem key={inst.id} value={inst.code.toString()} className="rounded-xl text-xs font-bold uppercase">
+                          {inst.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tight pl-1 text-left">
+                    This institution will be associated with all records in the CSV if not specified within the file.
+                  </p>
+                </div>
+              )}
+
               <div 
                 onClick={() => fileInputRef.current?.click()}
                 className={`

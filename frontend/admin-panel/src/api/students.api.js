@@ -21,7 +21,7 @@ export const registerStudent = async (data) => {
   return response.data
 }
 
-export const registerBulkStudentsStream = async (file) => {
+export const registerBulkStudentsStream = async (file, institutionCode) => {
   const formData = new FormData()
   formData.append("file", file)
 

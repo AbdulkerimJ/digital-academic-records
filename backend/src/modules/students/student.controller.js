@@ -103,7 +103,12 @@ export const registerBulkStudents = catchAsync(async (req, res) => {
   };
 
   try {
-    const results = await registerBulkStudentsService(req.file.buffer, onProgress);
+    const results = await registerBulkStudentsService({
+      fileBuffer: req.file.buffer,
+      onProgress,
+      user: req.user,
+      req,
+    });
 
     // Send final results and close stream
     res.write(`data: ${JSON.stringify({ complete: true, results })}\n\n`);
