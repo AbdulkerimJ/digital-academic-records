@@ -12,6 +12,7 @@ import Spinner from '../components/ui/Spinner'
 
 import LandingPage from '../pages/landing/LandingPage'
 import VerifyPage from '../pages/verify/VerifyPage'
+import GlobalErrorPage from '../pages/error/GlobalErrorPage'
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth()
@@ -49,18 +50,22 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <LandingPage />,
+    errorElement: <GlobalErrorPage />,
   },
   {
     path: '/verify/:token',
     element: <VerifyPage />,
+    errorElement: <GlobalErrorPage />,
   },
   {
     path: '/verify/:token/:type/:id',
     element: <RecordDetailPage />,
+    errorElement: <GlobalErrorPage />,
   },
 
   {
     path: '/dashboard',
+    errorElement: <GlobalErrorPage />,
     element: (
       <ProtectedRoute>
         <AppShell />
