@@ -1,7 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 export default function Modal({ open, onClose, title, children, size = 'md' }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!open) return
     const esc = (e) => { if (e.key === 'Escape') onClose() }
@@ -13,11 +20,11 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
     }
   }, [open, onClose])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
   const widthCls = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' }[size] || 'max-w-lg'
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in-up"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
@@ -39,6 +46,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

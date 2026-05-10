@@ -58,8 +58,9 @@ export const getStudentFullRecordsService = async (id, user) => {
   // 2. Prepare filter logic based on role
   let examFilter = { studentId: id };
   let degreeFilter = { studentId: id };
-
-  if (user.roleName === "REGISTRAR") {
+  
+  // If a user object is provided (internal dashboard request), apply role-based filtering
+  if (user && user.roleName === "REGISTRAR") {
     // If college admin, they only see their own degrees and NO exams
     if (user.institutionType === "COLLEGE") {
       degreeFilter.institutionId = user.institutionId;
@@ -73,15 +74,15 @@ export const getStudentFullRecordsService = async (id, user) => {
   }
 
   // 3. Fetch records in parallel (conditionally)
-  const [exams, degrees] = await Promise.all([
-    examFilter ? findExamRecords(examFilter) : Promise.resolve([]),
-    degreeFilter ? findDegrees(degreeFilter) : Promise.resolve([]),
+  const [examsRes, degreesRes] = await Promise.all([
+    examFilter ? findExamRecords(examFilter, { limit: 1000 }) : Promise.resolve({ examRecords: [] }),
+    degreeFilter ? findDegrees(degreeFilter, { limit: 1000 }) : Promise.resolve({ degrees: [] }),
   ]);
 
   return {
     student,
-    exams,
-    degrees,
+    exams: examsRes.examRecords || [],
+    degrees: degreesRes.degrees || [],
   };
 };
 

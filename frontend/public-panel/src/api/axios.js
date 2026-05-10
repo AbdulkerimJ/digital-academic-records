@@ -44,7 +44,7 @@ api.interceptors.response.use(
         }
       } catch {
         localStorage.removeItem('studentAccessToken')
-        window.location.href = '/login'
+        window.location.href = '/'
       }
     }
     

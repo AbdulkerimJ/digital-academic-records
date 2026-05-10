@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
       </div>
     </div>
   )
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/" replace />
 
   return children
 }
@@ -52,14 +52,7 @@ const router = createBrowserRouter([
     path: '/verify/:token',
     element: <VerifyPage />,
   },
-  {
-    path: '/login',
-    element: (
-      <PublicRoute>
-        <LoginPage />
-      </PublicRoute>
-    ),
-  },
+
   {
     path: '/dashboard',
     element: (

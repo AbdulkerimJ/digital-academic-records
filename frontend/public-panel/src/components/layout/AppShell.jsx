@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 
 export default function AppShell() {
   return (
-    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-background relative overflow-y-auto scrollbar-hide">
       {/* Background ambient light */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary),0.05),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(var(--primary),0.03),transparent_25%)]" />
       
