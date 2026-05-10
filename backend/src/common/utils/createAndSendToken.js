@@ -43,7 +43,7 @@ export const signStudentRefreshToken = (payload) => {
 export const userRefreshCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: REFRESH_COOKIE_SAME_SITE,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
   path: REFRESH_COOKIE_PATH,
   maxAge: REFRESH_COOKIE_MAX_AGE_MS,
 };
@@ -51,7 +51,7 @@ export const userRefreshCookieOptions = {
 export const studentRefreshCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: REFRESH_COOKIE_SAME_SITE,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
   path: REFRESH_COOKIE_PATH,
   maxAge: STUDENT_REFRESH_COOKIE_MAX_AGE_MS,
 };

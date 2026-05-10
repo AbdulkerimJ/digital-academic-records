@@ -22,6 +22,21 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  })
+  
+  failedQueue = [];
+}
+
 // Response interceptor for token refresh
 api.interceptors.response.use(
   (response) => response,
@@ -32,7 +47,19 @@ api.interceptors.response.use(
     const isAuthRoute = originalRequest.url.includes("/login") || originalRequest.url.includes("/refresh")
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject })
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        })
+      }
+
       originalRequest._retry = true
+      isRefreshing = true
 
       try {
         // Attempt to refresh the token
@@ -46,16 +73,21 @@ api.interceptors.response.use(
           const { accessToken } = res.data.data
           localStorage.setItem("accessToken", accessToken)
           
+          processQueue(null, accessToken);
+          
           // Retry the original request
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return api(originalRequest)
         }
       } catch (refreshError) {
+        processQueue(refreshError, null);
         // If refresh fails, clear tokens and redirect to login
         localStorage.removeItem("accessToken")
         localStorage.removeItem("user")
         window.location.href = "/login"
         return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false;
       }
     }
 
