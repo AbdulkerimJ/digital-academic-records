@@ -31,10 +31,10 @@ export default function Navbar({ onMenuToggle }) {
 
         <Link to="/dashboard/profile" className="flex items-center gap-4 group">
           <div className="hidden md:flex flex-col items-end">
-            <span className="text-xs font-black text-foreground uppercase tracking-tight">
+            <span className="text-xs font-black text-foreground capitalize tracking-tight">
               {student?.firstName} {student?.lastName}
             </span>
-            <span className="text-[9px] font-bold text-primary uppercase tracking-[0.2em]">Verified Student</span>
+            <span className="text-[9px] font-bold text-primary capitalize tracking-[0.2em]">Verified Student</span>
           </div>
           <div className="w-12 h-12 bg-muted/50 border border-border group-hover:border-primary/50 flex items-center justify-center transition-all">
             <User size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />

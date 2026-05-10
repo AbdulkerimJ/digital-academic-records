@@ -89,7 +89,7 @@ export default function CollegeModal({ isOpen, onClose, college, institutionId }
             <GraduationCap size={24} />
           </div>
           <DialogHeader className="text-left">
-            <DialogTitle className="text-2xl font-black tracking-tighter uppercase leading-none">
+            <DialogTitle className="text-2xl font-black tracking-tighter capitalize leading-none">
               {isEditing ? "Edit college" : "Add college"}
             </DialogTitle>
             <p className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">

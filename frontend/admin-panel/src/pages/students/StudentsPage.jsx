@@ -63,14 +63,14 @@ export default function StudentsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
         <div className="space-y-3 text-left">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
             </div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
               <Clock size={10} /> {new Date().toLocaleDateString()}
             </div>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Student <span className="text-primary">Registry</span>
           </h2>
           <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
@@ -124,7 +124,7 @@ export default function StudentsPage() {
               <ShieldCheck size={28} />
             </div>
             <DialogHeader className="text-left">
-              <DialogTitle className="text-3xl font-black tracking-tighter uppercase leading-none">Student verification</DialogTitle>
+              <DialogTitle className="text-3xl font-black tracking-tighter capitalize leading-none">Student verification</DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">
                 Enter the student's National ID to verify their identity and register them in the system.
               </DialogDescription>
@@ -133,7 +133,7 @@ export default function StudentsPage() {
 
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <Label htmlFor="faydaId" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">National ID</Label>
+              <Label htmlFor="faydaId" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground/60">National ID</Label>
               <div className="relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
                 <Input 
@@ -141,14 +141,14 @@ export default function StudentsPage() {
                   value={faydaId}
                   onChange={(e) => setFaydaId(e.target.value.toUpperCase())}
                   placeholder="ID-XXXXXXXX"
-                  className="h-14 pl-12 rounded-none bg-muted/10 border border-border focus-visible:ring-primary/20 font-mono text-base font-bold tracking-tight uppercase"
+                  className="h-14 pl-12 rounded-none bg-muted/10 border border-border focus-visible:ring-primary/20 font-mono text-base font-bold tracking-tight capitalize"
                 />
               </div>
             </div>
             
             <div className="p-5 bg-primary/[0.03] border-l-2 border-primary flex gap-5 items-start">
               <Activity size={16} className="text-primary mt-0.5 shrink-0" />
-              <p className="text-[10px] font-bold text-primary/70 leading-relaxed uppercase tracking-tight">
+              <p className="text-[10px] font-bold text-primary/70 leading-relaxed capitalize tracking-tight">
                 Verifying the ID will automatically create a student profile in the registry.
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function StudentsPage() {
 
           <DialogFooter className="p-10 pt-0">
             <Button 
-              className="w-full h-14 rounded-none font-bold text-xs uppercase tracking-widest shadow-2xl shadow-primary/20 transition-all" 
+              className="w-full h-14 rounded-none font-bold text-xs capitalize tracking-widest shadow-2xl shadow-primary/20 transition-all" 
               disabled={!faydaId || registerMutation.isPending}
               onClick={() => registerMutation.mutate(faydaId)}
             >

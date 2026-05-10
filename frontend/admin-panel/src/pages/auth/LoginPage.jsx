@@ -48,10 +48,10 @@ export default function LoginPage() {
           </button>
 
          <div className="hidden lg:flex flex-col items-end space-y-2 pointer-events-none">
-            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                <Activity size={12} className="animate-pulse" /> System online
             </div>
-            <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tighter flex items-center gap-2">
+            <div className="text-[9px] font-bold text-muted-foreground/40 capitalize tracking-tighter flex items-center gap-2">
                <Clock size={10} /> {new Date().toLocaleTimeString()}
             </div>
          </div>
@@ -70,13 +70,13 @@ export default function LoginPage() {
                  <h1 className="text-4xl font-black tracking-tighter text-foreground leading-none">
                    NAR
                  </h1>
-                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] ml-0.5">National academic registry</p>
+                 <p className="text-[10px] font-black text-primary capitalize tracking-[0.4em] ml-0.5">National academic registry</p>
               </div>
             </div>
             
             <div className="space-y-2">
               <h2 className="text-2xl font-black tracking-tight text-foreground leading-tight">Identity verification</h2>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-tight opacity-60 font-mono">Secure tunnel active · Node authorized</p>
+              <p className="text-xs font-bold text-muted-foreground capitalize tracking-tight opacity-60 font-mono">Secure tunnel active · Node authorized</p>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Email address</Label>
+                  <Label htmlFor="email" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Email address</Label>
                   <div className="relative">
                     <Globe size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/30" />
                     <Input
@@ -106,8 +106,8 @@ export default function LoginPage() {
                 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between ml-1">
-                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Administrative password</Label>
-                    <a href="#" className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline" onClick={(e) => e.preventDefault()}>
+                    <Label htmlFor="password" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Administrative password</Label>
+                    <a href="#" className="text-[9px] font-black text-primary capitalize tracking-widest hover:underline" onClick={(e) => e.preventDefault()}>
                       Reset access
                     </a>
                   </div>
@@ -128,7 +128,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-16 rounded-none text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all hover:brightness-110 active:scale-[0.98]"
+                className="w-full h-16 rounded-none text-[11px] font-black capitalize tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all hover:brightness-110 active:scale-[0.98]"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-3">
@@ -147,13 +147,13 @@ export default function LoginPage() {
             <div className="pt-6 border-t border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div className="flex items-center gap-2">
                   <ShieldCheck size={14} className="text-primary opacity-60" />
-                  <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">End-to-end encrypted</span>
+                  <span className="text-[9px] font-black text-muted-foreground/60 capitalize tracking-widest">End-to-end encrypted</span>
                </div>
-               <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tight truncate max-w-[200px]">System node: {window.location.hostname}</p>
+               <p className="text-[9px] font-bold text-muted-foreground/40 capitalize tracking-tight truncate max-w-[200px]">System node: {window.location.hostname}</p>
             </div>
           </div>
 
-          <div className="text-center text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest pt-4">
+          <div className="text-center text-[10px] font-bold text-muted-foreground/40 capitalize tracking-widest pt-4">
             National Academic Registry Infrastructure &copy; {new Date().getFullYear()}
           </div>
         </div>

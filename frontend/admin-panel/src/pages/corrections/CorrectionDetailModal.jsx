@@ -76,12 +76,12 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
         {/* Header */}
         <div className="bg-primary/5 p-8 border-b border-primary/10">
           <div className="flex items-center justify-between mb-4">
-            <Badge className="bg-primary/10 text-primary border-none rounded-lg text-[10px] font-black uppercase px-2 py-0.5 tracking-widest">
+            <Badge className="bg-primary/10 text-primary border-none rounded-lg text-[10px] font-black capitalize px-2 py-0.5 tracking-widest">
               Request ID: {requestId.slice(0, 8)}
             </Badge>
             {request && (
               <Badge className={`
-                rounded-full font-black text-[10px] uppercase px-4 py-1 flex items-center gap-1.5 border-none
+                rounded-full font-black text-[10px] capitalize px-4 py-1 flex items-center gap-1.5 border-none
                 ${request.status === 'pending' ? 'bg-amber-500 text-white' : request.status === 'approved' ? 'bg-emerald-500 text-white' : 'bg-destructive text-white'}
               `}>
                 {request.status === 'pending' && <Clock size={12} />}
@@ -116,10 +116,10 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                     <div className="p-2 bg-primary/10 rounded-xl text-primary">
                       <User size={18} />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student Identity</span>
+                    <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Student Identity</span>
                   </div>
                   <p className="font-black text-lg tracking-tight">{request.studentFirstName} {request.studentLastName}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">{request.nationalId}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/60 capitalize mt-1">{request.nationalId}</p>
                 </Card>
 
                 <Card className="p-6 border-border/40 bg-muted/5 rounded-3xl shadow-sm">
@@ -127,10 +127,10 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                     <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
                       <Building2 size={18} />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Institution</span>
+                    <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Institution</span>
                   </div>
                   <p className="font-black text-lg tracking-tight truncate">{request.institutionName}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Provider ID: {request.institutionId?.slice(0, 8)}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/60 capitalize mt-1">Provider ID: {request.institutionId?.slice(0, 8)}</p>
                 </Card>
               </div>
 
@@ -140,7 +140,7 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                   <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-600">
                     <MessageSquare size={16} />
                   </div>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Student's Request Statement</h4>
+                  <h4 className="text-xs font-black capitalize tracking-widest text-foreground">Student's Request Statement</h4>
                 </div>
                 <Card className="p-6 border-amber-500/20 bg-amber-500/5 rounded-3xl italic text-sm font-medium leading-relaxed text-amber-900 shadow-inner">
                   "{request.requestText}"
@@ -153,18 +153,18 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                   <div className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-600">
                     <FileText size={16} />
                   </div>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Target Record Details</h4>
+                  <h4 className="text-xs font-black capitalize tracking-widest text-foreground">Target Record Details</h4>
                 </div>
                 <div className="p-6 border border-border/60 rounded-3xl bg-background shadow-sm space-y-4">
                   <div className="flex justify-between items-center pb-4 border-b border-border/40">
                     <div>
-                      <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-2 py-0">
+                      <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black capitalize px-2 py-0">
                         {request.recordType}
                       </Badge>
                       <p className="font-black text-sm mt-1">Academic Certificate</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Reference ID</p>
+                      <p className="text-[10px] font-bold text-muted-foreground capitalize">Reference ID</p>
                       <p className="font-mono text-[10px] font-bold">{request.recordId}</p>
                     </div>
                   </div>
@@ -182,7 +182,7 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                     <div className="p-1.5 bg-destructive/10 rounded-lg text-destructive">
                       <AlertCircle size={16} />
                     </div>
-                    <h4 className="text-xs font-black uppercase tracking-widest text-destructive">Rejection Reason</h4>
+                    <h4 className="text-xs font-black capitalize tracking-widest text-destructive">Rejection Reason</h4>
                   </div>
                   <Textarea 
                     placeholder="Provide a detailed explanation for the student regarding why this request is being rejected..."
@@ -198,12 +198,12 @@ export default function CorrectionDetailModal({ requestId, isOpen, onClose }) {
                 <div className="p-6 bg-muted/30 rounded-3xl border border-dashed border-border/60">
                    <div className="flex items-center gap-3 mb-2">
                     <ShieldCheck size={18} className="text-primary/40" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Administrative Decision</span>
+                    <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Administrative Decision</span>
                   </div>
                   <p className="text-sm font-bold">Reviewed by Administrator</p>
                   {request.rejectionReason && (
                     <p className="text-xs font-medium text-destructive mt-2 bg-destructive/5 p-3 rounded-xl">
-                      <span className="font-black uppercase text-[9px] block mb-1">Reason for Rejection:</span>
+                      <span className="font-black capitalize text-[9px] block mb-1">Reason for Rejection:</span>
                       {request.rejectionReason}
                     </p>
                   )}

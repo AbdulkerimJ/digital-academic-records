@@ -18,7 +18,7 @@ export default function Pagination({
     return (
       <div className="bg-muted/20 px-8 py-5 flex items-center justify-between border-t border-border/40">
         <div className="flex items-center gap-4">
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+          <span className="text-[11px] font-bold text-muted-foreground capitalize tracking-widest">
             Page {page} of {totalPages || 1}
           </span>
         </div>

@@ -143,11 +143,11 @@ export default function DegreeTitlesTable() {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-muted/60">
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground pl-6">Level</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Code</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Qualification Title</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right pr-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Actions</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground pl-6">Level</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Code</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Qualification Title</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Status</TableHead>
+              <TableHead className="text-right pr-6 text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -169,14 +169,14 @@ export default function DegreeTitlesTable() {
               titles.map((t) => (
                 <TableRow key={t.id} className="border-muted/40 hover:bg-muted/5 transition-colors">
                   <TableCell className="pl-6 font-bold text-xs">
-                    <Badge variant="outline" className="rounded-md bg-muted/30 border-muted font-bold text-[9px] uppercase">
+                    <Badge variant="outline" className="rounded-md bg-muted/30 border-muted font-bold text-[9px] capitalize">
                       {t.levelName || "Unknown"}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs text-primary font-semibold">{t.code}</TableCell>
                   <TableCell className="font-semibold text-sm">{t.title}</TableCell>
                   <TableCell>
-                    <Badge variant={t.isActive ? "default" : "secondary"} className={`rounded-md text-[10px] uppercase font-bold px-2 ${t.isActive ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20' : ''}`}>
+                    <Badge variant={t.isActive ? "default" : "secondary"} className={`rounded-md text-[10px] capitalize font-bold px-2 ${t.isActive ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20' : ''}`}>
                       {t.isActive ? "Active" : "Disabled"}
                     </Badge>
                   </TableCell>
@@ -208,7 +208,7 @@ export default function DegreeTitlesTable() {
             
             <div className="p-8 space-y-5">
               <div className="space-y-1.5">
-                <Label htmlFor="level" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Educational Level</Label>
+                <Label htmlFor="level" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Educational Level</Label>
                 <Select value={formData.degreeLevelId} onValueChange={(val) => setFormData({...formData, degreeLevelId: val})}>
                   <SelectTrigger className="h-11 rounded-xl bg-muted/20 border-none focus:ring-primary/20 font-semibold">
                     <SelectValue placeholder="Select level" />
@@ -222,7 +222,7 @@ export default function DegreeTitlesTable() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="title" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Qualification Title</Label>
+                <Label htmlFor="title" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Qualification Title</Label>
                 <Input 
                   id="title" 
                   value={formData.title}
@@ -234,7 +234,7 @@ export default function DegreeTitlesTable() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="code" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Identification Code</Label>
+                <Label htmlFor="code" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Identification Code</Label>
                 <Input 
                   id="code" 
                   value={formData.code}
@@ -257,7 +257,7 @@ export default function DegreeTitlesTable() {
                   type="button"
                   variant={formData.isActive ? "default" : "outline"}
                   size="sm"
-                  className={`rounded-lg h-7 px-3 font-bold text-[10px] uppercase tracking-wider ${formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : ''}`}
+                  className={`rounded-lg h-7 px-3 font-bold text-[10px] capitalize tracking-wider ${formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : ''}`}
                   onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
                 >
                   {formData.isActive ? "Active" : "Disabled"}

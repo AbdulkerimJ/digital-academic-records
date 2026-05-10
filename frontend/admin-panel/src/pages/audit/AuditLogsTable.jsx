@@ -100,7 +100,7 @@ export default function AuditLogsTable({
                   </TableCell>
                   <TableCell className="py-2 px-6">
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-[10px] tracking-tight text-foreground uppercase">
+                      <span className="font-bold text-[10px] tracking-tight text-foreground capitalize">
                         {log.entityType}
                       </span>
                       <code className="text-[9px] font-bold text-muted-foreground/40 font-mono">
@@ -121,7 +121,7 @@ export default function AuditLogsTable({
                       <div className="text-[10px] font-bold text-foreground font-mono">
                         {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                       </div>
-                      <div className="text-[8px] font-bold text-muted-foreground uppercase">
+                      <div className="text-[8px] font-bold text-muted-foreground capitalize">
                         {new Date(log.createdAt).toLocaleDateString()}
                       </div>
                     </div>

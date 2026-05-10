@@ -269,7 +269,7 @@ export default function BulkUploadModal({
             <>
               {isSuperAdmin && institutionType && (
                 <div className="space-y-3 mb-6">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 text-left block">
+                  <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 text-left block">
                     {institutionType === "EXAM_BOARD" ? "Exam Body" : "Academic Institution"}
                   </Label>
                   <Select value={institutionCode} onValueChange={setInstitutionCode}>
@@ -281,13 +281,13 @@ export default function BulkUploadModal({
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-border shadow-2xl">
                       {institutionsData?.data?.institutions?.map((inst) => (
-                        <SelectItem key={inst.id} value={inst.code.toString()} className="rounded-xl text-xs font-bold uppercase">
+                        <SelectItem key={inst.id} value={inst.code.toString()} className="rounded-xl text-xs font-bold capitalize">
                           {inst.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tight pl-1 text-left">
+                  <p className="text-[9px] font-bold text-muted-foreground/50 capitalize tracking-tight pl-1 text-left">
                     This institution will be associated with all records in the CSV if not specified within the file.
                   </p>
                 </div>
@@ -316,7 +316,7 @@ export default function BulkUploadModal({
                     <p className="font-black text-sm tracking-tight">
                       {file ? file.name : "Select CSV File"}
                     </p>
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-1">
+                    <p className="text-[10px] font-bold text-muted-foreground/60 capitalize tracking-widest mt-1">
                       {file ? `${(file.size / 1024).toFixed(1)} KB` : "Drag and drop or click to browse"}
                     </p>
                   </div>
@@ -344,7 +344,7 @@ export default function BulkUploadModal({
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black tracking-widest uppercase">
+                <div className="flex justify-between text-[10px] font-black tracking-widest capitalize">
                   <span className="text-primary">Progress</span>
                   <span className="text-primary">{progress.percent}</span>
                 </div>
@@ -358,9 +358,9 @@ export default function BulkUploadModal({
                     <span className="text-xs font-bold font-mono">{progress.lastResult.id}</span>
                   </div>
                   {progress.lastResult.success ? (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-none px-2 rounded-lg text-[10px] uppercase font-black tracking-widest"><CheckCircle2 size={12} className="mr-1 inline" /> OK</Badge>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-none px-2 rounded-lg text-[10px] capitalize font-black tracking-widest"><CheckCircle2 size={12} className="mr-1 inline" /> OK</Badge>
                   ) : (
-                    <Badge variant="outline" className="bg-destructive/10 text-destructive border-none px-2 rounded-lg text-[10px] uppercase font-black tracking-widest"><AlertCircle size={12} className="mr-1 inline" /> Error</Badge>
+                    <Badge variant="outline" className="bg-destructive/10 text-destructive border-none px-2 rounded-lg text-[10px] capitalize font-black tracking-widest"><AlertCircle size={12} className="mr-1 inline" /> Error</Badge>
                   )}
                 </div>
               )}
@@ -384,7 +384,7 @@ export default function BulkUploadModal({
                     
                     <div>
                       <h3 className="font-black text-emerald-600 text-lg tracking-tight">Upload Complete!</h3>
-                      <p className="text-[10px] font-bold text-emerald-600/70 mt-0.5 uppercase tracking-widest">
+                      <p className="text-[10px] font-bold text-emerald-600/70 mt-0.5 capitalize tracking-widest">
                         Successfully processed {results.successful?.length || 0} of {results.total || 0} records
                       </p>
                     </div>
@@ -393,14 +393,14 @@ export default function BulkUploadModal({
                    {results.failed?.length > 0 && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-2">
+                        <h4 className="text-[10px] font-black capitalize tracking-widest text-destructive flex items-center gap-2">
                           <AlertCircle size={14} /> {results.failed.length} Errors Encountered
                         </h4>
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           onClick={downloadResultsPDF}
-                          className="h-7 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/5 p-0 px-2"
+                          className="h-7 text-[10px] font-black capitalize tracking-widest text-primary hover:text-primary hover:bg-primary/5 p-0 px-2"
                         >
                           <Download size={12} className="mr-1" /> Export PDF Report
                         </Button>
@@ -421,7 +421,7 @@ export default function BulkUploadModal({
                        <Button 
                           variant="outline" 
                           onClick={downloadResultsPDF}
-                          className="h-10 text-[10px] font-black uppercase tracking-widest text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-xl"
+                          className="h-10 text-[10px] font-black capitalize tracking-widest text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-xl"
                         >
                           <Download size={14} className="mr-2" /> Download Completion PDF
                         </Button>

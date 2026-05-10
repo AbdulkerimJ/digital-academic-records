@@ -78,7 +78,7 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
               <Building2 size={20} />
             </div>
             <DialogHeader className="text-left">
-              <DialogTitle className="text-2xl font-black tracking-tighter uppercase leading-none">
+              <DialogTitle className="text-2xl font-black tracking-tighter capitalize leading-none">
                 {isEditing ? "Registry entry" : "New institution"}
               </DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">
@@ -90,14 +90,14 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
 
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Institution name</Label>
+              <Label htmlFor="name" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Institution name</Label>
               <div className="relative">
                 <Input
                   id="name"
                   placeholder="e.g. UNIVERSITY OF ADDIS ABABA"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-14 rounded-none bg-muted/10 border border-border pl-12 focus-visible:ring-primary/20 text-sm font-black tracking-tight uppercase"
+                  className="h-14 rounded-none bg-muted/10 border border-border pl-12 focus-visible:ring-primary/20 text-sm font-black tracking-tight capitalize"
                   required
                 />
                 <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" size={18} />
@@ -106,7 +106,7 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="code" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Institution code</Label>
+                <Label htmlFor="code" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Institution code</Label>
                 <div className="relative">
                   <Input
                     id="code"
@@ -121,7 +121,7 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Category</Label>
+                <Label htmlFor="type" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Category</Label>
                 <Select 
                   value={formData.type} 
                   onValueChange={(val) => setFormData({ ...formData, type: val })}
@@ -129,12 +129,12 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
                   <SelectTrigger className="h-14 rounded-none bg-muted/10 border border-border focus:ring-primary/20 px-4">
                     <div className="flex items-center gap-3">
                       <Tag size={16} className="text-muted-foreground/40" />
-                      <SelectValue placeholder="Select type" className="text-xs font-bold uppercase" />
+                      <SelectValue placeholder="Select type" className="text-xs font-bold capitalize" />
                     </div>
                   </SelectTrigger>
                   <SelectContent className="rounded-none border border-border shadow-2xl p-1">
                     {institutionTypes.map(t => (
-                      <SelectItem key={t.code} value={t.code} className="rounded-none text-xs font-bold uppercase p-3 focus:bg-primary/10 transition-colors tracking-tight">
+                      <SelectItem key={t.code} value={t.code} className="rounded-none text-xs font-bold capitalize p-3 focus:bg-primary/10 transition-colors tracking-tight">
                         {t.name}
                       </SelectItem>
                     ))}
@@ -147,8 +147,8 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
               <div className="flex items-center gap-4">
                 <Activity className={cn("transition-all", formData.isActive ? "text-primary" : "text-muted-foreground/30")} size={24} />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground leading-none">Record status</p>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight mt-1">Institutional access control</p>
+                  <p className="text-[10px] font-black capitalize tracking-widest text-foreground leading-none">Record status</p>
+                  <p className="text-[9px] font-bold text-muted-foreground capitalize tracking-tight mt-1">Institutional access control</p>
                 </div>
               </div>
               <Button
@@ -156,7 +156,7 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
                 variant={formData.isActive ? "default" : "outline"}
                 size="sm"
                 className={cn(
-                  "rounded-none h-10 px-6 font-black text-[10px] uppercase tracking-widest transition-all",
+                  "rounded-none h-10 px-6 font-black text-[10px] capitalize tracking-widest transition-all",
                   formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 border-none' : 'border-border'
                 )}
                 onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
@@ -167,13 +167,13 @@ export default function InstitutionModal({ isOpen, onClose, institution = null, 
           </div>
 
           <DialogFooter className="p-10 pt-0 flex sm:justify-between items-center gap-4">
-            <Button type="button" variant="ghost" onClick={onClose} className="rounded-none h-14 px-8 font-black text-[10px] uppercase tracking-widest text-muted-foreground/60 hover:text-foreground">
+            <Button type="button" variant="ghost" onClick={onClose} className="rounded-none h-14 px-8 font-black text-[10px] capitalize tracking-widest text-muted-foreground/60 hover:text-foreground">
               Abort
             </Button>
             <Button 
               type="submit" 
               disabled={mutation.isPending}
-              className="rounded-none h-14 px-12 font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-primary/20 transition-all min-w-[180px]"
+              className="rounded-none h-14 px-12 font-black text-[10px] capitalize tracking-widest shadow-2xl shadow-primary/20 transition-all min-w-[180px]"
             >
               {mutation.isPending ? "Processing..." : (isEditing ? "Save changes" : "Create record")}
             </Button>

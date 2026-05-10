@@ -210,11 +210,11 @@ export default function UsersPage() {
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Activity size={10} className="animate-pulse" /> System online
             </div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
               <Clock size={10} /> {new Date().toLocaleDateString()}
             </div>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Directory <span className="text-primary">Registry</span>
           </h2>
           <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">

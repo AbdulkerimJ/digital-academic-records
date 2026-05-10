@@ -12,7 +12,7 @@ import { listInstitutions } from "../../api/institutions.api"
 import { BookOpen, Fingerprint, Calendar, Building2, Activity, ShieldCheck, Award } from "lucide-react"
 import { cn } from "../../lib/utils"
 
-export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
+export default function ExamAddEditModal({ isOpen, onClose, exam = null, onSuccess }) {
   const isEditing = !!exam
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -74,6 +74,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exams"] })
       toast.success(isEditing ? "Record updated." : "Exam registered.")
+      if (onSuccess) onSuccess()
       onClose()
     },
     onError: (error) => {
@@ -123,13 +124,13 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
               <div className="w-10 h-10 bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/20">
                 <BookOpen size={20} />
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 uppercase tracking-widest">
+              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 capitalize tracking-widest">
                 <ShieldCheck size={12} /> Secure ledger
               </div>
             </div>
             
             <DialogHeader className="text-left">
-              <DialogTitle className="text-2xl font-black tracking-tighter uppercase leading-none">
+              <DialogTitle className="text-2xl font-black tracking-tighter capitalize leading-none">
                 {isEditing ? "Modify assessment" : "Register assessment"}
               </DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground leading-relaxed mt-1 tracking-tight">
@@ -143,7 +144,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
               <div className="space-y-8">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Student ID</Label>
+                    <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Student ID</Label>
                     <div className="relative">
                       <Fingerprint size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
                       <Input
@@ -151,21 +152,21 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
                         value={formData.nationalId}
                         onChange={handleChange}
                         placeholder="ID-XXXXXXXX"
-                        className="h-12 rounded-none bg-muted/10 border-border pl-12 focus-visible:ring-primary/20 font-mono text-sm font-bold uppercase"
+                        className="h-12 rounded-none bg-muted/10 border-border pl-12 focus-visible:ring-primary/20 font-mono text-sm font-bold capitalize"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Exam level</Label>
+                    <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Exam level</Label>
                     <Select value={formData.examLevelCode} onValueChange={(v) => handleSelectChange("examLevelCode", v)} required>
                       <SelectTrigger className="h-12 rounded-none bg-muted/10 border-border px-4">
                         <SelectValue placeholder="Select level" />
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-border shadow-2xl">
                         {levelsData?.data?.examLevels?.filter(l => l.isActive).map((level) => (
-                          <SelectItem key={level.id} value={level.code.toString()} className="rounded-none text-xs font-bold uppercase">
+                          <SelectItem key={level.id} value={level.code.toString()} className="rounded-none text-xs font-bold capitalize">
                             {level.name}
                           </SelectItem>
                         ))}
@@ -176,7 +177,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
 
                 {isSuperAdmin && (
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Exam body</Label>
+                    <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Exam body</Label>
                     <Select value={formData.institutionCode} onValueChange={(v) => handleSelectChange("institutionCode", v)} required>
                       <SelectTrigger className="h-12 rounded-none bg-muted/10 border-border px-4">
                         <div className="flex items-center gap-3">
@@ -186,7 +187,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-border shadow-2xl">
                         {institutionsData?.data?.institutions?.map((inst) => (
-                          <SelectItem key={inst.id} value={inst.code.toString()} className="rounded-none text-xs font-bold uppercase">
+                          <SelectItem key={inst.id} value={inst.code.toString()} className="rounded-none text-xs font-bold capitalize">
                             {inst.name}
                           </SelectItem>
                         ))}
@@ -197,11 +198,11 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
               </div>
             ) : (
               <div className="p-6 border border-border bg-muted/5 space-y-4">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center justify-between text-[10px] font-black capitalize tracking-widest">
                   <span className="text-muted-foreground/50">Student ID:</span>
                   <span className="text-foreground font-mono">{formData.nationalId}</span>
                 </div>
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center justify-between text-[10px] font-black capitalize tracking-widest">
                   <span className="text-muted-foreground/50">Exam level:</span>
                   <span className="text-foreground">{formData.examLevelCode}</span>
                 </div>
@@ -210,7 +211,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Exam year</Label>
+                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Exam year</Label>
                 <div className="relative">
                   <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
                   <Input
@@ -225,7 +226,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Result status</Label>
+                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Result status</Label>
                 <Select value={formData.resultStatus} onValueChange={(v) => handleSelectChange("resultStatus", v)} required>
                   <SelectTrigger className="h-12 rounded-none bg-muted/10 border-border px-4 font-bold text-xs">
                     <SelectValue placeholder="Status" />
@@ -240,7 +241,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
 
             <div className="grid grid-cols-3 gap-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Total score</Label>
+                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Total score</Label>
                 <Input
                   name="totalScore"
                   type="number"
@@ -252,7 +253,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
                 />
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Average</Label>
+                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Average</Label>
                 <Input
                   name="averageScore"
                   type="number"
@@ -264,7 +265,7 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
                 />
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Percentile</Label>
+                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Percentile</Label>
                 <Input
                   name="percentile"
                   type="number"
@@ -279,13 +280,13 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
           </div>
 
           <DialogFooter className="p-8 pt-0 flex sm:justify-between items-center gap-4">
-            <Button type="button" variant="ghost" onClick={onClose} className="rounded-none h-14 px-8 font-black text-[10px] uppercase tracking-widest text-muted-foreground/60 hover:text-foreground">
+            <Button type="button" variant="ghost" onClick={onClose} className="rounded-none h-14 px-8 font-black text-[10px] capitalize tracking-widest text-muted-foreground/60 hover:text-foreground">
               Abort
             </Button>
             <Button 
               type="submit" 
               disabled={mutation.isPending}
-              className="rounded-none h-14 px-12 font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-primary/20 transition-all min-w-[180px]"
+              className="rounded-none h-14 px-12 font-black text-[10px] capitalize tracking-widest shadow-2xl shadow-primary/20 transition-all min-w-[180px]"
             >
               {mutation.isPending ? "Processing..." : (isEditing ? "Save changes" : "Create record")}
             </Button>

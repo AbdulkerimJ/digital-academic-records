@@ -40,7 +40,7 @@ export default function Sidebar({ isOpen, onClose }) {
   }, [location.pathname])
 
   const linkCls = ({ isActive }) => 
-    `flex items-center justify-between px-4 py-3 border border-transparent text-xs font-black uppercase tracking-widest transition-all group ${
+    `flex items-center justify-between px-4 py-3 border border-transparent text-xs font-black capitalize tracking-widest transition-all group ${
       isActive 
         ? 'bg-primary/10 border-primary/20 text-primary' 
         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -68,14 +68,14 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
           <div className="flex flex-col">
             <h1 className="text-xl font-black tracking-tighter leading-none">NAR</h1>
-            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National academic registry</span>
+            <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">National academic registry</span>
           </div>
         </Link>
       </div>
 
       {/* Navigation Sub-header */}
       <div className="px-8 pt-8 pb-2">
-        <p className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-[0.3em]">System Modules</p>
+        <p className="text-[9px] font-mono text-muted-foreground/50 capitalize tracking-[0.3em]">System Modules</p>
       </div>
 
       {/* Nav Items */}
@@ -112,12 +112,12 @@ export default function Sidebar({ isOpen, onClose }) {
               {getInitials(student)}
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-[11px] font-black text-foreground truncate uppercase tracking-tight">
+              <span className="text-[11px] font-black text-foreground truncate capitalize tracking-tight">
                 {student?.firstName} {student?.lastName}
               </span>
               <div className="flex items-center gap-1.5 mt-0.5">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Authenticated</span>
+                 <span className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest">Authenticated</span>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function Sidebar({ isOpen, onClose }) {
         
         {/* System Version */}
         <div className="flex items-center justify-between px-2 pt-2 opacity-30">
-           <span className="text-[9px] font-mono uppercase tracking-widest">Node: v2.4.0</span>
+           <span className="text-[9px] font-mono capitalize tracking-widest">Node: v2.4.0</span>
            <Activity size={12} />
         </div>
       </div>

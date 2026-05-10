@@ -94,14 +94,14 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
         <div className="space-y-3 text-left">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Activity size={10} className="animate-pulse" /> System Online
             </div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
               <Clock size={10} /> Last Sync: {new Date().toLocaleTimeString()}
             </div>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Welcome, <span className="text-primary">{user?.firstName || 'Admin'}</span>
           </h2>
         </div>
@@ -135,14 +135,14 @@ export default function DashboardPage() {
               )}>
                 <stat.icon size={20} />
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600/40 uppercase tracking-widest">
+              <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600/40 capitalize tracking-widest">
                 <ShieldCheck size={12} /> SECURE
               </div>
             </div>
 
             <div className="space-y-1 text-left relative z-10">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
+                <p className="text-[10px] font-black text-muted-foreground capitalize tracking-widest opacity-60">
                   {stat.title}
                 </p>
                 {stat.urgent && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
@@ -152,7 +152,7 @@ export default function DashboardPage() {
                   {stat.value.toLocaleString()}
                 </h3>
                 <p className={cn(
-                  "text-[10px] font-bold uppercase tracking-tight pb-1",
+                  "text-[10px] font-bold capitalize tracking-tight pb-1",
                   stat.urgent ? "text-amber-600" : "text-muted-foreground/60"
                 )}>
                   {stat.description}
@@ -167,14 +167,14 @@ export default function DashboardPage() {
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
           
           <div className="flex items-center justify-between text-white relative z-10">
-            <h4 className="text-sm font-black uppercase tracking-widest">Recent Activity</h4>
+            <h4 className="text-sm font-black capitalize tracking-widest">Recent Activity</h4>
             <TrendingUp size={16} className="opacity-50 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
           </div>
           
           <div className="space-y-4 mt-6 relative z-10 text-left">
-             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Check system actions</p>
+             <p className="text-[10px] font-bold capitalize tracking-[0.2em] text-white/70">Check system actions</p>
              <Link to="/audit-logs">
-               <button className="h-10 w-full bg-white/10 border border-white/20 hover:bg-white hover:text-primary text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer">
+               <button className="h-10 w-full bg-white/10 border border-white/20 hover:bg-white hover:text-primary text-[10px] font-black capitalize tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer">
                   View Logs <ChevronRight size={14} />
                </button>
              </Link>
@@ -187,7 +187,7 @@ export default function DashboardPage() {
         <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
         <div className="flex items-center gap-3 text-primary mb-3">
           <ShieldCheck size={18} />
-          <h4 className="text-[11px] font-black uppercase tracking-[0.4em]">Privacy Notice</h4>
+          <h4 className="text-[11px] font-black capitalize tracking-[0.4em]">Privacy Notice</h4>
         </div>
         <p className="text-[13px] text-muted-foreground font-medium tracking-tight max-w-4xl leading-relaxed">
           This administrative panel is restricted to authorized personnel. Every action you take is automatically logged for security and auditing purposes. Please ensure you logout when your session is finished.

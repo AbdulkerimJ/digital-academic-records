@@ -178,7 +178,7 @@ export default function LandingPage() {
               </div>
               <div className="flex flex-col">
                 <h1 className="text-xl font-black tracking-tighter text-slate-950 dark:text-white transition-colors">NAR</h1>
-                <span className="text-[8px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em] mt-0.5 transition-colors">National academic registry</span>
+                <span className="text-[8px] font-bold text-blue-600 dark:text-blue-400 capitalize tracking-[0.4em] mt-0.5 transition-colors">National academic registry</span>
               </div>
             </div>
 
@@ -191,7 +191,7 @@ export default function LandingPage() {
                  <button 
                   key={item.name}
                   onClick={() => scrollTo(item.id)}
-                  className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  className="text-[11px] font-bold capitalize tracking-[0.2em] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
                  >
                    {item.name}
                  </button>
@@ -209,7 +209,7 @@ export default function LandingPage() {
               </button>
               <button 
                 onClick={() => setLoginModalOpen(true)}
-                className="h-10 px-6 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 rounded-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:-translate-y-0.5"
+                className="h-10 px-6 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 rounded-full flex items-center gap-2 text-[10px] font-black capitalize tracking-widest transition-all shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:-translate-y-0.5"
               >
                 <User size={14} /> Student Login
               </button>
@@ -238,11 +238,11 @@ export default function LandingPage() {
                     <Fingerprint size={26} />
                  </div>
                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] mb-1">Identity Gateway</span>
+                    <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 capitalize tracking-[0.3em] mb-1">Identity Gateway</span>
                     <h3 className="text-xl font-bold tracking-tight text-slate-950 dark:text-white leading-none">Student portal</h3>
                  </div>
               </div>
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded-full">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-500 text-[9px] font-black capitalize tracking-widest rounded-full">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Secure session
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function LandingPage() {
                     <h4 className="text-2xl font-black text-slate-950 dark:text-white">Identity verified</h4>
                     <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Your biometric profile is currently active.</p>
                   </div>
-                  <Link to="/dashboard" onClick={() => setLoginModalOpen(false)} className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/20 dark:shadow-none">
+                  <Link to="/dashboard" onClick={() => setLoginModalOpen(false)} className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] capitalize tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/20 dark:shadow-none">
                     Enter Dashboard <ChevronRight size={18} />
                   </Link>
                 </div>
@@ -286,7 +286,7 @@ export default function LandingPage() {
                     </div>
                     <button 
                       type="submit" 
-                      className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all disabled:opacity-50 shadow-xl shadow-slate-900/20 dark:shadow-none"
+                      className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] capitalize tracking-widest hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all disabled:opacity-50 shadow-xl shadow-slate-900/20 dark:shadow-none"
                       disabled={loading}
                     >
                       {loading ? <Spinner size="sm" /> : 'Request Access OTP'}
@@ -295,7 +295,7 @@ export default function LandingPage() {
                 ) : (
                   <form onSubmit={handleVerifyOtp} className="space-y-6">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Verification code</label>
+                       <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 capitalize tracking-widest ml-1">Verification code</label>
                        <input
                         type="text"
                         name="otp"
@@ -312,13 +312,13 @@ export default function LandingPage() {
                       <button
                         type="button"
                         onClick={() => setStep('id')}
-                        className="h-14 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
+                        className="h-14 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 capitalize tracking-widest hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
                       >
                         Cancel
                       </button>
                       <button 
                         type="submit" 
-                        className="h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-xl shadow-slate-900/20 dark:shadow-none hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all"
+                        className="h-14 bg-slate-900 dark:bg-white text-white dark:text-black flex items-center justify-center rounded-2xl font-bold text-[11px] capitalize tracking-widest shadow-xl shadow-slate-900/20 dark:shadow-none hover:bg-slate-800 dark:hover:bg-slate-200 active:scale-[0.98] transition-all"
                         disabled={loading}
                       >
                         {loading ? <Spinner size="sm" /> : 'Confirm identity'}
@@ -330,7 +330,7 @@ export default function LandingPage() {
             )}
             
             <div className="pt-6 border-t border-slate-100 dark:border-white/5">
-               <p className="text-[9px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">
+               <p className="text-[9px] font-mono text-slate-400 dark:text-slate-600 capitalize tracking-widest text-center">
                   Protected by national encryption protocols. unauthorized access attempts are logged.
                </p>
             </div>
@@ -389,7 +389,7 @@ export default function LandingPage() {
 
                 <button 
                   type="submit"
-                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-cyan-600 text-white flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-cyan-600 text-white flex items-center justify-center gap-3 rounded-2xl font-bold text-[12px] capitalize tracking-widest shadow-lg shadow-blue-500/20 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-[0.98] transition-all"
                 >
                   <ShieldCheck size={18} /> Run System Verification
                 </button>
@@ -398,13 +398,13 @@ export default function LandingPage() {
                   <button 
                     type="button"
                     onClick={() => setCameraOpen(true)}
-                    className="h-14 flex items-center justify-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
+                    className="h-14 flex items-center justify-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 capitalize tracking-widest hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
                   >
                     <Camera size={18} /> Scan QR
                   </button>
                   <label 
                     htmlFor="qr-upload"
-                    className="h-14 flex items-center justify-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
+                    className="h-14 flex items-center justify-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-600 dark:text-slate-300 capitalize tracking-widest cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all"
                   >
                     <Upload size={18} /> Upload QR
                   </label>
@@ -470,7 +470,7 @@ export default function LandingPage() {
                     <Zap size={24} />
                   </div>
                   <h3 className="text-5xl md:text-6xl font-black tracking-tighter leading-[1.05] text-slate-950 dark:text-white transition-colors">Seamless <br/> Verification <br/> Workflow</h3>
-                  <p className="text-[12px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest pt-2 transition-colors">Operational Guide v1.0</p>
+                  <p className="text-[12px] font-bold text-blue-600 dark:text-blue-400 capitalize tracking-widest pt-2 transition-colors">Operational Guide v1.0</p>
                 </div>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium transition-colors">
                   The Digital Academic Records system simplifies the complex process of credential issuance and verification through a streamlined three-step protocol.
@@ -501,11 +501,11 @@ export default function LandingPage() {
         {/* 7. Footer */}
         <div className="mt-12 pt-12 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-center gap-8 pb-8 transition-colors">
            <div className="flex flex-wrap items-center justify-center gap-8">
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors">© {new Date().getFullYear()} National Academic Registry</p>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 capitalize tracking-widest transition-colors">© {new Date().getFullYear()} National Academic Registry</p>
               <div className="flex items-center gap-8">
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Privacy Protocol</span>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Security Standards</span>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Help Center</span>
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 capitalize tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Privacy Protocol</span>
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 capitalize tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Security Standards</span>
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 capitalize tracking-widest cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">Help Center</span>
               </div>
            </div>
         </div>

@@ -75,10 +75,10 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
               ) : (
                 <>
                   <div className="space-y-1">
-                    <DialogTitle className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">
+                    <DialogTitle className="text-3xl font-black tracking-tighter text-foreground capitalize leading-none">
                       {student?.firstName} {student?.lastName}
                     </DialogTitle>
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
                        <div className="flex items-center gap-1.5">
                           <Fingerprint size={12} className="text-primary/40" /> {student?.nationalId}
                        </div>
@@ -91,8 +91,8 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                   
                   <div className="flex items-center gap-4 border-t border-border/50 pt-4">
                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">System id:</span>
-                        <code className="text-[10px] font-bold text-primary/60 font-mono uppercase tracking-widest">{student?.id?.slice(0, 8)}...</code>
+                        <span className="text-[9px] font-bold text-muted-foreground capitalize tracking-tighter">System id:</span>
+                        <code className="text-[10px] font-bold text-primary/60 font-mono capitalize tracking-widest">{student?.id?.slice(0, 8)}...</code>
                      </div>
                   </div>
                 </>
@@ -125,9 +125,9 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                       <div className="w-10 h-10 bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-500/20">
                         <GraduationCap size={20} />
                       </div>
-                      <h3 className="text-sm font-black tracking-widest uppercase">University degrees</h3>
+                      <h3 className="text-sm font-black tracking-widest capitalize">University degrees</h3>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
                        <History size={12} /> {degrees.length} records
                     </div>
                   </div>
@@ -144,15 +144,15 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.03] rounded-bl-full -mr-16 -mt-16 transition-all group-hover:bg-primary/[0.07]" />
                           <div className="relative space-y-6">
                             <div className="flex justify-between items-start">
-                              <div className="px-3 py-1 bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary uppercase tracking-widest">
+                              <div className="px-3 py-1 bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary capitalize tracking-widest">
                                 {degree.degreeLevelCode}
                               </div>
-                              <span className="text-[9px] font-bold text-muted-foreground font-mono uppercase tracking-tighter">Year {new Date(degree.createdAt).getFullYear()}</span>
+                              <span className="text-[9px] font-bold text-muted-foreground font-mono capitalize tracking-tighter">Year {new Date(degree.createdAt).getFullYear()}</span>
                             </div>
                             
                             <div className="space-y-2">
-                              <h4 className="font-black text-base tracking-tighter uppercase leading-tight group-hover:text-primary transition-colors">{degree.degreeTitle}</h4>
-                              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              <h4 className="font-black text-base tracking-tighter capitalize leading-tight group-hover:text-primary transition-colors">{degree.degreeTitle}</h4>
+                              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
                                 <Building2 size={12} className="text-primary/30" />
                                 {degree.institutionName}
                               </div>
@@ -160,7 +160,7 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
 
                             <div className="pt-4 border-t border-border flex items-center justify-between">
                               <div className="flex flex-col">
-                                 <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">CGPA</span>
+                                 <span className="text-[8px] font-bold text-muted-foreground/40 capitalize tracking-widest">CGPA</span>
                                  <div className="text-xl font-black text-primary font-mono">{degree.cgpa?.toFixed(2) || "N/A"}</div>
                               </div>
                               <Award size={24} className="text-primary opacity-10 group-hover:opacity-100 transition-all transform group-hover:scale-110" />
@@ -181,9 +181,9 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                       <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/20">
                         <BookOpen size={20} />
                       </div>
-                      <h3 className="text-sm font-black tracking-widest uppercase">National exams</h3>
+                      <h3 className="text-sm font-black tracking-widest capitalize">National exams</h3>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
                        <History size={12} /> {exams.length} records
                     </div>
                   </div>
@@ -202,12 +202,12 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                           </div>
                           <div className="flex-1 space-y-1">
                             <div className="flex items-center justify-between">
-                              <h4 className="font-black text-sm tracking-widest uppercase text-foreground group-hover:text-primary transition-colors">{exam.examLevelName}</h4>
-                              <div className="text-[10px] font-bold text-muted-foreground font-mono bg-muted/20 px-3 py-1 border border-border uppercase tracking-widest">
+                              <h4 className="font-black text-sm tracking-widest capitalize text-foreground group-hover:text-primary transition-colors">{exam.examLevelName}</h4>
+                              <div className="text-[10px] font-bold text-muted-foreground font-mono bg-muted/20 px-3 py-1 border border-border capitalize tracking-widest">
                                 Year {exam.year}
                               </div>
                             </div>
-                            <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                            <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground/60 capitalize tracking-widest">
                               <div className="flex items-center gap-2">
                                 <span className="opacity-40">Total score:</span> 
                                 <span className="text-primary font-black text-xs font-mono">{exam.totalScore || "N/A"}</span>
@@ -220,7 +220,7 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                             <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-bold text-emerald-700 uppercase tracking-widest">Verified</div>
+                             <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-bold text-emerald-700 capitalize tracking-widest">Verified</div>
                           </div>
                         </div>
                       ))}

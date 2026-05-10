@@ -152,7 +152,7 @@ export default function CorrectionTable() {
                     </div>
                   </TableCell>
                   <TableCell className="py-2 px-6">
-                    <div className="inline-flex px-2 py-0.5 bg-muted/50 border border-border text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <div className="inline-flex px-2 py-0.5 bg-muted/50 border border-border text-[9px] font-bold text-muted-foreground capitalize tracking-widest">
                       {request.recordType}
                     </div>
                   </TableCell>

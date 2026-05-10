@@ -132,7 +132,7 @@ export default function CorrectionDetailPage() {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-3xl font-black tracking-tight text-primary/90">Correction Review Board</h2>
-            <Badge className="rounded-xl font-black text-[9px] uppercase px-2 py-0.5 bg-primary/5 text-primary border-primary/20">
+            <Badge className="rounded-xl font-black text-[9px] capitalize px-2 py-0.5 bg-primary/5 text-primary border-primary/20">
               {request?.recordType} Record
             </Badge>
           </div>
@@ -141,7 +141,7 @@ export default function CorrectionDetailPage() {
           </p>
         </div>
         {request && (
-          <Badge className={`ml-auto rounded-full font-black text-[10px] uppercase px-4 py-1 flex items-center gap-1.5 border-none ${STATUS_CLASSES[request.status] || "bg-muted"}`}>
+          <Badge className={`ml-auto rounded-full font-black text-[10px] capitalize px-4 py-1 flex items-center gap-1.5 border-none ${STATUS_CLASSES[request.status] || "bg-muted"}`}>
             <StatusIcon size={12} />
             {request.status}
           </Badge>
@@ -177,7 +177,7 @@ export default function CorrectionDetailPage() {
                 <div className="p-2 bg-amber-500/10 rounded-xl text-amber-600">
                   <MessageSquare size={18} />
                 </div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-foreground">Student's Request Statement</h3>
+                <h3 className="text-xs font-black capitalize tracking-widest text-foreground">Student's Request Statement</h3>
               </div>
               <blockquote className="p-5 border border-amber-500/20 bg-amber-500/5 rounded-2xl italic text-sm font-medium leading-relaxed text-amber-900">
                 "{request.requestText}"
@@ -194,12 +194,12 @@ export default function CorrectionDetailPage() {
               <Card className="p-6 rounded-3xl border-dashed border-border/60 bg-muted/20 shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={18} className="text-primary/40" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Administrative Decision</span>
+                  <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Administrative Decision</span>
                 </div>
                 <p className="text-sm font-bold">Reviewed on {new Date(request.reviewedAt).toLocaleDateString()}</p>
                 {request.rejectionReason && (
                   <div className="text-xs font-medium text-destructive bg-destructive/5 p-4 rounded-2xl">
-                    <span className="font-black uppercase text-[9px] block mb-1">Reason for Rejection:</span>
+                    <span className="font-black capitalize text-[9px] block mb-1">Reason for Rejection:</span>
                     {request.rejectionReason}
                   </div>
                 )}
@@ -213,7 +213,7 @@ export default function CorrectionDetailPage() {
                   <div className="p-2 bg-destructive/10 rounded-xl text-destructive">
                     <AlertCircle size={18} />
                   </div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-destructive">Rejection Reason</h3>
+                  <h3 className="text-xs font-black capitalize tracking-widest text-destructive">Rejection Reason</h3>
                 </div>
                 <Textarea
                   placeholder="Provide a detailed explanation for the student..."
@@ -276,10 +276,10 @@ export default function CorrectionDetailPage() {
                 <div className="p-2 bg-primary/10 rounded-xl text-primary">
                   <User size={18} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student Identity</span>
+                <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Student Identity</span>
               </div>
               <p className="font-black text-lg tracking-tight">{request.studentFirstName} {request.studentLastName}</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1 font-mono">{request.studentNationalId || "N/A"}</p>
+              <p className="text-[10px] font-bold text-muted-foreground/60 capitalize mt-1 font-mono">{request.studentNationalId || "N/A"}</p>
             </Card>
 
             {/* Institution */}
@@ -288,7 +288,7 @@ export default function CorrectionDetailPage() {
                 <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
                   <Building2 size={18} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Institution</span>
+                <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Institution</span>
               </div>
               <p className="font-black text-lg tracking-tight leading-tight">{request.institutionName || "N/A"}</p>
               <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mt-1">{request.institutionId?.slice(0, 8)}</p>
@@ -300,10 +300,10 @@ export default function CorrectionDetailPage() {
                 <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
                   <FileText size={14} />
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">System Reference</span>
+                <span className="text-[9px] font-black capitalize tracking-widest text-muted-foreground/60">System Reference</span>
               </div>
               <div className="space-y-1">
-                <p className="text-[9px] font-bold text-muted-foreground/40 uppercase">Record ID</p>
+                <p className="text-[9px] font-bold text-muted-foreground/40 capitalize">Record ID</p>
                 <p className="font-mono text-[9px] font-bold text-muted-foreground/50 break-all leading-tight">{request.recordId}</p>
               </div>
             </Card>
@@ -316,7 +316,7 @@ export default function CorrectionDetailPage() {
         <ExamAddEditModal
           isOpen={isFixModalOpen}
           onClose={() => setIsFixModalOpen(false)}
-          initialData={targetRecord}
+          exam={targetRecord}
           hideToast={true}
           onSuccess={() => {
             approveMutation.mutate()
@@ -328,7 +328,7 @@ export default function CorrectionDetailPage() {
         <DegreeAddEditModal
           isOpen={isFixModalOpen}
           onClose={() => setIsFixModalOpen(false)}
-          initialData={targetRecord}
+          degree={targetRecord}
           hideToast={true}
           onSuccess={() => {
             approveMutation.mutate()

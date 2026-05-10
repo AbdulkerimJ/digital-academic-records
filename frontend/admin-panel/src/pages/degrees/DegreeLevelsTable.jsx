@@ -94,11 +94,11 @@ export default function DegreeLevelsTable() {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-muted/60">
-              <TableHead className="w-20 text-[10px] font-bold uppercase tracking-widest text-muted-foreground pl-6">Rank</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Code</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Level Name</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right pr-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Actions</TableHead>
+              <TableHead className="w-20 text-[10px] font-bold capitalize tracking-widest text-muted-foreground pl-6">Rank</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Code</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Level Name</TableHead>
+              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Status</TableHead>
+              <TableHead className="text-right pr-6 text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -123,7 +123,7 @@ export default function DegreeLevelsTable() {
                   <TableCell className="font-mono text-xs">{level.code}</TableCell>
                   <TableCell className="font-semibold">{level.name}</TableCell>
                   <TableCell>
-                    <Badge variant={level.isActive ? "default" : "secondary"} className={`rounded-md text-[10px] uppercase font-bold px-2 ${level.isActive ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20' : ''}`}>
+                    <Badge variant={level.isActive ? "default" : "secondary"} className={`rounded-md text-[10px] capitalize font-bold px-2 ${level.isActive ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20' : ''}`}>
                       {level.isActive ? "Active" : "Disabled"}
                     </Badge>
                   </TableCell>
@@ -156,7 +156,7 @@ export default function DegreeLevelsTable() {
             <div className="p-8 space-y-5">
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-1 space-y-1.5">
-                  <Label htmlFor="rank" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Rank</Label>
+                  <Label htmlFor="rank" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Rank</Label>
                   <Input 
                     id="rank" 
                     type="number"
@@ -168,7 +168,7 @@ export default function DegreeLevelsTable() {
                   />
                 </div>
                 <div className="col-span-2 space-y-1.5">
-                  <Label htmlFor="code" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Code</Label>
+                  <Label htmlFor="code" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Code</Label>
                   <Input 
                     id="code" 
                     value={formData.code}
@@ -181,7 +181,7 @@ export default function DegreeLevelsTable() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Display Name</Label>
+                <Label htmlFor="name" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Display Name</Label>
                 <Input 
                   id="name" 
                   value={formData.name}
@@ -204,7 +204,7 @@ export default function DegreeLevelsTable() {
                   type="button"
                   variant={formData.isActive ? "default" : "outline"}
                   size="sm"
-                  className={`rounded-lg h-7 px-3 font-bold text-[10px] uppercase tracking-wider ${formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : ''}`}
+                  className={`rounded-lg h-7 px-3 font-bold text-[10px] capitalize tracking-wider ${formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : ''}`}
                   onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
                 >
                   {formData.isActive ? "Active" : "Disabled"}

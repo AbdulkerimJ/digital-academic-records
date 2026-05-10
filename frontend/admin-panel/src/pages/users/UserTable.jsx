@@ -105,7 +105,7 @@ export default function UserTable({
         )}
         onClick={() => onSort(field)}
       >
-        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
           {label}
           <div className="flex flex-col gap-0.5">
             {isSorted ? (
@@ -128,8 +128,8 @@ export default function UserTable({
               <SortHeader field="firstName" label="User details" className="w-[300px]" />
               <SortHeader field="roleName" label="System role" className="w-[180px]" />
               <SortHeader field="institutionName" label="Institution" className="w-[250px]" />
-              <TableHead className="py-4 px-6 text-[10px] font-bold text-muted-foreground border-r border-border/50 w-[150px] uppercase tracking-widest">Status</TableHead>
-              <TableHead className="text-right pr-8 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Actions</TableHead>
+              <TableHead className="py-4 px-6 text-[10px] font-bold text-muted-foreground border-r border-border/50 w-[150px] capitalize tracking-widest">Status</TableHead>
+              <TableHead className="text-right pr-8 py-4 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -142,7 +142,7 @@ export default function UserTable({
                     <div className="w-16 h-16 bg-muted/30 flex items-center justify-center mb-6 border border-border">
                       <SearchX size={32} className="text-muted-foreground/30" />
                     </div>
-                    <p className="text-xs font-black text-foreground uppercase tracking-widest">
+                    <p className="text-xs font-black text-foreground capitalize tracking-widest">
                       {isFiltered ? "No matching records" : "Registry empty"}
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground max-w-xs mt-2 mb-8 leading-relaxed tracking-tight">
@@ -151,11 +151,11 @@ export default function UserTable({
                         : "There are currently no administrative users registered. Start by inviting a registrar."}
                     </p>
                     {!isFiltered ? (
-                      <Button variant="outline" className="rounded-none gap-2 font-bold text-[10px] border-border shadow-sm uppercase tracking-widest" onClick={onInvite}>
+                      <Button variant="outline" className="rounded-none gap-2 font-bold text-[10px] border-border shadow-sm capitalize tracking-widest" onClick={onInvite}>
                         <UserPlus size={14} /> Invite first user
                       </Button>
                     ) : (
-                      <Button variant="outline" className="rounded-none font-bold text-[10px] border-border shadow-sm uppercase tracking-widest" onClick={onClearFilters}>Reset filters</Button>
+                      <Button variant="outline" className="rounded-none font-bold text-[10px] border-border shadow-sm capitalize tracking-widest" onClick={onClearFilters}>Reset filters</Button>
                     )}
                   </div>
                 </TableCell>
@@ -169,7 +169,7 @@ export default function UserTable({
                         {user.firstName?.[0]}{user.lastName?.[0]}
                       </div>
                       <div className="flex flex-col min-w-0 text-left">
-                        <span className="font-black text-xs tracking-tighter text-foreground uppercase group-hover:text-primary transition-colors truncate">
+                        <span className="font-black text-xs tracking-tighter text-foreground capitalize group-hover:text-primary transition-colors truncate">
                           {user.firstName} {user.lastName}
                         </span>
                         <code className="text-[10px] font-bold text-muted-foreground/50 mt-0.5 truncate font-mono">{user.email}</code>
@@ -183,7 +183,7 @@ export default function UserTable({
                         user.roleName === "SUPER_ADMIN" ? "text-primary opacity-100" : "text-muted-foreground"
                       )} />
                       <span className={cn(
-                        "text-[10px] font-bold uppercase tracking-widest",
+                        "text-[10px] font-bold capitalize tracking-widest",
                         user.roleName === "SUPER_ADMIN" ? "text-primary font-black" : "text-muted-foreground/70"
                       )}>
                         {user.roleName.replace("_", " ").toLowerCase()}
@@ -193,7 +193,7 @@ export default function UserTable({
                   <TableCell className="px-6">
                     <div className="flex items-center gap-2 text-foreground/80">
                       <User size={12} className="opacity-20" />
-                      <span className="text-[10px] font-bold tracking-tight uppercase truncate max-w-[200px]">
+                      <span className="text-[10px] font-bold tracking-tight capitalize truncate max-w-[200px]">
                         {user.institutionName || "System managed"}
                       </span>
                     </div>
@@ -208,19 +208,19 @@ export default function UserTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 rounded-none border border-border shadow-2xl p-2">
-                          <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground/50 px-3 py-2 border-b border-border mb-2 uppercase tracking-widest">Account control</DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground/50 px-3 py-2 border-b border-border mb-2 capitalize tracking-widest">Account control</DropdownMenuLabel>
                           
                           {user.status === "Pending" && (
                             <>
                               <DropdownMenuItem 
                                 onClick={() => onResend(user.id)}
-                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all uppercase tracking-widest"
+                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all capitalize tracking-widest"
                               >
                                 <RefreshCw size={14} /> Resend invite
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => onRevoke(user.id)}
-                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all uppercase tracking-widest"
+                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all capitalize tracking-widest"
                               >
                                 <Ban size={14} /> Revoke invite
                               </DropdownMenuItem>
@@ -230,7 +230,7 @@ export default function UserTable({
                           {user.status === "Active" && (
                             <DropdownMenuItem 
                               onClick={() => onSuspend(user.id)}
-                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all uppercase tracking-widest"
+                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all capitalize tracking-widest"
                             >
                               <Ban size={14} /> Suspend account
                             </DropdownMenuItem>
@@ -239,7 +239,7 @@ export default function UserTable({
                           {user.status === "Suspended" && (
                             <DropdownMenuItem 
                               onClick={() => onUnsuspend(user.id)}
-                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700 transition-all uppercase tracking-widest"
+                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700 transition-all capitalize tracking-widest"
                             >
                               <CheckCircle size={14} /> Unsuspend account
                             </DropdownMenuItem>
@@ -247,7 +247,7 @@ export default function UserTable({
 
                           <DropdownMenuItem 
                             onClick={() => onEdit(user)}
-                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all uppercase tracking-widest"
+                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all capitalize tracking-widest"
                           >
                             <Pencil size={14} /> Edit details
                           </DropdownMenuItem>
@@ -255,7 +255,7 @@ export default function UserTable({
                           <DropdownMenuSeparator className="bg-border my-2" />
                           <DropdownMenuItem 
                             onClick={() => onDelete(user)}
-                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-destructive focus:bg-destructive/5 focus:text-destructive transition-all uppercase tracking-widest"
+                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-destructive focus:bg-destructive/5 focus:text-destructive transition-all capitalize tracking-widest"
                           >
                             <Trash2 size={14} /> Delete record
                           </DropdownMenuItem>

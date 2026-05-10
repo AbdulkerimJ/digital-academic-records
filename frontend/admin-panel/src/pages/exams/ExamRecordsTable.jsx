@@ -184,7 +184,7 @@ export default function ExamRecordsTable() {
                         {exam.examLevelName}
                       </span>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <code className="text-[8px] font-bold text-primary uppercase font-mono">{exam.examLevelCode}</code>
+                        <code className="text-[8px] font-bold text-primary capitalize font-mono">{exam.examLevelCode}</code>
                         <span className="text-[9px] text-muted-foreground font-bold border-l border-border pl-2">
                           {exam.institutionName}
                         </span>
@@ -209,19 +209,19 @@ export default function ExamRecordsTable() {
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
                       {exam.totalScore && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Total</span>
+                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Total</span>
                           <span className="text-[10px] font-bold text-foreground">{exam.totalScore}</span>
                         </div>
                       )}
                       {exam.averageScore && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Avg</span>
+                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Avg</span>
                           <span className="text-[10px] font-bold text-foreground">{exam.averageScore}</span>
                         </div>
                       )}
                       {exam.percentile && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Perc</span>
+                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Perc</span>
                           <span className="text-[10px] font-bold text-foreground">{exam.percentile}%</span>
                         </div>
                       )}

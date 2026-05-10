@@ -79,7 +79,7 @@ export default function ProfilePage() {
       {/* 1. Technical Profile Header */}
       <div className="flex flex-col md:flex-row gap-10 items-center md:items-end p-10 bg-card border border-border shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10">
-           <div className="flex items-center gap-2.5 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+           <div className="flex items-center gap-2.5 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Shield size={12} /> Account verified
            </div>
         </div>
@@ -90,14 +90,14 @@ export default function ProfilePage() {
         
         <div className="flex-1 text-center md:text-left space-y-4">
           <div className="space-y-1">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
               {user?.firstName} {user?.lastName}
             </h2>
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
-               <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-3 py-1 border border-primary/20">
+               <div className="flex items-center gap-2 text-[10px] font-black text-primary capitalize tracking-widest bg-primary/5 px-3 py-1 border border-primary/20">
                   {user?.roleName?.replace("_", " ").toLowerCase()}
                </div>
-               <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+               <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
                   <Building2 size={12} className="opacity-40" />
                   {user?.institutionName || "Global administration"}
                </div>
@@ -106,8 +106,8 @@ export default function ProfilePage() {
           
           <div className="flex items-center justify-center md:justify-start gap-4 pt-2 border-t border-border/50">
              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-40">System id:</span>
-                <code className="text-[10px] font-bold text-primary/60 font-mono uppercase tracking-widest">{user?.id?.slice(0, 8)}</code>
+                <span className="text-[9px] font-black text-muted-foreground capitalize tracking-tighter opacity-40">System id:</span>
+                <code className="text-[10px] font-bold text-primary/60 font-mono capitalize tracking-widest">{user?.id?.slice(0, 8)}</code>
              </div>
           </div>
         </div>
@@ -122,8 +122,8 @@ export default function ProfilePage() {
                 <Fingerprint size={20} />
               </div>
               <div className="space-y-1">
-                <CardTitle className="text-xl font-black tracking-tighter uppercase leading-none text-foreground">Identity record</CardTitle>
-                <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight opacity-70">Update your administrative profile data.</CardDescription>
+                <CardTitle className="text-xl font-black tracking-tighter capitalize leading-none text-foreground">Identity record</CardTitle>
+                <CardDescription className="text-[10px] font-bold text-muted-foreground capitalize tracking-tight opacity-70">Update your administrative profile data.</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -131,29 +131,29 @@ export default function ProfilePage() {
             <form id="profile-form" onSubmit={handleProfileSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="firstName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">First name</Label>
+                  <Label htmlFor="firstName" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">First name</Label>
                   <Input 
                     id="firstName"
                     value={profileData.firstName}
                     onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm uppercase tracking-tight"
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm capitalize tracking-tight"
                     required
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="lastName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Last name</Label>
+                  <Label htmlFor="lastName" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Last name</Label>
                   <Input 
                     id="lastName"
                     value={profileData.lastName}
                     onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm uppercase tracking-tight"
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm capitalize tracking-tight"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="email-display" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Email address (locked)</Label>
+                <Label htmlFor="email-display" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Email address (locked)</Label>
                 <div className="relative">
                    <Input 
                     id="email-display"
@@ -170,7 +170,7 @@ export default function ProfilePage() {
             <Button 
               form="profile-form" 
               disabled={updateProfileMutation.isPending}
-              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:brightness-110"
+              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] capitalize tracking-widest shadow-xl shadow-primary/20 transition-all hover:brightness-110"
             >
               {updateProfileMutation.isPending ? "Processing..." : "Save changes"}
             </Button>
@@ -185,15 +185,15 @@ export default function ProfilePage() {
                 <Activity size={20} />
               </div>
               <div className="space-y-1">
-                <CardTitle className="text-xl font-black tracking-tighter uppercase leading-none text-foreground">Security access</CardTitle>
-                <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight opacity-70">Manage your administrative credentials.</CardDescription>
+                <CardTitle className="text-xl font-black tracking-tighter capitalize leading-none text-foreground">Security access</CardTitle>
+                <CardDescription className="text-[10px] font-bold text-muted-foreground capitalize tracking-tight opacity-70">Manage your administrative credentials.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-8 space-y-8">
             <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-8">
               <div className="space-y-3">
-                <Label htmlFor="currentPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Current password</Label>
+                <Label htmlFor="currentPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Current password</Label>
                 <Input 
                   id="currentPassword"
                   type="password"
@@ -207,7 +207,7 @@ export default function ProfilePage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="newPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">New password</Label>
+                  <Label htmlFor="newPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">New password</Label>
                   <Input 
                     id="newPassword"
                     type="password"
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="confirmPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Confirm password</Label>
+                  <Label htmlFor="confirmPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Confirm password</Label>
                   <Input 
                     id="confirmPassword"
                     type="password"
@@ -239,7 +239,7 @@ export default function ProfilePage() {
               form="password-form" 
               disabled={changePasswordMutation.isPending}
               variant="outline"
-              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] uppercase tracking-widest border-border hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all shadow-sm"
+              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] capitalize tracking-widest border-border hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all shadow-sm"
             >
               {changePasswordMutation.isPending ? "Updating credentials..." : "Update password"}
             </Button>

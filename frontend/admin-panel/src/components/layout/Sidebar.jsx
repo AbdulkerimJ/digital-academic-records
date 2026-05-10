@@ -120,7 +120,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <h1 className="text-xl font-black tracking-tighter leading-none text-foreground">
               NAR
             </h1>
-            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National academic registry</span>
+            <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">National academic registry</span>
           </div>
         </Link>
 
@@ -129,13 +129,13 @@ export default function Sidebar({ isOpen, onClose }) {
               <User size={40} />
            </div>
            <div className="space-y-1 relative z-10 text-left">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Logged in as</p>
-              <p className="text-xs font-black uppercase text-foreground truncate">
+              <p className="text-[9px] font-black text-muted-foreground capitalize tracking-widest">Logged in as</p>
+              <p className="text-xs font-black capitalize text-foreground truncate">
                 {user?.firstName} {user?.lastName}
               </p>
            </div>
            <div className="flex items-center gap-2 relative z-10">
-              <div className="px-2 py-0.5 border border-primary/20 text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5">
+              <div className="px-2 py-0.5 border border-primary/20 text-[8px] font-black text-primary capitalize tracking-widest bg-primary/5">
                 {user?.roleName}
               </div>
            </div>
@@ -144,7 +144,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
       <nav className="flex-1 px-4 overflow-y-auto no-scrollbar pb-10">
         <div className="mb-4 px-4 flex items-center justify-between">
-           <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Main Menu</span>
+           <span className="text-[9px] font-black capitalize tracking-[0.3em] text-muted-foreground/60">Main Menu</span>
            <Activity size={10} className="text-primary/40" />
         </div>
         
@@ -156,7 +156,7 @@ export default function Sidebar({ isOpen, onClose }) {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  "group flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all duration-200 border-l-2 text-left",
+                  "group flex items-center gap-3 px-4 py-3 text-[11px] font-black capitalize tracking-widest transition-all duration-200 border-l-2 text-left",
                   isActive
                     ? "bg-primary/5 text-primary border-primary"
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent"

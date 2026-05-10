@@ -89,7 +89,7 @@ export default function DepartmentModal({ isOpen, onClose, department, instituti
             <BookOpen size={24} />
           </div>
           <DialogHeader className="text-left">
-            <DialogTitle className="text-2xl font-black tracking-tighter uppercase leading-none">
+            <DialogTitle className="text-2xl font-black tracking-tighter capitalize leading-none">
               {isEditing ? "Edit department" : "Add department"}
             </DialogTitle>
             <p className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">

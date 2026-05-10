@@ -93,10 +93,10 @@ export default function Topbar({ onMenuToggle }) {
           </button>
 
           <div className="min-w-0 space-y-0.5 text-left">
-            <h2 className="text-xl md:text-2xl font-black tracking-tighter text-foreground uppercase leading-tight truncate">
+            <h2 className="text-xl md:text-2xl font-black tracking-tighter text-foreground capitalize leading-tight truncate">
               {section.title}
             </h2>
-            <p className="hidden md:block text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-70 truncate">
+            <p className="hidden md:block text-[10px] font-bold text-muted-foreground capitalize tracking-widest opacity-70 truncate">
               {section.description}
             </p>
           </div>
@@ -117,10 +117,10 @@ export default function Topbar({ onMenuToggle }) {
                   {getInitials(user)}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-none">
+                  <p className="text-[11px] font-black capitalize tracking-widest text-foreground leading-none">
                     {user?.firstName} {user?.lastName}
                   </p>
-                  <p className="mt-1.5 text-[9px] font-black text-primary uppercase tracking-tighter">
+                  <p className="mt-1.5 text-[9px] font-black text-primary capitalize tracking-tighter">
                     {user?.roleName}
                   </p>
                 </div>
@@ -135,10 +135,10 @@ export default function Topbar({ onMenuToggle }) {
                     {getInitials(user)}
                   </div>
                   <div className="min-w-0 flex-1 text-left">
-                    <p className="text-sm font-black uppercase tracking-tight text-foreground truncate">
+                    <p className="text-sm font-black capitalize tracking-tight text-foreground truncate">
                       {user?.firstName} {user?.lastName}
                     </p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">
+                    <p className="text-[10px] font-bold text-muted-foreground capitalize tracking-widest truncate">
                       {user?.institutionName}
                     </p>
                   </div>
@@ -150,8 +150,8 @@ export default function Topbar({ onMenuToggle }) {
                   <DropdownMenuItem className="group flex items-center gap-4 px-4 py-3 cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all">
                     <User size={16} />
                     <div className="flex flex-col text-left">
-                      <span className="text-[10px] font-black uppercase tracking-widest">My Profile</span>
-                      <span className="text-[8px] uppercase opacity-70">Settings and personal info</span>
+                      <span className="text-[10px] font-black capitalize tracking-widest">My Profile</span>
+                      <span className="text-[8px] capitalize opacity-70">Settings and personal info</span>
                     </div>
                   </DropdownMenuItem>
                 </NavLink>
@@ -163,12 +163,12 @@ export default function Topbar({ onMenuToggle }) {
                   onClick={logout}
                 >
                   <LogOut size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>
+                  <span className="text-[10px] font-black capitalize tracking-widest">Logout</span>
                 </DropdownMenuItem>
               </div>
 
               <div className="bg-muted/30 p-3 border-t border-border flex items-center justify-between">
-                 <span className="text-[8px] font-black text-muted-foreground uppercase">{user?.institutionType}</span>
+                 <span className="text-[8px] font-black text-muted-foreground capitalize">{user?.institutionType}</span>
                  <ShieldCheck size={12} className="text-primary" />
               </div>
             </DropdownMenuContent>

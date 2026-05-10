@@ -123,14 +123,14 @@ export default function AcademicStructurePage() {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-border pb-8">
         <div className="space-y-3 text-left">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest">
               <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
             </div>
-            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
               <Clock size={10} /> {new Date().toLocaleDateString()}
             </div>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Academic <span className="text-primary">Structure</span>
           </h2>
           <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
@@ -141,7 +141,7 @@ export default function AcademicStructurePage() {
         {/* Institution Context: Top Right */}
         {isSuperAdmin && (
           <div className="flex flex-col gap-1.5 text-right">
-            <div className="flex items-center justify-end gap-2 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+            <div className="flex items-center justify-end gap-2 text-[10px] font-black text-muted-foreground/60 capitalize tracking-widest">
               <Building2 size={12} className="text-primary" /> Institution Context
             </div>
             <Select value={selectedInstitutionId} onValueChange={(val) => { setSelectedInstitutionId(val); setSelectedCollege(null); }}>
@@ -163,13 +163,13 @@ export default function AcademicStructurePage() {
         {/* 3. College Selection Column */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-2">
-            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+            <h3 className="text-xs font-black capitalize tracking-widest flex items-center gap-2">
               <Building size={14} className="text-primary" /> Colleges
             </h3>
             <Button 
               size="sm" 
               onClick={() => { setEditingItem(null); setIsCollegeModalOpen(true); }}
-              className="rounded-none h-8 px-4 text-[10px] font-black uppercase tracking-widest"
+              className="rounded-none h-8 px-4 text-[10px] font-black capitalize tracking-widest"
               disabled={!selectedInstitutionId}
             >
               <Plus size={10} className="mr-1.5" /> Add college
@@ -180,8 +180,8 @@ export default function AcademicStructurePage() {
             <Table>
               <TableHeader className="bg-muted/10">
                 <TableRow className="hover:bg-transparent border-border">
-                  <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">College</TableHead>
-                  <TableHead className="text-right pr-4 text-[10px] font-black uppercase tracking-widest py-3">Actions</TableHead>
+                  <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">College</TableHead>
+                  <TableHead className="text-right pr-4 text-[10px] font-black capitalize tracking-widest py-3">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -190,7 +190,7 @@ export default function AcademicStructurePage() {
                 ) : colleges.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={2} className="h-40 text-center opacity-30">
-                      <p className="text-[10px] font-black uppercase">No colleges found</p>
+                      <p className="text-[10px] font-black capitalize">No colleges found</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -249,13 +249,13 @@ export default function AcademicStructurePage() {
         {/* 4. Department Management Column */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-2">
-            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+            <h3 className="text-xs font-black capitalize tracking-widest flex items-center gap-2">
               <Network size={14} className="text-primary" /> {selectedCollege ? `${selectedCollege.name} Departments` : "Departments"}
             </h3>
             <Button 
               size="sm" 
               onClick={() => { setEditingItem(null); setIsDeptModalOpen(true); }}
-              className="rounded-none h-8 px-4 text-[10px] font-black uppercase tracking-widest"
+              className="rounded-none h-8 px-4 text-[10px] font-black capitalize tracking-widest"
               disabled={!selectedCollege}
             >
               <Plus size={10} className="mr-1.5" /> Add department
@@ -268,17 +268,17 @@ export default function AcademicStructurePage() {
               <div className="w-16 h-16 bg-muted/20 flex items-center justify-center text-muted-foreground/40 mb-4 relative z-10">
                 <ArrowRight size={32} />
               </div>
-              <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest relative z-10">Select a college to view departments</p>
+              <p className="text-xs font-black text-muted-foreground/60 capitalize tracking-widest relative z-10">Select a college to view departments</p>
             </div>
           ) : (
             <div className="bg-card border border-border p-1 shadow-sm">
               <Table>
                 <TableHeader className="bg-muted/10">
                   <TableRow className="hover:bg-transparent border-border border-b-2">
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">Department</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">Code</TableHead>
-                    <TableHead className="text-center text-[10px] font-black uppercase tracking-widest py-3 px-4">Status</TableHead>
-                    <TableHead className="text-right pr-4 text-[10px] font-black uppercase tracking-widest py-3">Actions</TableHead>
+                    <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">Department</TableHead>
+                    <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">Code</TableHead>
+                    <TableHead className="text-center text-[10px] font-black capitalize tracking-widest py-3 px-4">Status</TableHead>
+                    <TableHead className="text-right pr-4 text-[10px] font-black capitalize tracking-widest py-3">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -287,7 +287,7 @@ export default function AcademicStructurePage() {
                   ) : departments.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="h-40 text-center opacity-30">
-                        <p className="text-[10px] font-black uppercase">No departments found for this college</p>
+                        <p className="text-[10px] font-black capitalize">No departments found for this college</p>
                       </TableCell>
                     </TableRow>
                   ) : (

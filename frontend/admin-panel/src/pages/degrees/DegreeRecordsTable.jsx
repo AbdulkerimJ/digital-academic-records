@@ -187,7 +187,7 @@ export default function DegreeRecordsTable() {
                         <span className="text-[9px] text-muted-foreground font-bold border border-border px-1">
                           {record.degreeLevelName}
                         </span>
-                        <code className="text-[8px] font-bold text-primary uppercase font-mono">{record.degreeTitleCode}</code>
+                        <code className="text-[8px] font-bold text-primary capitalize font-mono">{record.degreeTitleCode}</code>
                       </div>
                     </div>
                   </TableCell>
