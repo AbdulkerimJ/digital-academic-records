@@ -73,8 +73,8 @@ export default function DegreeAddEditModal({ isOpen, onClose, degree = null }) {
   })
 
   const { data: institutionsData } = useQuery({
-    queryKey: ["institutions-list"],
-    queryFn: () => listInstitutions(),
+    queryKey: ["institutions-list", "COLLEGE"],
+    queryFn: () => listInstitutions({ type: "COLLEGE" }),
     enabled: isOpen && isSuperAdmin,
   })
 
@@ -181,12 +181,12 @@ export default function DegreeAddEditModal({ isOpen, onClose, degree = null }) {
 
               {isSuperAdmin && (
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Institution</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Academic institution</Label>
                   <Select value={formData.institutionId} onValueChange={(v) => handleSelectChange("institutionId", v)} required>
                     <SelectTrigger className="h-12 rounded-none bg-muted/10 border-border px-4">
                       <div className="flex items-center gap-3">
                         <Building2 size={16} className="text-muted-foreground/40" />
-                        <SelectValue placeholder="Select institution" />
+                        <SelectValue placeholder="Select academic institution" />
                       </div>
                     </SelectTrigger>
                     <SelectContent className="rounded-none border-border shadow-2xl">

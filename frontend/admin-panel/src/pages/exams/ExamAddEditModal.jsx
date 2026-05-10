@@ -64,8 +64,8 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
   })
   
   const { data: institutionsData, isLoading: isLoadingInstitutions } = useQuery({
-    queryKey: ["institutions-list"],
-    queryFn: () => listInstitutions(),
+    queryKey: ["institutions-list", "EXAM_BOARD"],
+    queryFn: () => listInstitutions({ type: "EXAM_BOARD" }),
     enabled: isOpen && !isEditing && isSuperAdmin,
   })
 
@@ -176,12 +176,12 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null }) {
 
                 {isSuperAdmin && (
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Institution</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Exam body</Label>
                     <Select value={formData.institutionCode} onValueChange={(v) => handleSelectChange("institutionCode", v)} required>
                       <SelectTrigger className="h-12 rounded-none bg-muted/10 border-border px-4">
                         <div className="flex items-center gap-3">
                           <Building2 size={16} className="text-muted-foreground/40" />
-                          <SelectValue placeholder="Select institution" />
+                          <SelectValue placeholder="Select exam body" />
                         </div>
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-border shadow-2xl">

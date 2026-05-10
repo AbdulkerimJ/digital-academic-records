@@ -144,7 +144,7 @@ export default function DegreeRecordsTable() {
             <TableRow className="hover:bg-transparent border-border border-b-2">
               <TableHead className="w-[200px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Student name</TableHead>
               <TableHead className="w-[220px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Degree title</TableHead>
-              <TableHead className="w-[250px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Institution</TableHead>
+              <TableHead className="w-[250px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Academic Institution</TableHead>
               <TableHead className="text-xs font-bold text-muted-foreground py-4 text-center border-r border-border/50">CGPA</TableHead>
               <TableHead className="text-xs font-bold text-muted-foreground py-4 text-center border-r border-border/50">Date</TableHead>
               <TableHead className="text-right pr-8 text-xs font-bold text-muted-foreground py-4">Actions</TableHead>

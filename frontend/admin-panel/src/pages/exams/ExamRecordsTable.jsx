@@ -284,7 +284,7 @@ export default function ExamRecordsTable() {
         <ExamAddEditModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          initialData={editingExam}
+          exam={editingExam}
         />
       )}
 
