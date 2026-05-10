@@ -68,9 +68,9 @@ export default function LoginPage() {
               </div>
               <div className="space-y-1 text-left">
                  <h1 className="text-4xl font-black tracking-tighter text-foreground leading-none">
-                   DAR <span className="text-primary/60">Portal</span>
+                   NAR
                  </h1>
-                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] ml-0.5">Institutional gateway</p>
+                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] ml-0.5">National academic registry</p>
               </div>
             </div>
             
@@ -154,7 +154,7 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest pt-4">
-            Digital Academic Records Infrastructure &copy; {new Date().getFullYear()}
+            National Academic Registry Infrastructure &copy; {new Date().getFullYear()}
           </div>
         </div>
       </div>

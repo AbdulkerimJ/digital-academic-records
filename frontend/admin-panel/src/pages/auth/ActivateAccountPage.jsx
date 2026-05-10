@@ -69,7 +69,7 @@ export default function ActivateAccountPage() {
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground">
             <GraduationCap size={24} />
           </div>
-          <span className="text-xl font-bold tracking-tight">DAR Platform</span>
+          <span className="text-xl font-bold tracking-tight">NAR</span>
         </div>
 
         <div className="relative z-20 mt-auto">
@@ -77,7 +77,7 @@ export default function ActivateAccountPage() {
             Complete Your<br />Account Setup
           </h1>
           <p className="text-lg text-muted-foreground max-w-md">
-            You're just one step away from accessing the Digital Academic Records Administration portal.
+            You're just one step away from accessing the National Academic Registry Administration portal.
           </p>
           
           <div className="flex items-center gap-4 mt-8 pt-8 border-t border-border/50">

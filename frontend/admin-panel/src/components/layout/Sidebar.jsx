@@ -117,10 +117,10 @@ export default function Sidebar({ isOpen, onClose }) {
              <Shield size={22} className="text-white" />
           </div>
           <div className="flex flex-col text-left">
-            <h1 className="text-xl font-black tracking-tighter leading-none text-foreground uppercase">
-              DAR Portal
+            <h1 className="text-xl font-black tracking-tighter leading-none text-foreground">
+              NAR
             </h1>
-            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Institutional</span>
+            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National academic registry</span>
           </div>
         </Link>
 
