@@ -1,9 +1,11 @@
-import { Bell, Menu, Search, User } from 'lucide-react'
+import { Bell, Menu, Search, User, Sun, Moon } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import { Link } from 'react-router-dom'
 
 export default function Navbar({ onMenuToggle }) {
   const { student } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <header className="h-20 border-b border-border bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
@@ -28,6 +30,14 @@ export default function Navbar({ onMenuToggle }) {
       </div>
 
       <div className="flex items-center gap-3 md:gap-6">
+        <button 
+          onClick={toggleTheme}
+          className="p-2 text-muted-foreground hover:text-primary transition-all active:scale-90"
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+        
         <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors">
           <Bell size={20} />
           <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_var(--color-primary)]" />

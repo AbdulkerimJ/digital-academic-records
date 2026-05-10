@@ -1,5 +1,4 @@
 import { useRouteError, useNavigate } from "react-router-dom"
-import { Button } from "../../components/ui/Button"
 import { AlertTriangle, Home, RotateCcw, ShieldAlert, Activity } from "lucide-react"
 
 export default function GlobalErrorPage() {
@@ -43,19 +42,18 @@ export default function GlobalErrorPage() {
           </p>
 
           <div className="flex gap-4 pt-4">
-            <Button 
-              variant="outline" 
-              className="flex-1 h-12 rounded-none border-border font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-muted" 
+            <button 
+              className="flex-1 h-12 rounded-none border border-border font-black text-[10px] uppercase tracking-widest gap-2 hover:bg-muted flex items-center justify-center transition-all" 
               onClick={() => window.location.reload()}
             >
               <RotateCcw size={14} /> Re-initialize
-            </Button>
-            <Button 
-              className="flex-1 h-12 rounded-none font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/10" 
+            </button>
+            <button 
+              className="flex-1 h-12 rounded-none bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/10 flex items-center justify-center transition-all hover:brightness-110" 
               onClick={() => navigate("/", { replace: true })}
             >
               <Home size={14} /> Exit to Home
-            </Button>
+            </button>
           </div>
         </div>
 

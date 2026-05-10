@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AppShell from '../components/layout/AppShell'
-import LoginPage from '../pages/auth/LoginPage'
 import DashboardPage from '../pages/dashboard/DashboardPage'
 import RecordsPage from '../pages/records/RecordsPage'
 import QRCodesPage from '../pages/qr/QRCodesPage'
