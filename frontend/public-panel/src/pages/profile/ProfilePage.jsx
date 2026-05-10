@@ -2,20 +2,21 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { 
   User, Shield, Calendar, Mail, Fingerprint, 
-  Settings, LogOut, Key, CheckCircle2, AlertCircle 
+  Settings, LogOut, Key, CheckCircle2, AlertCircle,
+  Hash, Activity, ShieldCheck, Database, ArrowRight,
+  UserCheck
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import Badge from '../../components/ui/Badge'
 import Spinner from '../../components/ui/Spinner'
 
 export default function ProfilePage() {
   const { student, logout } = useAuth()
-  const [revoking, setRevoking] = useState(false)
 
   if (!student) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <Spinner size="lg" className="text-primary" />
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">Reading Identity Ledger...</p>
       </div>
     )
   }
@@ -25,122 +26,156 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
-      {/* Header Profile Section */}
-      <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-12 shadow-sm relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-primary/10 transition-colors duration-500" />
-        
-        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-          <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-4xl font-black shadow-xl shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-            {getInitials()}
+    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+      
+      {/* 1. Identity Header */}
+      <div className="space-y-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+                <User size={22} className="text-primary-foreground" />
+             </div>
+             <div className="flex flex-col">
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Identity Registry</h2>
+                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Official Student Profile</span>
+             </div>
           </div>
-          <div className="text-center md:text-left space-y-2">
-            <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
-              {student.firstName} {student.lastName}
-            </h1>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2">
-              <Badge variant="primary" className="px-3 py-1 text-xs">Verified Student</Badge>
-              <Badge variant="secondary" className="px-3 py-1 text-xs font-mono tracking-tight">{student.nationalId}</Badge>
-            </div>
-            <p className="text-muted-foreground font-medium pt-2 max-w-md">
-              Your profile is verified through the National Identity System (Fayda).
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column: Information */}
-        <div className="md:col-span-2 space-y-8">
-          <div className="bg-card border border-border rounded-3xl p-8 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <User size={20} />
-              </div>
-              <h2 className="text-xl font-bold">Personal Information</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">First Name</p>
-                <p className="text-base font-bold text-foreground">{student.firstName}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Father's / Last Name</p>
-                <p className="text-base font-bold text-foreground">{student.lastName}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fayda National ID</p>
-                <p className="text-base font-bold text-foreground font-mono">{student.nationalId}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Gender</p>
-                <p className="text-base font-bold text-foreground capitalize">{student.gender || 'Not specified'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Date of Birth</p>
-                <p className="text-base font-bold text-foreground">
-                  {student.dateOfBirth ? format(new Date(student.dateOfBirth), 'MMMM dd, yyyy') : 'N/A'}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Account Created</p>
-                <p className="text-base font-bold text-foreground">
-                  {student.createdAt ? format(new Date(student.createdAt), 'MMMM yyyy') : 'N/A'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Account Status Card */}
-          <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
-              <CheckCircle2 size={32} />
-            </div>
-            <div className="text-center sm:text-left space-y-1">
-              <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-400">Identity Fully Verified</h3>
-              <p className="text-sm text-emerald-800/70 dark:text-emerald-500/70 leading-relaxed">
-                Your academic records are linked to your national identity. Any changes to your identity information must be updated through the Fayda National ID office.
-              </p>
-            </div>
+          <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded">
+            <ShieldCheck size={12} /> Identity Verified
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="bg-card border border-border rounded-3xl p-2 shadow-sm">
-            <button 
-              className="w-full flex items-center justify-between p-4 hover:bg-secondary rounded-2xl transition-colors group"
-              onClick={logout}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <LogOut size={18} />
+        <div className="flex flex-col md:flex-row gap-8 items-center justify-between border-b border-border pb-10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">
+             <Fingerprint size={240} />
+          </div>
+          
+          <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+            <div className="w-40 h-40 border border-border bg-card flex items-center justify-center text-5xl font-black text-primary relative">
+               {getInitials()}
+               <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 border-4 border-background rounded-full flex items-center justify-center text-white">
+                  <CheckCircle2 size={18} />
+               </div>
+            </div>
+            <div className="text-center md:text-left space-y-4">
+              <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+                {student.firstName} <br/>
+                <span className="text-muted-foreground">{student.lastName}</span>
+              </h1>
+              <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                <div className="px-3 py-1 bg-muted/50 border border-border text-[10px] font-mono text-primary uppercase tracking-widest rounded">
+                  Fayda_ID: {student.nationalId}
                 </div>
-                <span className="text-sm font-bold text-foreground">Sign out of Portal</span>
               </div>
-              <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
+            </div>
           </div>
+
+          <button 
+            onClick={logout}
+            className="h-14 px-10 border border-destructive/30 text-destructive font-black text-[10px] uppercase tracking-[0.3em] hover:bg-destructive hover:text-white transition-all flex items-center justify-center gap-3 group relative z-10"
+          >
+            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+            Sign Out
+          </button>
         </div>
       </div>
-    </div>
-  )
-}
 
-function ChevronRight({ size, className }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
+      {/* 2. Identity Information Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Profile Data */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-card border border-border rounded overflow-hidden">
+            <div className="bg-muted/30 px-8 py-4 border-b border-border flex justify-between items-center">
+              <span className="text-[10px] font-mono text-primary font-black uppercase tracking-[0.2em]">National Identity Metadata</span>
+              <UserCheck size={14} className="text-muted-foreground/40" />
+            </div>
+            
+            <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">First Name</p>
+                  <p className="text-xl font-black uppercase tracking-tight">{student.firstName}</p>
+               </div>
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Father's Name</p>
+                  <p className="text-xl font-black uppercase tracking-tight">{student.lastName}</p>
+               </div>
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">National Identity Number</p>
+                  <p className="text-xl font-black font-mono tracking-tighter text-primary">{student.nationalId}</p>
+               </div>
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Gender</p>
+                  <p className="text-xl font-black uppercase tracking-tight">{student.gender || 'Not indexed'}</p>
+               </div>
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Date of Birth</p>
+                  <p className="text-xl font-black uppercase font-mono">
+                    {student.dateOfBirth ? format(new Date(student.dateOfBirth), 'yyyy-MM-dd') : 'N/A'}
+                  </p>
+               </div>
+               <div className="space-y-1.5">
+                  <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Registry Entry Date</p>
+                  <p className="text-xl font-black uppercase font-mono">
+                    {student.createdAt ? format(new Date(student.createdAt), 'yyyy-MM-dd') : 'N/A'}
+                  </p>
+               </div>
+            </div>
+          </div>
+
+          <div className="bg-emerald-500/5 border border-emerald-500/20 p-8 rounded flex items-start gap-6">
+             <div className="w-14 h-14 bg-emerald-500 text-white rounded flex items-center justify-center shrink-0">
+                <ShieldCheck size={28} />
+             </div>
+             <div className="space-y-1.5">
+                <h4 className="text-lg font-black uppercase tracking-tight text-emerald-900 dark:text-emerald-400">Data Integrity Confirmed</h4>
+                <p className="text-xs font-medium text-emerald-800/70 dark:text-emerald-500/70 leading-relaxed uppercase tracking-tight">
+                  Your identity is cryptographically linked to the national registry. Any updates to your personal metadata must be performed at an authorized National ID (Fayda) enrollment center.
+                </p>
+             </div>
+          </div>
+        </div>
+
+        {/* System Summary Sidebar */}
+        <div className="space-y-6">
+           <div className="bg-card border border-border rounded overflow-hidden">
+              <div className="bg-muted/30 px-6 py-3 border-b border-border">
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Registry Status</span>
+              </div>
+              <div className="p-6 space-y-6">
+                 <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground uppercase">Sync Status</span>
+                    <span className="text-emerald-500 font-black uppercase">Active</span>
+                 </div>
+                 <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground uppercase">Auth Provider</span>
+                    <span className="text-foreground font-black uppercase">Fayda ID</span>
+                 </div>
+                 <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground uppercase">Identity Lock</span>
+                    <span className="text-foreground font-black uppercase">Enabled</span>
+                 </div>
+                 <div className="pt-4 border-t border-border/50">
+                    <p className="text-[9px] text-muted-foreground uppercase leading-relaxed font-mono">
+                       Your data is protected by the National Digital Privacy Act.
+                    </p>
+                 </div>
+              </div>
+           </div>
+
+           <div className="bg-muted/20 border border-border rounded p-6 space-y-4">
+              <div className="flex items-center gap-2 text-primary">
+                 <Database size={14} />
+                 <span className="text-[9px] font-black uppercase tracking-widest">Storage Registry</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest leading-relaxed">
+                 All records are immutable once verified by the issuing institution.
+              </p>
+           </div>
+        </div>
+
+      </div>
+
+    </div>
   )
 }

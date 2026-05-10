@@ -14,7 +14,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
 import { Card } from "../../components/ui/card"
-import { Plus, Edit2, Trash2, Search, UploadCloud } from "lucide-react"
+import { Plus, Edit2, Trash2, Search, UploadCloud, Activity, ShieldCheck, GraduationCap } from "lucide-react"
 import { toast } from "sonner"
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import ExamAddEditModal from "./ExamAddEditModal"
@@ -22,6 +22,7 @@ import BulkUploadModal from "../../components/common/BulkUploadModal"
 import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import Pagination from "../../components/common/Pagination"
 import { useSearchParams } from "react-router-dom"
+import { cn } from "../../lib/utils"
 
 export default function ExamRecordsTable() {
   const { user } = useAuth()
@@ -44,44 +45,21 @@ export default function ExamRecordsTable() {
     queryFn: () => listExams({ page, limit, search: searchQuery }),
   })
 
-  const examsData = data?.data?.examRecords
-  const exams = Array.isArray(examsData) ? examsData : []
+  const exams = Array.isArray(data?.data?.examRecords) ? data.data.examRecords : []
   const totalCount = data?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
-
-  // Predictive Prefetching for next/prev pages
-  useEffect(() => {
-    const commonParams = { search: searchQuery, limit }
-    
-    // Prefetch Next Page
-    if (page < totalPages) {
-      queryClient.prefetchQuery({
-        queryKey: ["exams", page + 1, limit, searchQuery],
-        queryFn: () => listExams({ ...commonParams, page: page + 1 })
-      })
-    }
-
-    // Prefetch Previous Page
-    if (page > 1) {
-      queryClient.prefetchQuery({
-        queryKey: ["exams", page - 1, limit, searchQuery],
-        queryFn: () => listExams({ ...commonParams, page: page - 1 })
-      })
-    }
-  }, [page, searchQuery, limit, totalPages, queryClient])
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteExam(id),
     onSuccess: () => {
-      toast.success("Exam record deleted successfully.")
+      toast.success("Record deleted.")
       queryClient.invalidateQueries({ queryKey: ["exams"] })
       setIsDeleteModalOpen(false)
       setRecordToDelete(null)
     },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to delete exam"),
+    onError: (err) => toast.error(err.response?.data?.message || "Delete failed"),
   })
 
-  // Debounced search effect
   useEffect(() => {
     const timer = setTimeout(() => {
       const newParams = new URLSearchParams(searchParams)
@@ -90,13 +68,8 @@ export default function ExamRecordsTable() {
       newParams.set("page", "1")
       setSearchParams(newParams)
     }, 300)
-
     return () => clearTimeout(timer)
-  }, [searchInput, setSearchParams, searchParams])
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-  }
+  }, [searchInput, setSearchParams])
 
   const setPage = (newPage) => {
     const newParams = new URLSearchParams(searchParams)
@@ -133,114 +106,167 @@ export default function ExamRecordsTable() {
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-card border border-border/60 p-4 rounded-2xl shadow-sm relative overflow-hidden">
-        <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto relative z-10">
-          <div className="relative w-full md:w-[400px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input
-              placeholder="Search by student name or National ID..."
-              className="pl-9 rounded-xl bg-background border-border/60 focus-visible:ring-primary/20 h-10 font-medium"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-          </div>
-        </form>
+    <div className="space-y-4">
+      
+      {/* 1. Action Bar */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-muted/20 border-b border-border p-4 relative overflow-hidden">
+        <div className="relative w-full md:max-w-md group">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
+          <Input
+            placeholder="Search by student name or ID..."
+            className="h-10 pl-10 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
 
         <div className="flex gap-2 w-full md:w-auto relative z-10">
           <Button
             variant="outline"
-            className="flex-1 md:flex-none rounded-xl h-10 font-black gap-2 border-primary/20 text-primary hover:bg-primary/10"
+            className="flex-1 md:flex-none rounded-none h-10 px-6 font-bold text-xs border-border hover:bg-muted/50 transition-all"
             onClick={() => setIsBulkOpen(true)}
           >
-            <UploadCloud size={16} /> Bulk Upload CSV
+            <UploadCloud size={14} /> Bulk upload
           </Button>
           <Button
-            className="flex-1 md:flex-none rounded-xl h-10 font-black gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+            className="flex-1 md:flex-none rounded-none h-10 px-6 font-bold text-xs shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
             onClick={openAddModal}
           >
-            <Plus size={16} /> Add Single Record
+            <Plus size={14} /> Add result
           </Button>
         </div>
       </div>
 
-      <Card className="rounded-3xl border-border/60 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-border/40">
-                <TableHead className="w-[180px] text-[10px] font-black uppercase tracking-widest py-5">Student</TableHead>
-                <TableHead className="w-[180px] text-[10px] font-black uppercase tracking-widest py-5">Exam Level</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest py-5 text-center">Year</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest py-5 text-center">Status</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest py-5">Scores</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest py-5 text-right px-8">Actions</TableHead>
+      {/* 2. Data Grid */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <TableHead className="w-[200px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Student name</TableHead>
+              <TableHead className="w-[220px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Exam level</TableHead>
+              <TableHead className="text-center text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50 w-[100px]">Year</TableHead>
+              <TableHead className="text-center text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50 w-[120px]">Result</TableHead>
+              <TableHead className="text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Scores</TableHead>
+              <TableHead className="text-right pr-8 text-xs font-bold text-muted-foreground py-4">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableBodySkeleton columns={6} rows={limit} />
+            ) : exams.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-60 text-center">
+                  <div className="flex flex-col items-center gap-3 opacity-30">
+                    <GraduationCap size={48} strokeWidth={1} />
+                    <p className="text-xs font-bold">No exam results found</p>
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableBodySkeleton columns={6} rows={5} />
-              ) : exams.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-48 text-center text-muted-foreground font-medium">
-                    No exam records found.
+            ) : (
+              exams.map((exam) => (
+                <TableRow 
+                  key={exam.id} 
+                  className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
+                >
+                  <TableCell className="py-2 pl-6">
+                    <div className="flex flex-col text-left">
+                      <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
+                        {exam.studentFirstName} {exam.studentLastName}
+                      </span>
+                      <code className="text-[10px] font-bold text-muted-foreground font-mono">
+                        {exam.studentNationalId}
+                      </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className="flex flex-col text-left">
+                      <span className="font-bold text-xs tracking-tight text-foreground">
+                        {exam.examLevelName}
+                      </span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <code className="text-[8px] font-bold text-primary uppercase font-mono">{exam.examLevelCode}</code>
+                        <span className="text-[9px] text-muted-foreground font-bold border-l border-border pl-2">
+                          {exam.institutionName}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center py-2 px-6">
+                    <span className="text-xs font-bold font-mono text-muted-foreground">{exam.year}</span>
+                  </TableCell>
+                  <TableCell className="text-center py-2 px-6">
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold",
+                      exam.resultStatus === 'PASS' 
+                        ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" 
+                        : "bg-destructive/10 text-destructive border-destructive/20"
+                    )}>
+                      {exam.resultStatus === 'PASS' && <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />}
+                      {exam.resultStatus}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      {exam.totalScore && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Total</span>
+                          <span className="text-[10px] font-bold text-foreground">{exam.totalScore}</span>
+                        </div>
+                      )}
+                      {exam.averageScore && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Avg</span>
+                          <span className="text-[10px] font-bold text-foreground">{exam.averageScore}</span>
+                        </div>
+                      )}
+                      {exam.percentile && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Perc</span>
+                          <span className="text-[10px] font-bold text-foreground">{exam.percentile}%</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right pr-8 py-2">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditModal(exam)}
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all"
+                      >
+                        <Edit2 size={14} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteClick(exam)}
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/20 transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                exams.map((exam) => (
-                  <TableRow key={exam.id} className="hover:bg-muted/10 transition-colors border-border/40">
-                    <TableCell className="py-4">
-                      <div className="font-bold text-sm text-foreground">{exam.studentFirstName} {exam.studentLastName}</div>
-                      <div className="text-[10px] font-mono text-muted-foreground">{exam.studentNationalId}</div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="font-bold text-sm">{exam.examLevelName}</div>
-                      <div className="text-[10px] font-mono text-muted-foreground">{exam.examLevelCode} · {exam.institutionName}</div>
-                    </TableCell>
-                    <TableCell className="text-center py-4">
-                      <Badge variant="outline" className="font-black text-xs px-2.5 py-0.5 rounded-lg border-muted-foreground/20">
-                        {exam.year}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center py-4">
-                      <Badge className={`font-black text-[10px] px-3 uppercase rounded-full ${exam.resultStatus === 'PASS' ? 'bg-emerald-500/10 text-emerald-600 border-none' : 'bg-destructive/10 text-destructive border-none'}`}>
-                        {exam.resultStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="text-xs font-medium space-y-0.5">
-                        {exam.totalScore && <div><span className="text-muted-foreground text-[10px] uppercase font-bold tracking-widest mr-2">Total</span>{exam.totalScore}</div>}
-                        {exam.averageScore && <div><span className="text-muted-foreground text-[10px] uppercase font-bold tracking-widest mr-2">Avg</span>{exam.averageScore}</div>}
-                        {exam.percentile && <div><span className="text-muted-foreground text-[10px] uppercase font-bold tracking-widest mr-2">Perc</span>{exam.percentile}%</div>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right py-4 px-6">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditModal(exam)}
-                          className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
-                        >
-                          <Edit2 size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(exam)}
-                          className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* 3. Pagination */}
+      <div className="p-4 border-t border-border bg-muted/5">
+        <Pagination 
+          page={page} 
+          totalPages={totalPages} 
+          setPage={setPage} 
+          limit={limit}
+          setLimit={setLimit}
+          totalCount={totalCount}
+          itemName="exam records"
+          isFetching={isFetching}
+        />
+      </div>
 
       {isDeleteModalOpen && (
         <ConfirmDeleteModal
@@ -249,20 +275,10 @@ export default function ExamRecordsTable() {
           onConfirm={handleConfirmDelete}
           isDeleting={deleteMutation.isPending}
           itemName={`${recordToDelete?.studentFirstName} ${recordToDelete?.studentLastName}'s ${recordToDelete?.examLevelName}`}
-          title="Delete Exam Record"
+          title="Delete result"
+          description="Are you sure you want to delete this exam result? This action will be logged."
         />
       )}
-
-      <Pagination 
-        page={page} 
-        totalPages={totalPages} 
-        setPage={setPage} 
-        limit={limit}
-        setLimit={setLimit}
-        totalCount={totalCount}
-        itemName="exams"
-        isFetching={isFetching}
-      />
 
       {isModalOpen && (
         <ExamAddEditModal
@@ -276,8 +292,8 @@ export default function ExamRecordsTable() {
         <BulkUploadModal
           isOpen={isBulkOpen}
           onClose={() => setIsBulkOpen(false)}
-          title="Bulk Upload Exam Records"
-          description="Upload a CSV file containing multiple exam records. Download the template below to ensure proper formatting."
+          title="Bulk Result Upload"
+          description="Upload a CSV file to import multiple exam results simultaneously."
           uploadFunction={uploadBulkExams}
           queryKeyToInvalidate="exams"
           templateUrl={user?.roleName === "SUPER_ADMIN" ? "/templates/exams_super_template.csv" : "/templates/exams_template.csv"}

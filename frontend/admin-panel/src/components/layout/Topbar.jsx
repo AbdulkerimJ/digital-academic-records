@@ -1,10 +1,8 @@
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useLocation, NavLink } from "react-router-dom";
-import { Moon, Sun, LogOut, ChevronDown, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Moon, Sun, LogOut, ChevronDown, User, ShieldCheck, Activity, Menu } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,55 +11,47 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Separator } from "../ui/separator";
 
 const sectionTitles = [
   {
     path: "/",
-    title: "Dashboard overview",
-    description:
-      "Monitor records, institutions, and verification activity in one place.",
+    title: "Dashboard",
+    description: "Overview of all system activity and records.",
   },
   {
     path: "/users",
-    title: "User administration",
-    description:
-      "Manage platform roles and privileged access for the records team.",
+    title: "Admin Users",
+    description: "Manage who has access to this system.",
   },
   {
     path: "/institutions",
-    title: "Institution registry",
-    description:
-      "Track the organizations connected to the academic records platform.",
+    title: "Institutions",
+    description: "Manage schools and organizations on the platform.",
   },
   {
     path: "/students",
-    title: "Student records",
-    description:
-      "Review and maintain student identity and academic profile data.",
+    title: "Students",
+    description: "View and manage all student records.",
   },
   {
     path: "/degrees",
-    title: "Degree management",
-    description:
-      "Handle qualifications, titles, and credential issuance records.",
+    title: "Degrees",
+    description: "Manage and issue digital degree certificates.",
   },
   {
     path: "/exams",
-    title: "Examination records",
-    description: "Maintain exam results and board-level academic evidence.",
+    title: "Exams",
+    description: "Manage exam records and results.",
   },
   {
     path: "/corrections",
-    title: "Correction requests",
-    description:
-      "Process record amendments and verification follow-up requests.",
+    title: "Correction Requests",
+    description: "Review and approve data change requests.",
   },
   {
     path: "/profile",
-    title: "Account settings",
-    description:
-      "Manage your personal information, and account security.",
+    title: "Profile Settings",
+    description: "Update your personal details and security.",
   },
 ];
 
@@ -82,113 +72,105 @@ function getSection(pathname) {
   return nestedMatch || sectionTitles[0];
 }
 
-export default function Topbar() {
+export default function Topbar({ onMenuToggle }) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const location = useLocation();
 
   const section = getSection(location.pathname);
-  const roleLabel =
-    user?.roleName?.replaceAll("_", " ").toLowerCase() || "workspace access";
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/85 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-              Academic operations
-            </p>
-            <Badge variant="secondary" className="rounded-full">
-              {roleLabel}
-            </Badge>
-          </div>
-          <h2 className="mt-1 truncate text-lg font-semibold text-foreground sm:text-xl">
-            {section.title}
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            {section.description}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-11 w-11 rounded-2xl"
-            aria-label="Toggle theme"
-            title="Toggle theme"
+    <header className="sticky top-0 z-40 border-b border-border bg-card px-4 md:px-8 py-4 shadow-sm transition-all duration-500">
+      <div className="flex flex-wrap items-center justify-between gap-6">
+        
+        {/* Page Context */}
+        <div className="flex items-center gap-4 min-w-0">
+          <button 
+            onClick={onMenuToggle}
+            className="p-2 -ml-2 text-muted-foreground hover:text-primary lg:hidden transition-colors"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </Button>
+            <Menu size={20} />
+          </button>
 
-          <Separator orientation="vertical" className="hidden h-10 sm:block" />
+          <div className="min-w-0 space-y-0.5 text-left">
+            <h2 className="text-xl md:text-2xl font-black tracking-tighter text-foreground uppercase leading-tight truncate">
+              {section.title}
+            </h2>
+            <p className="hidden md:block text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-70 truncate">
+              {section.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="h-12 w-12 border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all shadow-sm"
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-12 gap-3 rounded-2xl px-3">
-                <Avatar className="h-8 w-8 border border-border">
-                  <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
-                    {getInitials(user)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden text-left sm:block">
-                  <p className="text-sm font-semibold leading-none text-foreground">
+              <button className="h-12 pl-1 pr-4 border border-border bg-background flex items-center gap-3 hover:border-primary/50 transition-all group shadow-sm">
+                <div className="h-10 w-10 bg-primary flex items-center justify-center text-[11px] font-black text-white">
+                  {getInitials(user)}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-none">
                     {user?.firstName} {user?.lastName}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {user?.institutionName || "Digital Academic Records"}
+                  <p className="mt-1.5 text-[9px] font-black text-primary uppercase tracking-tighter">
+                    {user?.roleName}
                   </p>
                 </div>
-                <ChevronDown size={16} className="text-muted-foreground" />
-              </Button>
+                <ChevronDown size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+              </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-72 rounded-2xl p-2">
-              <DropdownMenuLabel className="p-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-11 w-11 border border-border">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getInitials(user)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">
+            <DropdownMenuContent align="end" className="w-80 rounded-none border-border bg-card p-0 overflow-hidden shadow-2xl">
+              <DropdownMenuLabel className="p-6 bg-muted/20 border-b border-border">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 bg-primary flex items-center justify-center text-xs font-black text-white">
+                    {getInitials(user)}
+                  </div>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-sm font-black uppercase tracking-tight text-foreground truncate">
                       {user?.firstName} {user?.lastName}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {user?.roleName?.replaceAll("_", " ")}
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">
+                      {user?.institutionName}
                     </p>
                   </div>
                 </div>
               </DropdownMenuLabel>
 
-              <DropdownMenuSeparator className="my-2" />
-              
-              <NavLink to="/profile">
-                <DropdownMenuItem className="gap-3 rounded-xl px-3 py-2.5 cursor-pointer focus:bg-accent transition-colors">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="p-2">
+                <NavLink to="/profile">
+                  <DropdownMenuItem className="group flex items-center gap-4 px-4 py-3 cursor-pointer focus:bg-primary/10 focus:text-primary rounded-none transition-all">
                     <User size={16} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold">Account Settings</span>
-                    <span className="text-[10px] text-muted-foreground">Manage your profile and security</span>
-                  </div>
-                </DropdownMenuItem>
-              </NavLink>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[10px] font-black uppercase tracking-widest">My Profile</span>
+                      <span className="text-[8px] uppercase opacity-70">Settings and personal info</span>
+                    </div>
+                  </DropdownMenuItem>
+                </NavLink>
 
-              <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuSeparator className="bg-border/50 mx-2" />
 
-              <DropdownMenuItem
-                className="gap-3 rounded-xl px-3 py-2.5 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                onClick={logout}
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10">
+                <DropdownMenuItem
+                  className="flex items-center gap-4 px-4 py-3 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-none cursor-pointer transition-all"
+                  onClick={logout}
+                >
                   <LogOut size={16} />
-                </div>
-                <span className="font-semibold">Sign out</span>
-              </DropdownMenuItem>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>
+                </DropdownMenuItem>
+              </div>
+
+              <div className="bg-muted/30 p-3 border-t border-border flex items-center justify-between">
+                 <span className="text-[8px] font-black text-muted-foreground uppercase">{user?.institutionType}</span>
+                 <ShieldCheck size={12} className="text-primary" />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -1,4 +1,5 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard,
@@ -10,10 +11,12 @@ import {
   ClipboardCheck,
   Network,
   History,
+  Shield,
+  Activity,
+  User,
+  ChevronRight,
+  X
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
 import { cn } from "../../lib/utils";
 
 const navItems = [
@@ -25,7 +28,7 @@ const navItems = [
     end: true,
   },
   {
-    title: "Users",
+    title: "Admin Users",
     href: "/users",
     icon: Users,
     roles: ["SUPER_ADMIN"],
@@ -77,19 +80,13 @@ const navItems = [
   },
 ];
 
-function getInitials(user) {
-  const firstInitial = user?.firstName?.[0] || "D";
-  const lastInitial = user?.lastName?.[0] || "A";
-  return `${firstInitial}${lastInitial}`.toUpperCase();
-}
-
-function formatLabel(value) {
-  if (!value) return "";
-  return value.replaceAll("_", " ").toLowerCase();
-}
-
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const { user } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    onClose?.();
+  }, [location.pathname]);
 
   const filteredNavItems = navItems.filter((item) => {
     if (!item.roles.includes(user?.roleName)) return false;
@@ -102,73 +99,89 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className="relative z-10 flex h-screen w-80 shrink-0 flex-col border-r border-border bg-card/90 backdrop-blur-md">
-      <div className="p-6 pb-4">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-            <GraduationCap size={22} />
+    <aside className={cn(
+      "fixed inset-y-0 left-0 z-50 flex w-80 flex-col border-r border-border bg-card transition-transform duration-300 transform lg:relative lg:translate-x-0 shadow-sm",
+      isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+    )}>
+      
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 text-muted-foreground lg:hidden"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="p-8 space-y-8">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 bg-primary rounded-none flex items-center justify-center shadow-lg shadow-primary/10 group-hover:scale-105 transition-transform">
+             <Shield size={22} className="text-white" />
           </div>
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">
-              DAR Admin
+          <div className="flex flex-col text-left">
+            <h1 className="text-xl font-black tracking-tighter leading-none text-foreground uppercase">
+              DAR Portal
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Digital Academic Records
-            </p>
+            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Institutional</span>
           </div>
         </Link>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Badge variant="secondary" className="rounded-full">
-            {formatLabel(user?.roleName) || "workspace"}
-          </Badge>
-          {user?.institutionType ? (
-            <Badge variant="outline" className="rounded-full">
-              {formatLabel(user.institutionType)}
-            </Badge>
-          ) : null}
+        <div className="p-4 border border-border bg-muted/20 rounded-none space-y-3 relative overflow-hidden group">
+           <div className="absolute top-0 right-0 p-2 opacity-[0.05] group-hover:text-primary transition-colors">
+              <User size={40} />
+           </div>
+           <div className="space-y-1 relative z-10 text-left">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Logged in as</p>
+              <p className="text-xs font-black uppercase text-foreground truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+           </div>
+           <div className="flex items-center gap-2 relative z-10">
+              <div className="px-2 py-0.5 border border-primary/20 text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5">
+                {user?.roleName}
+              </div>
+           </div>
         </div>
       </div>
 
-      <div className="px-6">
-        <Separator />
-      </div>
-
-      <nav className="flex-1 px-4 py-5">
-        <div className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-          Navigation
+      <nav className="flex-1 px-4 overflow-y-auto no-scrollbar pb-10">
+        <div className="mb-4 px-4 flex items-center justify-between">
+           <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Main Menu</span>
+           <Activity size={10} className="text-primary/40" />
         </div>
-        {filteredNavItems.map((item) => (
-          <NavLink
-            key={item.href}
-            to={item.href}
-            end={item.end}
-            className={({ isActive }) =>
-              cn(
-                "group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <span
-                  className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
-                    isActive
-                      ? "bg-primary-foreground/15 text-primary-foreground"
-                      : "bg-background text-muted-foreground shadow-sm ring-1 ring-border group-hover:bg-background group-hover:text-primary",
-                  )}
-                >
-                  <item.icon size={18} />
-                </span>
-                <span className="flex-1">{item.title}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        
+        <div className="space-y-0.5">
+          {filteredNavItems.map((item, index) => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              end={item.end}
+              className={({ isActive }) =>
+                cn(
+                  "group flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all duration-200 border-l-2 text-left",
+                  isActive
+                    ? "bg-primary/5 text-primary border-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={cn(
+                    "w-5 font-mono text-[9px] transition-colors",
+                    isActive ? "text-primary/40" : "text-muted-foreground/30"
+                  )}>
+                    {(index + 1).toString().padStart(2, '0')}
+                  </span>
+                  <item.icon size={16} className={cn(
+                    "shrink-0 transition-all",
+                    isActive ? "scale-110" : "group-hover:scale-110"
+                  )} />
+                  <span className="flex-1 truncate">{item.title}</span>
+                  {isActive && <ChevronRight size={12} className="text-primary/30" />}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
     </aside>

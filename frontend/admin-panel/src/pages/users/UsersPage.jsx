@@ -15,8 +15,8 @@ import { Button } from "../../components/ui/button"
 import { 
   UserPlus, 
   AlertTriangle,
-  UserCog,
-  GraduationCap
+  Activity,
+  Clock
 } from "lucide-react"
 import { toast } from "sonner"
 import { Card } from "../../components/ui/card"
@@ -24,8 +24,6 @@ import { Card } from "../../components/ui/card"
 import UserInviteModal from "./UserInviteModal"
 import EditUserModal from "./EditUserModal"
 import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
-import PageLoader from "../../components/common/PageLoader"
-import TableSkeleton from "../../components/common/TableSkeleton"
 import UserFilters from "./UserFilters"
 import UserTable from "./UserTable"
 
@@ -91,7 +89,7 @@ export default function UsersPage() {
 
   const queryClient = useQueryClient()
 
-  const { data: usersData, isLoading, error, isFetching } = useQuery({
+  const { data: usersData, error, isFetching } = useQuery({
     queryKey: ["users", { page, limit, sortBy, sortDir, searchTerm, roleFilter, statusFilter, institutionFilter }],
     queryFn: () => listUsers({ 
       page, 
@@ -124,12 +122,12 @@ export default function UsersPage() {
   const instRaw = institutionsData?.data?.institutions
   const institutions = Array.isArray(instRaw) ? instRaw : []
 
-  // Predictive Prefetching for next/prev pages
+  // Predictive Prefetching
   useEffect(() => {
     const totalPages = Math.ceil(totalCount / limit)
     const commonParams = { 
       limit, 
-      offset: 0, // Will be overridden
+      offset: 0,
       sortBy, 
       sortDir, 
       search: searchTerm, 
@@ -138,7 +136,6 @@ export default function UsersPage() {
       institutionId: institutionFilter 
     }
     
-    // Prefetch Next Page
     if (page < totalPages) {
       queryClient.prefetchQuery({
         queryKey: ["users", { ...commonParams, page: page + 1, offset: page * limit }],
@@ -146,7 +143,6 @@ export default function UsersPage() {
       })
     }
 
-    // Prefetch Previous Page
     if (page > 1) {
       queryClient.prefetchQuery({
         queryKey: ["users", { ...commonParams, page: page - 1, offset: (page - 2) * limit }],
@@ -156,17 +152,16 @@ export default function UsersPage() {
   }, [page, limit, sortBy, sortDir, searchTerm, roleFilter, statusFilter, institutionFilter, totalCount, queryClient])
 
   const getDerivedStatus = (user) => {
-    if (user.isSuspended) return "SUSPENDED"
-    if (user.isActive) return "ACTIVE"
-    if (user.invitationToken) return "PENDING"
-    return "REVOKED"
+    if (user.isSuspended) return "Suspended"
+    if (user.isActive) return "Active"
+    if (user.invitationToken) return "Pending"
+    return "Revoked"
   }
 
   const users = rawUsers.map(user => ({
     ...user,
     status: getDerivedStatus(user)
   }))
-
 
   const mutationOptions = {
     onSuccess: (data) => {
@@ -184,7 +179,7 @@ export default function UsersPage() {
       if (data.data?.emailSent) {
         toast.success(data.message || "Invitation resent successfully")
       } else {
-        toast.warning("Invitation token was regenerated, but the email failed to send. You can try resending again later.")
+        toast.warning("Invitation token was regenerated, but the email failed to send.")
       }
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
@@ -198,37 +193,40 @@ export default function UsersPage() {
   const deleteMutation = useMutation({ mutationFn: deleteUser, ...mutationOptions })
 
   if (error) return (
-    <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5">
+    <Card className="p-12 flex flex-col items-center justify-center text-center border-border bg-muted/5 rounded-none">
       <AlertTriangle size={48} className="text-destructive mb-4" />
-      <h3 className="text-xl font-bold text-destructive mb-2">Failed to load users</h3>
-      <p className="text-muted-foreground">{error.response?.data?.message || error.message}</p>
+      <h3 className="text-sm font-bold text-destructive mb-2">System error</h3>
+      <p className="text-xs font-bold text-muted-foreground">{error.response?.data?.message || error.message}</p>
     </Card>
   )
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 rounded-2xl border border-primary/10 shadow-sm relative overflow-hidden">
-        <FetchingIndicator isFetching={isFetching} />
-        <div className="absolute -right-12 -top-12 text-primary/5 rotate-12 pointer-events-none">
-          <GraduationCap size={200} />
+    <div className="space-y-10 pb-20">
+      
+      {/* 1. Header (Keep Uppercase) */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Activity size={10} className="animate-pulse" /> System online
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Clock size={10} /> {new Date().toLocaleDateString()}
+            </div>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            Directory <span className="text-primary">Registry</span>
+          </h2>
+          <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
+            Manage institutional registrars, board members, and administrative access controls.
+          </p>
         </div>
         
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="p-3.5 bg-background shadow-sm rounded-xl text-primary border border-primary/10">
-            <UserCog size={28} />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground font-serif">Directory Management</h2>
-            <p className="text-muted-foreground mt-1">Oversee institutional registrars, board members, and system administrators.</p>
-          </div>
-        </div>
         <Button 
           onClick={() => setIsInviteModalOpen(true)} 
-          className="gap-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 relative z-10 h-11 px-6 rounded-xl font-semibold"
+          className="rounded-none h-11 px-8 gap-3 font-bold text-xs shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
         >
-          <UserPlus size={18} />
-          Invite New User
+          <UserPlus size={14} /> Invite user
         </Button>
       </div>
 
@@ -246,27 +244,30 @@ export default function UsersPage() {
         onClear={clearFilters}
       />
 
-      <UserTable 
-        users={users}
-        totalCount={totalCount}
-        currentPage={page}
-        onPageChange={setPage}
-        itemsPerPage={limit}
-        onItemsPerPageChange={setLimit}
-        sortBy={sortBy}
-        sortDir={sortDir}
-        onSort={setSort}
-        isFiltered={searchTerm || roleFilter !== "all" || statusFilter !== "all" || institutionFilter !== "all"}
-        isFetching={isFetching}
-        onEdit={setUserToEdit}
-        onDelete={setUserToDelete}
-        onSuspend={(userId) => suspendMutation.mutate({ userId })}
-        onUnsuspend={unsuspendMutation.mutate}
-        onResend={resendMutation.mutate}
-        onRevoke={revokeMutation.mutate}
-        onInvite={() => setIsInviteModalOpen(true)}
-        onClearFilters={clearFilters}
-      />
+      <div className="relative">
+        <FetchingIndicator isFetching={isFetching} />
+        <UserTable 
+          users={users}
+          totalCount={totalCount}
+          currentPage={page}
+          onPageChange={setPage}
+          itemsPerPage={limit}
+          onItemsPerPageChange={setLimit}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={setSort}
+          isFiltered={searchTerm || roleFilter !== "all" || statusFilter !== "all" || institutionFilter !== "all"}
+          isFetching={isFetching}
+          onEdit={setUserToEdit}
+          onDelete={setUserToDelete}
+          onSuspend={(userId) => suspendMutation.mutate({ userId })}
+          onUnsuspend={unsuspendMutation.mutate}
+          onResend={resendMutation.mutate}
+          onRevoke={revokeMutation.mutate}
+          onInvite={() => setIsInviteModalOpen(true)}
+          onClearFilters={clearFilters}
+        />
+      </div>
 
       <UserInviteModal 
         isOpen={isInviteModalOpen} 
@@ -288,15 +289,19 @@ export default function UsersPage() {
           })
         }}
         isDeleting={deleteMutation.isPending}
+        title="Delete user"
         description={
-          <>
-            Are you sure you want to permanently delete <span className="font-bold text-foreground">"{userToDelete?.firstName} {userToDelete?.lastName}"</span>? 
-            <br/><br/>
-            This will completely remove their access and all associated configuration from the digital records system. This action cannot be reversed.
-          </>
+          <div className="space-y-4">
+            <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+              Are you sure you want to permanently delete <span className="text-foreground font-black underline underline-offset-4 decoration-primary/30">"{userToDelete?.firstName} {userToDelete?.lastName}"</span>?
+            </p>
+            <div className="bg-destructive/5 border-l-2 border-destructive p-4">
+              <p className="text-[10px] font-bold text-destructive tracking-widest">Warning: Permanent action</p>
+              <p className="text-[10px] font-bold text-destructive/70 mt-1">This will completely remove their access and associated configurations. This action cannot be reversed.</p>
+            </div>
+          </div>
         }
       />
     </div>
   )
 }
-

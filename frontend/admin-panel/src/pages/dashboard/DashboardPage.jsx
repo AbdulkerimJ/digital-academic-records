@@ -1,170 +1,199 @@
-import { useQuery } from "@tanstack/react-query"
-import { getDashboardStats } from "../../api/dashboard.api"
-import { useAuth } from "../../context/AuthContext"
-import { 
-  Users, 
-  GraduationCap, 
-  FileText, 
-  Building2, 
+import { useQuery } from "@tanstack/react-query";
+import { getDashboardStats } from "../../api/dashboard.api";
+import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
+import {
+  Users,
+  GraduationCap,
+  FileText,
+  Building2,
   AlertCircle,
-  TrendingUp,
   CheckCircle2,
-  Sparkles
-} from "lucide-react"
-import { Skeleton } from "../../components/ui/skeleton"
-import { Badge } from "../../components/ui/badge"
+  ShieldCheck,
+  Activity,
+  ArrowUpRight,
+  TrendingUp,
+  Clock,
+  ChevronRight
+} from "lucide-react";
+import { Skeleton } from "../../components/ui/skeleton";
+import { cn } from "../../lib/utils";
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: getDashboardStats,
-  })
+  });
 
-  const stats = data?.data?.stats || {}
-  const activitiesRaw = data?.data?.recentActivities
-  const activities = Array.isArray(activitiesRaw) ? activitiesRaw : []
+  const stats = data?.data?.stats || {};
 
   const statCards = [
     {
-      title: "Students",
+      title: "Total Students",
       value: stats.totalStudents || 0,
       icon: GraduationCap,
-      color: "text-blue-600",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
-      description: "Identity verified"
+      description: "Students on platform",
     },
     {
-      title: "Administrators",
+      title: "Admins",
       value: stats.totalUsers || 0,
       icon: Users,
-      color: "text-indigo-600",
-      bg: "bg-indigo-500/10",
-      border: "border-indigo-500/20",
-      description: "Active platform users"
+      description: "System staff",
     },
     {
-      title: "Exam Records",
+      title: "Exams",
       value: stats.totalExams || 0,
       icon: FileText,
-      color: "text-emerald-600",
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-      description: "Validated results"
+      description: "Exam records",
     },
     {
-      title: "Degrees Issued",
+      title: "Degrees",
       value: stats.totalDegrees || 0,
       icon: CheckCircle2,
-      color: "text-purple-600",
-      bg: "bg-purple-500/10",
-      border: "border-purple-500/20",
-      description: "Digital certificates"
+      description: "Certificates",
     },
     {
-      title: "Corrections",
+      title: "Pending Tasks",
       value: stats.pendingCorrections || 0,
       icon: AlertCircle,
-      color: stats.pendingCorrections > 0 ? "text-amber-600" : "text-slate-400",
-      bg: stats.pendingCorrections > 0 ? "bg-amber-500/10" : "bg-slate-500/10",
-      border: stats.pendingCorrections > 0 ? "border-amber-500/20" : "border-slate-500/20",
-      description: "Awaiting review"
-    }
-  ]
+      description: "Needs review",
+      urgent: stats.pendingCorrections > 0,
+    },
+  ];
 
   if (user?.roleName === "SUPER_ADMIN") {
     statCards.unshift({
       title: "Institutions",
       value: stats.totalInstitutions || 0,
       icon: Building2,
-      color: "text-rose-600",
-      bg: "bg-rose-500/10",
-      border: "border-rose-500/20",
-      description: "Partner registry"
-    })
+      description: "Schools and Boards",
+    });
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="space-y-8">
         <div className="space-y-4">
-          <Skeleton className="h-12 w-[300px] rounded-2xl" />
-          <Skeleton className="h-4 w-[500px] rounded-lg" />
+          <Skeleton className="h-12 w-full max-w-xl bg-muted/20" />
+          <Skeleton className="h-4 w-48 bg-muted/20" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-40 rounded-[2.5rem]" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-32 bg-muted/10 border border-border" />
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-10 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      {/* Premium Welcome Header */}
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/5 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/40 backdrop-blur-xl border border-border/50 p-8 rounded-[2rem] shadow-sm">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none px-3 py-1 rounded-lg flex gap-1.5 items-center">
-                <Sparkles size={12} fill="currentColor" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Active Session</span>
-              </Badge>
+    <div className="space-y-10 pb-20">
+      
+      {/* 1. Refined Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Activity size={10} className="animate-pulse" /> System Online
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-tight">
-              Hello, <span className="text-primary">{user?.firstName}</span>
-            </h2>
-            <p className="text-muted-foreground font-medium max-w-xl text-lg">
-              {stats.pendingCorrections > 0 
-                ? <>System stable. <span className="text-foreground font-bold">{stats.pendingCorrections} tasks</span> need your attention.</>
-                : "Everything is running smoothly. You're all caught up!"}
-            </p>
+            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Clock size={10} /> Last Sync: {new Date().toLocaleTimeString()}
+            </div>
           </div>
-          <div className="hidden lg:block">
-             <div className="h-24 w-24 rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary rotate-3 hover:rotate-0 transition-transform duration-500">
-                <TrendingUp size={40} />
-             </div>
-          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            Admin <span className="text-primary">Dashboard</span>
+          </h2>
         </div>
       </div>
 
-      {/* Dynamic Stats Grid */}
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {/* 2. Beautified Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {statCards.map((stat, i) => (
-          <div 
-            key={i} 
-            className={`group relative overflow-hidden bg-card/30 backdrop-blur-md border ${stat.border} p-6 rounded-[2rem] hover:bg-card/60 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1`}
+          <div
+            key={i}
+            className={cn(
+              "group relative bg-card border border-border p-6 flex flex-col justify-between gap-8 transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1 overflow-hidden",
+              stat.urgent && "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]"
+            )}
           >
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity duration-500 -mr-4 -mt-4">
-              <stat.icon size={80} strokeWidth={1} />
-            </div>
-            
-            <div className="flex flex-col h-full justify-between gap-6">
-              <div className={`${stat.bg} ${stat.color} w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500`}>
-                <stat.icon size={22} strokeWidth={2.5} />
+            {/* Top Accent Line */}
+            <div className={cn(
+              "absolute top-0 left-0 h-[2px] transition-all duration-500 group-hover:w-full",
+              stat.urgent ? "bg-amber-500 w-full" : "bg-primary w-8"
+            )} />
+
+            {/* Faint Background Pattern (Only on Hover) */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity duration-700 bg-[radial-gradient(#000_1px,transparent_1px)] bg-[size:10px_10px]" />
+
+            <div className="flex items-start justify-between relative z-10">
+              <div className={cn(
+                "w-11 h-11 flex items-center justify-center border transition-all duration-500",
+                stat.urgent 
+                  ? "bg-amber-500 border-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                  : "bg-background border-border text-primary group-hover:bg-primary group-hover:border-primary group-hover:text-white group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+              )}>
+                <stat.icon size={20} />
               </div>
-              
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+              <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600/40 uppercase tracking-widest">
+                <ShieldCheck size={12} /> SECURE
+              </div>
+            </div>
+
+            <div className="space-y-1 text-left relative z-10">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
                   {stat.title}
                 </p>
-                <div className="flex items-baseline gap-2">
-                  <h3 className="text-3xl font-black tracking-tight">
-                    {stat.value.toLocaleString()}
-                  </h3>
-                </div>
-                <p className="text-[10px] font-bold text-muted-foreground mt-2 line-clamp-1">
+                {stat.urgent && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
+              </div>
+              <div className="flex items-end justify-between gap-2">
+                <h3 className="text-3xl font-black tracking-tighter text-foreground font-mono leading-none">
+                  {stat.value.toLocaleString()}
+                </h3>
+                <p className={cn(
+                  "text-[10px] font-bold uppercase tracking-tight pb-1",
+                  stat.urgent ? "text-amber-600" : "text-muted-foreground/60"
+                )}>
                   {stat.description}
                 </p>
               </div>
             </div>
           </div>
         ))}
+
+        {/* 3. Action Protocol Card */}
+        <div className="bg-primary p-6 flex flex-col justify-between text-white group hover:brightness-105 transition-all shadow-xl shadow-primary/20 relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+          
+          <div className="flex items-center justify-between text-white relative z-10">
+            <h4 className="text-sm font-black uppercase tracking-widest">Recent Activity</h4>
+            <TrendingUp size={16} className="opacity-50 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </div>
+          
+          <div className="space-y-4 mt-6 relative z-10 text-left">
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Check system actions</p>
+             <Link to="/audit-logs">
+               <button className="h-10 w-full bg-white/10 border border-white/20 hover:bg-white hover:text-primary text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                  View Logs <ChevronRight size={14} />
+               </button>
+             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Refined Privacy Disclaimer */}
+      <div className="bg-card border border-border p-8 text-left shadow-sm relative group overflow-hidden">
+        <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
+        <div className="flex items-center gap-3 text-primary mb-3">
+          <ShieldCheck size={18} />
+          <h4 className="text-[11px] font-black uppercase tracking-[0.4em]">Privacy Notice</h4>
+        </div>
+        <p className="text-[13px] text-muted-foreground font-medium tracking-tight max-w-4xl leading-relaxed">
+          This administrative panel is restricted to authorized personnel. Every action you take is automatically logged for security and auditing purposes. Please ensure you logout when your session is finished.
+        </p>
       </div>
 
     </div>
-  )
+  );
 }

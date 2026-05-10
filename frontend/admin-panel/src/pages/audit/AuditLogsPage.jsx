@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams } from "react-router-dom"
-import { History, Activity, AlertTriangle, ShieldCheck } from "lucide-react"
+import { History, Activity, AlertTriangle, ShieldCheck, Clock } from "lucide-react"
 import { Card } from "../../components/ui/card"
 import { toast } from "sonner"
 
@@ -31,7 +31,7 @@ export default function AuditLogsPage() {
         newParams.set(key, value)
       }
     })
-    newParams.set("page", "1") // Reset to page 1 on filter change
+    newParams.set("page", "1")
     setSearchParams(newParams)
   }
 
@@ -52,7 +52,7 @@ export default function AuditLogsPage() {
     setSearchParams({})
   }
 
-  const { data, isLoading, error, isFetching } = useQuery({
+  const { data, error, isFetching } = useQuery({
     queryKey: ["audit-logs", { page, limit, actionFilter, entityFilter }],
     queryFn: () => getAuditLogs({
       page,
@@ -73,34 +73,38 @@ export default function AuditLogsPage() {
 
   if (error) {
     return (
-      <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5">
+      <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5 rounded-none">
         <AlertTriangle size={48} className="text-destructive mb-4" />
-        <h3 className="text-xl font-bold text-destructive mb-2">Failed to load activity logs</h3>
-        <p className="text-muted-foreground">{error.response?.data?.message || error.message}</p>
+        <h3 className="text-sm font-black uppercase tracking-widest text-destructive mb-2">Security Fetch Error</h3>
+        <p className="text-xs font-bold text-muted-foreground uppercase opacity-70">{error.response?.data?.message || error.message}</p>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 rounded-2xl border border-primary/10 shadow-sm relative overflow-hidden">
-        <FetchingIndicator isFetching={isFetching} />
-        <div className="absolute -right-12 -top-12 text-primary/5 rotate-12 pointer-events-none">
-          <History size={200} />
-        </div>
-        
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="p-3.5 bg-background shadow-sm rounded-xl text-primary border border-primary/10">
-            <ShieldCheck size={28} />
+    <div className="space-y-10 pb-20">
+      
+      {/* 1. Header (Keep Uppercase) */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Clock size={10} /> {new Date().toLocaleDateString()}
+            </div>
           </div>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground font-serif">System Activity Logs</h2>
-            <p className="text-muted-foreground mt-1">Monitor all administrative actions and security events across the platform.</p>
-          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            Audit <span className="text-primary">Logs</span>
+          </h2>
+          <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
+            Monitor all administrative actions and security events across the platform.
+          </p>
         </div>
       </div>
 
+      {/* 2. Filters */}
       <AuditLogsFilters 
         actionFilter={actionFilter}
         setActionFilter={(val) => updateFilters({ action: val })}
@@ -109,16 +113,19 @@ export default function AuditLogsPage() {
         onClear={clearFilters}
       />
 
-      <AuditLogsTable 
-        logs={logs}
-        totalCount={totalCount}
-        currentPage={page}
-        onPageChange={setPage}
-        itemsPerPage={limit}
-        onItemsPerPageChange={setLimit}
-        isFetching={isLoading}
-        onViewDetails={handleViewDetails}
-      />
+      {/* 3. Activity Feed */}
+      <div className="bg-card border border-border shadow-sm p-1">
+        <AuditLogsTable 
+          logs={logs}
+          totalCount={totalCount}
+          currentPage={page}
+          onPageChange={setPage}
+          itemsPerPage={limit}
+          onItemsPerPageChange={setLimit}
+          isFetching={isFetching}
+          onViewDetails={handleViewDetails}
+        />
+      </div>
 
       <AuditLogDetailsModal 
         isOpen={isDetailsModalOpen}

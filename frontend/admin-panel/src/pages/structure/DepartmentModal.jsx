@@ -31,7 +31,7 @@ const formSchema = z.object({
   isActive: z.boolean().default(true),
 })
 
-export default function DepartmentModal({ isOpen, onClose, institutionId, collegeId, department }) {
+export default function DepartmentModal({ isOpen, onClose, department, institutionId, collegeId }) {
   const queryClient = useQueryClient()
   const isEditing = !!department
 
@@ -68,12 +68,12 @@ export default function DepartmentModal({ isOpen, onClose, institutionId, colleg
       return createDepartment(institutionId, collegeId, data)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["departments", collegeId] })
-      toast.success(isEditing ? "Department updated" : "Department created")
+      queryClient.invalidateQueries({ queryKey: ["departments", institutionId, collegeId] })
+      toast.success(isEditing ? "Department updated." : "Department created.")
       onClose()
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || "Something went wrong")
+      toast.error(err.response?.data?.message || "Operation failed")
     },
   })
 
@@ -83,30 +83,34 @@ export default function DepartmentModal({ isOpen, onClose, institutionId, colleg
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
-        <div className="bg-primary/5 p-6 border-b border-primary/10">
-          <div className="mx-auto w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-primary shadow-lg mb-3">
+      <DialogContent className="sm:max-w-[450px] rounded-none p-0 overflow-hidden border border-border shadow-2xl">
+        <div className="bg-muted/30 p-8 border-b border-border text-left space-y-4">
+          <div className="w-12 h-12 bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
             <BookOpen size={24} />
           </div>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-black text-center">
-              {isEditing ? "Edit Department" : "Add New Department"}
+          <DialogHeader className="text-left">
+            <DialogTitle className="text-2xl font-black tracking-tighter uppercase leading-none">
+              {isEditing ? "Edit department" : "Add department"}
             </DialogTitle>
+            <p className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">
+              {isEditing ? "Update existing department details." : "Register a new department within the academic hierarchy."}
+            </p>
           </DialogHeader>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-6">
+            
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Department Name</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-bold text-muted-foreground/80">Department name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Software Engineering" {...field} className="rounded-xl h-11" />
+                    <Input placeholder="e.g. Software Engineering" {...field} className="h-11 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 text-xs font-bold" />
                   </FormControl>
-                  <FormMessage className="text-[10px]" />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -115,12 +119,12 @@ export default function DepartmentModal({ isOpen, onClose, institutionId, colleg
               control={form.control}
               name="code"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Short Code</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-[10px] font-bold text-muted-foreground/80">Short code</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. SE" {...field} className="rounded-xl h-11 uppercase" />
+                    <Input placeholder="e.g. SE" {...field} className="h-11 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 text-xs font-bold font-mono" />
                   </FormControl>
-                  <FormMessage className="text-[10px]" />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -129,28 +133,29 @@ export default function DepartmentModal({ isOpen, onClose, institutionId, colleg
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-2xl border p-4 bg-muted/20 border-border/40">
+                <FormItem className="flex flex-row items-center justify-between border border-border p-4 bg-muted/5">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-xs font-black uppercase tracking-tight">Active Status</FormLabel>
-                    <p className="text-[10px] text-muted-foreground font-medium">Allow students to be registered in this department</p>
+                    <FormLabel className="text-xs font-bold text-foreground">Active status</FormLabel>
+                    <p className="text-[10px] text-muted-foreground font-medium">Allow students to be registered in this department.</p>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      className="rounded-none"
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
 
-            <DialogFooter className="pt-2 gap-2">
-              <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl font-bold">
+            <DialogFooter className="pt-4 gap-2">
+              <Button type="button" variant="ghost" onClick={onClose} className="rounded-none font-bold text-xs">
                 Cancel
               </Button>
-              <Button type="submit" disabled={mutation.isPending} className="rounded-xl font-black px-8">
+              <Button type="submit" disabled={mutation.isPending} className="rounded-none h-11 px-8 font-bold text-xs shadow-xl shadow-primary/20 transition-all">
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {isEditing ? "Save Changes" : "Create Department"}
+                {isEditing ? "Save changes" : "Create department"}
               </Button>
             </DialogFooter>
           </form>

@@ -1,250 +1,156 @@
 import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { 
+  listColleges, 
+  listDepartments, 
+  deleteCollege, 
+  deleteDepartment,
+  updateCollege,
+  updateDepartment,
+  listInstitutions
+} from "../../api/institutions.api"
 import { useAuth } from "../../context/AuthContext"
-import { listColleges, listDepartments, deleteCollege, deleteDepartment, listInstitutions, updateCollege, updateDepartment } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
-import { Card } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
-import { Skeleton } from "../../components/ui/skeleton"
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "../../components/ui/table"
 import { 
   Plus, 
-  Search, 
-  GraduationCap, 
-  BookOpen, 
-  MoreVertical, 
+  Building, 
+  Network, 
+  Pencil, 
   Trash2, 
-  Edit2, 
+  Activity,
+  Clock,
   Building2,
   ChevronRight,
-  AlertCircle,
-  Network,
-  Power
+  ArrowRight
 } from "lucide-react"
-import FetchingIndicator from "../../components/common/FetchingIndicator"
-import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { toast } from "sonner"
 import CollegeModal from "./CollegeModal"
 import DepartmentModal from "./DepartmentModal"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
+import { TableBodySkeleton } from "../../components/common/TableSkeleton"
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "../../components/ui/select"
+import { cn } from "../../lib/utils"
 
 export default function AcademicStructurePage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const isSuperAdmin = user?.roleName === "SUPER_ADMIN"
 
-  const selectedInstitutionId = searchParams.get("institutionId") || user?.institutionId || ""
-  const selectedCollegeId = searchParams.get("collegeId") || ""
+  // Hierarchy State
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState(user?.institutionId || "")
+  const [selectedCollege, setSelectedCollege] = useState(null)
 
-  const setSelectedInstitutionId = (id) => {
-    const newParams = new URLSearchParams(searchParams)
-    if (id) newParams.set("institutionId", id)
-    else newParams.delete("institutionId")
-    
-    // Always reset college when institution changes
-    newParams.delete("collegeId")
-    setSearchParams(newParams, { replace: true })
-  }
-
-  const setSelectedCollegeId = (id) => {
-    const newParams = new URLSearchParams(searchParams)
-    if (id) newParams.set("collegeId", id)
-    else newParams.delete("collegeId")
-    setSearchParams(newParams, { replace: true })
-  }
-  
+  // Modals state
   const [isCollegeModalOpen, setIsCollegeModalOpen] = useState(false)
-  const [collegeToEdit, setCollegeToEdit] = useState(null)
+  const [isDeptModalOpen, setIsDeptModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
   
-  const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false)
-  const [departmentToEdit, setDepartmentToEdit] = useState(null)
+  // Delete state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState(null)
+  const [deleteType, setDeleteType] = useState("")
 
-  // Delete Confirmation State
-  const [deleteConfirm, setDeleteConfirm] = useState({
-    isOpen: false,
-    type: null, // "college" or "department"
-    id: null,
-    name: ""
+  // Queries
+  const { data: instData } = useQuery({
+    queryKey: ["institutions", "academic"],
+    queryFn: () => listInstitutions({ limit: 100, type: "COLLEGE" }), // Filter only Colleges/Universities
+    enabled: isSuperAdmin
   })
 
-  // Fetch institutions if super admin
-  const { data: institutionsData } = useQuery({
-    queryKey: ["institutions", "COLLEGE"],
-    queryFn: () => listInstitutions({ limit: 100, type: "COLLEGE" }),
-    enabled: user?.roleName === "SUPER_ADMIN",
-  })
-
-  const instRaw = institutionsData?.data?.institutions
-  const institutions = Array.isArray(instRaw) ? instRaw : []
-
-  // Fetch colleges
-  const { data: collegesData, isLoading: isLoadingColleges, isFetching: isFetchingColleges } = useQuery({
+  const { data: collegesData, isLoading: loadingColleges } = useQuery({
     queryKey: ["colleges", selectedInstitutionId],
     queryFn: () => listColleges(selectedInstitutionId),
-    enabled: !!selectedInstitutionId,
+    enabled: !!selectedInstitutionId
   })
 
-  // Fetch departments
-  const { data: departmentsData, isLoading: isLoadingDepartments, isFetching: isFetchingDepartments } = useQuery({
-    queryKey: ["departments", selectedCollegeId],
-    queryFn: () => listDepartments(selectedInstitutionId, selectedCollegeId),
-    enabled: !!selectedCollegeId,
+  const { data: deptsData, isLoading: loadingDepts } = useQuery({
+    queryKey: ["departments", selectedInstitutionId, selectedCollege?.id],
+    queryFn: () => listDepartments(selectedInstitutionId, selectedCollege?.id),
+    enabled: !!selectedInstitutionId && !!selectedCollege?.id
   })
 
-  // Auto-select first college-type institution for Super Admin if none selected
-  useEffect(() => {
-    if (user?.roleName === "SUPER_ADMIN" && !searchParams.get("institutionId") && institutions.length > 0) {
-      setSelectedInstitutionId(institutions[0].id)
-    }
-  }, [user, searchParams, institutions])
+  const colleges = Array.isArray(collegesData?.data?.colleges) ? collegesData.data.colleges : []
+  const departments = Array.isArray(deptsData?.data?.departments) ? deptsData.data.departments : []
+  const institutions = instData?.data?.institutions || []
 
-
-  const isExamBoardUser = user?.institutionType === "EXAM_BOARD"
-
-  if (isExamBoardUser) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <div className="p-4 bg-destructive/10 rounded-full text-destructive">
-          <Network size={48} />
-        </div>
-        <div className="text-center">
-          <h2 className="text-2xl font-black">Access Restricted</h2>
-          <p className="text-muted-foreground">Academic structure management is not available for Exam Boards.</p>
-        </div>
-      </div>
-    )
-  }
-
-  const collegesRaw = collegesData?.data?.colleges
-  const colleges = Array.isArray(collegesRaw) ? collegesRaw : []
-  const deptsRaw = departmentsData?.data?.departments
-  const departments = Array.isArray(deptsRaw) ? deptsRaw : []
-
-  // Auto-select first college if none selected
-  useEffect(() => {
-    if (colleges.length > 0 && !selectedCollegeId) {
-      setSelectedCollegeId(colleges[0].id)
-    }
-  }, [colleges, selectedCollegeId])
-
-  // Safety check: if selected college is no longer in the list (e.g. deleted), clear it
-  useEffect(() => {
-    // Only check if we actually have a selection in the URL
-    if (selectedCollegeId) {
-      // If the list is empty, or the ID isn't in the list, and we aren't currently loading new data
-      const exists = colleges.some(c => c.id === selectedCollegeId)
-      if (!exists && !isFetchingColleges) {
-        setSelectedCollegeId("")
+  // Mutations
+  const deleteMutation = useMutation({
+    mutationFn: (id) => 
+      deleteType === "college" 
+        ? deleteCollege(selectedInstitutionId, id) 
+        : deleteDepartment(selectedInstitutionId, selectedCollege.id, id),
+    onSuccess: () => {
+      toast.success("Record deleted.")
+      queryClient.invalidateQueries([deleteType === "college" ? "colleges" : "departments"])
+      setIsDeleteModalOpen(false)
+      setItemToDelete(null)
+      if (deleteType === "college" && selectedCollege?.id === itemToDelete.id) {
+        setSelectedCollege(null)
       }
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Delete failed")
+  })
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: ({ type, item }) => 
+      type === "college" 
+        ? updateCollege(selectedInstitutionId, item.id, { isActive: !item.isActive }) 
+        : updateDepartment(selectedInstitutionId, selectedCollege.id, item.id, { isActive: !item.isActive }),
+    onSuccess: (_, variables) => {
+      toast.success("Status updated.")
+      queryClient.invalidateQueries([variables.type === "college" ? "colleges" : "departments"])
     }
-  }, [colleges, selectedCollegeId, isFetchingColleges])
-
-  const deleteCollegeMutation = useMutation({
-    mutationFn: (collegeId) => deleteCollege(selectedInstitutionId, collegeId),
-    onSuccess: (_, deletedId) => {
-      toast.success("College deleted successfully")
-      
-      // If the currently selected college was deleted, clear the selection
-      if (selectedCollegeId === deletedId) {
-        setSelectedCollegeId("")
-      }
-
-      setDeleteConfirm({ isOpen: false, type: null, id: null, name: "" })
-      
-      // Remove all department queries from cache to ensure no stale data
-      queryClient.removeQueries({ queryKey: ["departments", deletedId] })
-      queryClient.invalidateQueries({ queryKey: ["colleges", selectedInstitutionId] })
-      queryClient.invalidateQueries({ queryKey: ["departments"] })
-    },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to delete college"),
   })
-
-  const deleteDepartmentMutation = useMutation({
-    mutationFn: (deptId) => deleteDepartment(selectedInstitutionId, selectedCollegeId, deptId),
-    onSuccess: () => {
-      toast.success("Department deleted successfully")
-      setDeleteConfirm({ isOpen: false, type: null, id: null, name: "" })
-      queryClient.invalidateQueries({ queryKey: ["departments", selectedCollegeId] })
-    },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to delete department"),
-  })
-
-  const toggleCollegeStatusMutation = useMutation({
-    mutationFn: ({ collegeId, isActive }) => updateCollege(selectedInstitutionId, collegeId, { isActive: !isActive }),
-    onSuccess: () => {
-      toast.success("College status updated")
-      queryClient.invalidateQueries({ queryKey: ["colleges", selectedInstitutionId] })
-    },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to update college status"),
-  })
-
-  const toggleDepartmentStatusMutation = useMutation({
-    mutationFn: ({ deptId, isActive }) => updateDepartment(selectedInstitutionId, selectedCollegeId, deptId, { isActive: !isActive }),
-    onSuccess: () => {
-      toast.success("Department status updated")
-      queryClient.invalidateQueries({ queryKey: ["departments", selectedCollegeId] })
-    },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to update department status"),
-  })
-
-  const handleDeleteCollegeRequest = (college) => {
-    setDeleteConfirm({
-      isOpen: true,
-      type: "college",
-      id: college.id,
-      name: college.name
-    })
-  }
-
-  const handleDeleteDepartmentRequest = (dept) => {
-    setDeleteConfirm({
-      isOpen: true,
-      type: "department",
-      id: dept.id,
-      name: dept.name
-    })
-  }
-
-  const handleConfirmDelete = () => {
-    if (deleteConfirm.type === "college") {
-      deleteCollegeMutation.mutate(deleteConfirm.id)
-    } else {
-      deleteDepartmentMutation.mutate(deleteConfirm.id)
-    }
-  }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-primary/90 flex items-center gap-3">
-            <Network className="text-primary" />
-            Academic Structure
+    <div className="space-y-10 pb-20">
+      
+      {/* 1. Header & Context */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest">
+              <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Clock size={10} /> {new Date().toLocaleDateString()}
+            </div>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            Academic <span className="text-primary">Structure</span>
           </h2>
-          <p className="text-xs text-muted-foreground font-medium mt-0.5 uppercase tracking-widest">
-            Manage Colleges and Departments
+          <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
+            Manage the institutional hierarchy through a nested college and department workflow.
           </p>
         </div>
 
-        {user?.roleName === "SUPER_ADMIN" && (
-          <div className="w-full md:w-64">
-            <Select value={selectedInstitutionId} onValueChange={setSelectedInstitutionId}>
-              <SelectTrigger className="rounded-xl h-11 border-primary/20 bg-primary/5 font-bold">
-                <Building2 size={16} className="mr-2 text-primary" />
+        {/* Institution Context: Top Right */}
+        {isSuperAdmin && (
+          <div className="flex flex-col gap-1.5 text-right">
+            <div className="flex items-center justify-end gap-2 text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+              <Building2 size={12} className="text-primary" /> Institution Context
+            </div>
+            <Select value={selectedInstitutionId} onValueChange={(val) => { setSelectedInstitutionId(val); setSelectedCollege(null); }}>
+              <SelectTrigger className="w-full md:w-64 h-10 rounded-none bg-muted/20 border-border text-xs font-bold focus:ring-primary/20">
                 <SelectValue placeholder="Select Institution" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/40">
-                {institutions.map((inst) => (
-                  <SelectItem key={inst.id} value={inst.id} className="rounded-lg font-medium">
-                    {inst.name}
-                  </SelectItem>
+              <SelectContent className="rounded-none border-border shadow-2xl">
+                {institutions.map(inst => (
+                  <SelectItem key={inst.id} value={inst.id} className="text-xs font-bold">{inst.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -252,256 +158,203 @@ export default function AcademicStructurePage() {
         )}
       </div>
 
-      {!selectedInstitutionId ? (
-        <Card className="p-12 flex flex-col items-center justify-center gap-4 text-center border-dashed rounded-[3rem] bg-muted/20 border-primary/20">
-          <Building2 size={48} className="text-primary/20" />
-          <div>
-            <h3 className="text-xl font-black">No Institution Selected</h3>
-            <p className="text-sm text-muted-foreground font-medium">Please select an institution to manage its academic structure.</p>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* 3. College Selection Column */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <Building size={14} className="text-primary" /> Colleges
+            </h3>
+            <Button 
+              size="sm" 
+              onClick={() => { setEditingItem(null); setIsCollegeModalOpen(true); }}
+              className="rounded-none h-8 px-4 text-[10px] font-black uppercase tracking-widest"
+              disabled={!selectedInstitutionId}
+            >
+              <Plus size={10} className="mr-1.5" /> Add college
+            </Button>
           </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Colleges Column */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <GraduationCap size={16} className="text-primary" />
-                Colleges
-              </h3>
-              <Button 
-                size="sm" 
-                onClick={() => { setCollegeToEdit(null); setIsCollegeModalOpen(true); }}
-                className="h-8 rounded-lg font-black text-[10px] uppercase gap-1.5 shadow-lg shadow-primary/20"
-              >
-                <Plus size={14} /> Add College
-              </Button>
-            </div>
 
-            <Card className="rounded-[2.5rem] border-border/60 shadow-sm overflow-hidden p-3 space-y-1 min-h-[400px] relative">
-              <FetchingIndicator isFetching={isFetchingColleges} />
-              {isFetchingColleges && colleges.length === 0 ? (
-                Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-2xl border border-border/20 bg-muted/10">
-                    <Skeleton className="h-10 w-10 rounded-xl" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-3/4 rounded-full" />
-                      <Skeleton className="h-2 w-1/4 rounded-full" />
-                    </div>
-                  </div>
-                ))
-              ) : colleges.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[360px] text-center p-6 text-muted-foreground gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-                    <GraduationCap size={20} />
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-50">No Colleges Found</p>
-                </div>
-              ) : (
-                colleges.map((college) => (
-                  <div
-                    key={college.id}
-                    onClick={() => setSelectedCollegeId(college.id)}
-                    className={`
-                      group flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border
-                      ${selectedCollegeId === college.id 
-                        ? "bg-primary text-white border-primary shadow-xl shadow-primary/20 scale-[1.02]" 
-                        : "bg-background text-foreground border-border/40 hover:border-primary/40 hover:bg-primary/5"}
-                    `}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${selectedCollegeId === college.id ? "bg-white/20" : "bg-muted text-primary"}`}>
-                        {college.code}
-                      </div>
-                      <div>
-                        <p className="font-black text-sm tracking-tight leading-tight">{college.name}</p>
-                        <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedCollegeId === college.id ? "text-white/60" : "text-muted-foreground/60"}`}>
-                          {college.isActive ? "Active" : "Inactive"}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+          <div className="bg-card border border-border p-1 shadow-sm">
+            <Table>
+              <TableHeader className="bg-muted/10">
+                <TableRow className="hover:bg-transparent border-border">
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">College</TableHead>
+                  <TableHead className="text-right pr-4 text-[10px] font-black uppercase tracking-widest py-3">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingColleges ? (
+                  <TableBodySkeleton columns={2} rows={8} />
+                ) : colleges.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="h-40 text-center opacity-30">
+                      <p className="text-[10px] font-black uppercase">No colleges found</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  colleges.map((college) => (
+                    <TableRow 
+                      key={college.id} 
+                      className={cn(
+                        "group border-border hover:bg-primary/[0.02] cursor-pointer transition-all",
+                        selectedCollege?.id === college.id ? "bg-primary/[0.05] border-l-2 border-l-primary" : "border-l-2 border-l-transparent"
+                      )}
+                      onClick={() => setSelectedCollege(college)}
+                    >
+                      <TableCell className="py-3 px-4">
+                        <div className="flex flex-col">
+                          <span className={cn(
+                            "font-bold text-xs tracking-tight",
+                            selectedCollege?.id === college.id ? "text-primary" : "text-foreground"
+                          )}>
+                            {college.name}
+                          </span>
+                          <code className="text-[9px] font-bold text-muted-foreground/40 font-mono">{college.code}</code>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className={`h-8 w-8 rounded-lg ${selectedCollegeId === college.id ? "hover:bg-white/20 text-white" : "hover:bg-primary/10 text-muted-foreground"}`}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => { e.stopPropagation(); setEditingItem(college); setIsCollegeModalOpen(true); }} 
+                            className="h-7 w-7 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
                           >
-                            <MoreVertical size={14} />
+                            <Pencil size={12} />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl border-border/40">
-                          <DropdownMenuItem 
-                            onClick={(e) => { e.stopPropagation(); setCollegeToEdit(college); setIsCollegeModalOpen(true); }}
-                            className="rounded-lg font-bold text-xs gap-2"
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={(e) => { e.stopPropagation(); setItemToDelete(college); setDeleteType("college"); setIsDeleteModalOpen(true); }} 
+                            className="h-7 w-7 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                           >
-                            <Edit2 size={12} /> Edit Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => { e.stopPropagation(); toggleCollegeStatusMutation.mutate({ collegeId: college.id, isActive: college.isActive }); }}
-                            className="rounded-lg font-bold text-xs gap-2"
-                          >
-                            <Power size={12} className={college.isActive ? "text-amber-500" : "text-emerald-500"} /> 
-                            {college.isActive ? "Deactivate" : "Activate"} College
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteCollegeRequest(college); }}
-                            className="rounded-lg font-bold text-xs gap-2 text-destructive focus:text-destructive"
-                          >
-                            <Trash2 size={12} /> Delete College
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))
-              )}
-            </Card>
-          </div>
-
-          {/* Departments Column */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <BookOpen size={16} className="text-emerald-500" />
-                Departments
-                {selectedCollegeId && (
-                  <Badge variant="outline" className="ml-2 font-mono text-[9px] border-emerald-500/20 text-emerald-600 bg-emerald-500/5 px-2">
-                    {colleges.find(c => c.id === selectedCollegeId)?.code}
-                  </Badge>
+                            <Trash2 size={12} />
+                          </Button>
+                          <ChevronRight size={14} className={cn(
+                            "ml-2 transition-transform",
+                            selectedCollege?.id === college.id ? "translate-x-1 text-primary" : "text-muted-foreground/20"
+                          )} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-              </h3>
-              <Button 
-                size="sm" 
-                disabled={!selectedCollegeId}
-                onClick={() => { setDepartmentToEdit(null); setIsDepartmentModalOpen(true); }}
-                className="h-8 rounded-lg font-black text-[10px] uppercase gap-1.5 shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700"
-              >
-                <Plus size={14} /> Add Department
-              </Button>
-            </div>
-
-            <Card className="rounded-[2.5rem] border-border/60 shadow-sm overflow-hidden p-3 space-y-1 min-h-[400px] relative">
-              <FetchingIndicator isFetching={isFetchingDepartments} />
-              {!selectedCollegeId ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-12 text-muted-foreground gap-4 opacity-60">
-                  <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center border border-dashed border-primary/20">
-                    <AlertCircle size={32} className="text-primary/30" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-primary/60">No College Selected</p>
-                    <p className="text-[10px] font-bold opacity-40 mt-1 max-w-[200px]">Choose a college from the left to manage its departments</p>
-                  </div>
-                </div>
-              ) : isFetchingDepartments && departments.length === 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {Array(4).fill(0).map((_, i) => (
-                    <div key={i} className="p-4 rounded-2xl border border-border/20 bg-muted/10 space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-2 flex-1">
-                          <Skeleton className="h-4 w-5/6 rounded-full" />
-                          <Skeleton className="h-3 w-1/3 rounded-full" />
-                        </div>
-                        <Skeleton className="h-6 w-6 rounded-lg" />
-                      </div>
-                      <div className="flex gap-2">
-                        <Skeleton className="h-4 w-12 rounded-md" />
-                        <Skeleton className="h-4 w-16 rounded-full" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : departments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-12 text-muted-foreground gap-4">
-                  <div className="w-16 h-16 rounded-3xl bg-emerald-500/5 flex items-center justify-center border border-dashed border-emerald-500/20">
-                    <BookOpen size={32} className="text-emerald-500/30" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-emerald-600/60">No Departments</p>
-                    <p className="text-[10px] font-bold opacity-40 mt-1">Start by adding the first department to this college.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {departments.map((dept) => (
-                    <div key={dept.id} className="group p-4 rounded-2xl border border-border/40 bg-muted/5 hover:bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-emerald-500/30 transition-all flex flex-col justify-between gap-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <p className="font-black text-sm tracking-tight leading-tight group-hover:text-emerald-600 transition-colors">{dept.name}</p>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] font-bold text-muted-foreground bg-muted px-1.5 rounded">{dept.code}</span>
-                            <Badge className={`text-[8px] h-4 font-black uppercase tracking-tight ${dept.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"} border-none`}>
-                              {dept.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg">
-                              <MoreVertical size={14} />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl border-border/40">
-                            <DropdownMenuItem 
-                              onClick={() => { setDepartmentToEdit(dept); setIsDepartmentModalOpen(true); }}
-                              className="rounded-lg font-bold text-xs gap-2"
-                            >
-                              <Edit2 size={12} /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => toggleDepartmentStatusMutation.mutate({ deptId: dept.id, isActive: dept.isActive })}
-                              className="rounded-lg font-bold text-xs gap-2"
-                            >
-                              <Power size={12} className={dept.isActive ? "text-amber-500" : "text-emerald-500"} /> 
-                              {dept.isActive ? "Deactivate" : "Activate"} Dept
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteDepartmentRequest(dept)}
-                              className="rounded-lg font-bold text-xs gap-2 text-destructive focus:text-destructive"
-                            >
-                              <Trash2 size={12} /> Delete Dept
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
+              </TableBody>
+            </Table>
           </div>
         </div>
-      )}
 
-      {/* Modals */}
+        {/* 4. Department Management Column */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <Network size={14} className="text-primary" /> {selectedCollege ? `${selectedCollege.name} Departments` : "Departments"}
+            </h3>
+            <Button 
+              size="sm" 
+              onClick={() => { setEditingItem(null); setIsDeptModalOpen(true); }}
+              className="rounded-none h-8 px-4 text-[10px] font-black uppercase tracking-widest"
+              disabled={!selectedCollege}
+            >
+              <Plus size={10} className="mr-1.5" /> Add department
+            </Button>
+          </div>
+
+          {!selectedCollege ? (
+            <div className="border border-border p-20 flex flex-col items-center justify-center text-center bg-muted/5 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-16 h-16 bg-muted/20 flex items-center justify-center text-muted-foreground/40 mb-4 relative z-10">
+                <ArrowRight size={32} />
+              </div>
+              <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest relative z-10">Select a college to view departments</p>
+            </div>
+          ) : (
+            <div className="bg-card border border-border p-1 shadow-sm">
+              <Table>
+                <TableHeader className="bg-muted/10">
+                  <TableRow className="hover:bg-transparent border-border border-b-2">
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">Department</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest py-3 px-4">Code</TableHead>
+                    <TableHead className="text-center text-[10px] font-black uppercase tracking-widest py-3 px-4">Status</TableHead>
+                    <TableHead className="text-right pr-4 text-[10px] font-black uppercase tracking-widest py-3">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loadingDepts ? (
+                    <TableBodySkeleton columns={4} rows={8} />
+                  ) : departments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-40 text-center opacity-30">
+                        <p className="text-[10px] font-black uppercase">No departments found for this college</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    departments.map((dept) => (
+                      <TableRow key={dept.id} className="group border-border hover:bg-primary/[0.02] border-b last:border-0 transition-colors">
+                        <TableCell className="py-3 px-4">
+                          <span className="font-bold text-xs tracking-tight">{dept.name}</span>
+                        </TableCell>
+                        <TableCell className="py-3 px-4">
+                          <code className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
+                            {dept.code}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-center py-3 px-4">
+                          <div 
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold cursor-pointer transition-all",
+                              dept.isActive ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" : "bg-amber-500/10 text-amber-700 border-amber-500/20"
+                            )}
+                            onClick={() => toggleStatusMutation.mutate({ type: "department", item: dept })}
+                          >
+                            {dept.isActive && <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />}
+                            {dept.isActive ? "Active" : "Inactive"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right pr-4 py-3">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <Button variant="ghost" size="icon" onClick={() => { setEditingItem(dept); setIsDeptModalOpen(true); }} className="h-7 w-7 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
+                              <Pencil size={12} />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => { setItemToDelete(dept); setDeleteType("department"); setIsDeleteModalOpen(true); }} className="h-7 w-7 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </div>
+
       <CollegeModal 
         isOpen={isCollegeModalOpen} 
-        onClose={() => setIsCollegeModalOpen(false)} 
+        onClose={() => { setIsCollegeModalOpen(false); setEditingItem(null); }}
+        college={editingItem}
         institutionId={selectedInstitutionId}
-        college={collegeToEdit}
       />
 
-      <DepartmentModal
-        isOpen={isDepartmentModalOpen}
-        onClose={() => setIsDepartmentModalOpen(false)}
+      <DepartmentModal 
+        isOpen={isDeptModalOpen} 
+        onClose={() => { setIsDeptModalOpen(false); setEditingItem(null); }}
+        department={editingItem}
         institutionId={selectedInstitutionId}
-        collegeId={selectedCollegeId}
-        department={departmentToEdit}
+        collegeId={selectedCollege?.id}
       />
 
-      <ConfirmDeleteModal
-        isOpen={deleteConfirm.isOpen}
-        onClose={() => setDeleteConfirm({ ...deleteConfirm, isOpen: false })}
-        onConfirm={handleConfirmDelete}
-        isDeleting={deleteCollegeMutation.isPending || deleteDepartmentMutation.isPending}
-        title={`Delete ${deleteConfirm.type === "college" ? "College" : "Department"}`}
-        itemName={deleteConfirm.name}
-        description={deleteConfirm.type === "college" ? "Deleting this college will also permanently remove all its associated departments and potentially linked academic records. This action cannot be undone." : null}
+      <ConfirmDeleteModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setItemToDelete(null); }}
+        onConfirm={() => deleteMutation.mutate(itemToDelete.id)}
+        title="Delete record"
+        description={`Are you sure you want to delete this ${deleteType}? This action will be logged.`}
+        isDeleting={deleteMutation.isPending}
       />
     </div>
   )

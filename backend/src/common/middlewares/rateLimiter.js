@@ -2,7 +2,7 @@ import rateLimit from "express-rate-limit";
 
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  max: 200, // Limit each IP to 200 requests per `window` (here, per 15 minutes)
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: {
@@ -13,7 +13,7 @@ export const globalLimiter = rateLimit({
 
 export const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // Limit each IP to 20 requests per hour for auth endpoints
+  max: 100, // Limit each IP to 100 requests per hour for auth endpoints
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -24,7 +24,7 @@ export const authLimiter = rateLimit({
 
 export const qrLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 50, // Limit each IP to 50 requests per hour for QR verification
+  max: 100, // Limit each IP to 100 requests per hour for QR verification
   standardHeaders: true,
   legacyHeaders: false,
   message: {

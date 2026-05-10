@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { QrCode, Trash2, Plus, ExternalLink, ShieldCheck, Copy, CheckCircle2, Download } from 'lucide-react'
+import { 
+  QrCode, Trash2, Plus, ExternalLink, ShieldCheck, 
+  Copy, CheckCircle2, Download, Shield, Activity,
+  Lock, Hash, Cpu, Fingerprint, AlertTriangle, 
+  Clock, ArrowUpRight, Globe
+} from 'lucide-react'
 import { getMyQrTokens, generateQrCode, deleteQrToken } from '../../api/student.api'
 import QRCode from 'qrcode'
 import { toast } from 'sonner'
 import Spinner from '../../components/ui/Spinner'
-import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 
 export default function QRCodesPage() {
@@ -40,7 +44,6 @@ export default function QRCodesPage() {
     setGenerating(true)
     try {
       const res = await generateQrCode()
-      // Extract token to build frontend-specific URL
       const rawToken = res.data.verificationUrl.split('/').pop()
       const localUrl = `${window.location.origin}/verify/${rawToken}`
       const localQr = await QRCode.toDataURL(localUrl, { margin: 2, width: 300 })
@@ -52,7 +55,7 @@ export default function QRCodesPage() {
         rawToken
       })
       setPreviewOpen(true)
-      toast.success('New QR code generated successfully.')
+      toast.success('New access token generated.')
       refetch()
     } catch (err) {
       toast.error(err.message)
@@ -62,15 +65,17 @@ export default function QRCodesPage() {
   }
 
   const handleDelete = async (id) => {
-    setDeletingId(id)
-    try {
-      await deleteQrToken(id)
-      toast.success('QR token revoked successfully.')
-      refetch()
-    } catch (err) {
-      toast.error(err.message)
-    } finally {
-      setDeletingId(null)
+    if (window.confirm('Are you sure you want to revoke this access token?')) {
+      setDeletingId(id)
+      try {
+        await deleteQrToken(id)
+        toast.success('Access token revoked.')
+        refetch()
+      } catch (err) {
+        toast.error(err.message)
+      } finally {
+        setDeletingId(null)
+      }
     }
   }
 
@@ -78,7 +83,7 @@ export default function QRCodesPage() {
     navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-    toast.success('Verification URL copied to clipboard')
+    toast.success('URL copied')
   }
 
   const downloadImage = (dataUrl, filename) => {
@@ -91,116 +96,151 @@ export default function QRCodesPage() {
   }
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" className="text-primary" /></div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">Loading Tokens...</p>
+      </div>
+    )
   }
 
   const tokens = data?.data?.tokens || []
 
   return (
-    <div className="animate-fade-in-up space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-card border border-border p-8 rounded-3xl shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="hidden sm:flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary">
-            <QrCode size={32} />
+    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+      
+      {/* 1. Module Header */}
+      <div className="space-y-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+                <Lock size={22} className="text-primary-foreground" />
+             </div>
+             <div className="flex flex-col">
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Access Tokens</h2>
+                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Manage Verification Keys</span>
+             </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-foreground tracking-tight">Access Tokens</h1>
-            <p className="text-muted-foreground font-medium mt-2 max-w-lg">Generate secure, time-limited QR codes to allow employers or institutions to verify your academic records.</p>
+          <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-muted/30 rounded text-[9px] font-black uppercase tracking-widest">
+            <Activity size={12} className="text-primary" /> {tokens.filter(t => new Date(t.expiresAt) > new Date()).length} Active Tokens
           </div>
         </div>
-        <button 
-          onClick={handleGenerate}
-          disabled={generating}
-          className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50 shrink-0"
-        >
-          {generating ? <Spinner size="sm" /> : <Plus size={18} />} Generate New Token
-        </button>
+
+        <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+              Access <br/>
+              <span className="text-muted-foreground">Tokens</span>
+            </h1>
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest leading-relaxed border-l-2 border-primary pl-6">
+              Generate QR codes to let employers verify your records. 
+              These tokens are temporary and can be revoked at any time.
+            </p>
+          </div>
+          
+          <button 
+            onClick={handleGenerate}
+            disabled={generating}
+            className="w-full md:w-auto h-16 px-10 bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-[0.3em] shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-4 group"
+          >
+            {generating ? (
+              <Spinner size="sm" />
+            ) : (
+              <>
+                <Plus size={18} /> 
+                Generate New Token
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
+      {/* 2. Tokens Inventory */}
       <div className="space-y-6">
         {tokens.length === 0 ? (
-          <div className="bg-card border border-border border-dashed rounded-3xl p-16 text-center flex flex-col items-center">
-            <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mb-6">
-              <QrCode size={40} className="text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-bold text-foreground">No active tokens</h3>
-            <p className="text-muted-foreground mt-2 max-w-md">You haven't generated any QR access tokens yet. Generate one to share your verified records.</p>
+          <div className="bg-muted/10 border border-border border-dashed rounded p-20 text-center flex flex-col items-center">
+            <QrCode size={48} className="text-muted-foreground/20 mb-6" />
+            <h3 className="text-xl font-black uppercase tracking-tight">No active tokens</h3>
+            <p className="text-xs font-mono text-muted-foreground mt-2 uppercase tracking-widest">Generate a token to share your records.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {tokens.map((token) => {
               const isExpired = new Date(token.expiresAt) < new Date()
               const localUrl = `${window.location.origin}/verify/${token.token}`
               
               return (
-                <div key={token.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row gap-6 relative overflow-hidden group">
-                  <div className="shrink-0 flex flex-col items-center gap-3">
+                <div key={token.id} className="bg-card border border-border rounded overflow-hidden flex flex-col md:flex-row group">
+                  
+                  {/* QR Visual */}
+                  <div className="shrink-0 bg-muted/30 p-8 flex flex-col items-center justify-center gap-6 border-b md:border-b-0 md:border-r border-border">
                     {qrImages[token.id] ? (
-                      <div className="p-2 bg-white rounded-xl border border-border shadow-sm">
-                        <img src={qrImages[token.id]} alt="QR Code" className="w-24 h-24 sm:w-32 sm:h-32 object-contain" />
+                      <div className="p-3 bg-white rounded border border-border shadow-sm">
+                        <img src={qrImages[token.id]} alt="QR" className="w-32 h-32 object-contain" />
                       </div>
                     ) : (
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-secondary rounded-xl animate-pulse" />
+                      <div className="w-32 h-32 bg-background border border-border border-dashed animate-pulse rounded" />
                     )}
                     <button
-                      onClick={() => downloadImage(qrImages[token.id], `dar_qr_${token.token.substring(0,6)}_${format(new Date(), 'yyyyMMdd_HHmm')}.png`)}
-                      className="w-full py-2 flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-bold rounded-lg transition-colors border border-border"
+                      onClick={() => downloadImage(qrImages[token.id], `qr_${token.token.substring(0,8)}.png`)}
+                      className="w-full h-10 border border-border text-[9px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2"
                     >
-                      <Download size={14} /> Download
+                      <Download size={12} /> Download PNG
                     </button>
                   </div>
-                  
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {isExpired ? (
-                            <Badge variant="danger">Expired</Badge>
-                          ) : (
-                            <Badge variant="success">Active</Badge>
-                          )}
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest font-mono">
-                            {token.token.substring(0, 8)}...
-                          </span>
+
+                  {/* Token Metadata */}
+                  <div className="flex-1 p-8 space-y-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`px-2 py-1 border text-[9px] font-black uppercase tracking-widest rounded ${
+                          isExpired ? 'bg-destructive/10 border-destructive/20 text-destructive' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                        }`}>
+                          {isExpired ? 'EXPIRED' : 'ACTIVE'}
                         </div>
-                        <button
-                          onClick={() => handleDelete(token.id)}
-                          disabled={deletingId === token.id}
-                          className="p-2 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
-                          title="Revoke Token"
-                        >
-                          {deletingId === token.id ? <Spinner size="sm" /> : <Trash2 size={16} />}
-                        </button>
+                        <div className="px-3 py-1 bg-muted/50 border border-border text-[10px] font-mono text-muted-foreground uppercase tracking-widest rounded">
+                          Token: {token.token.substring(0, 12).toUpperCase()}...
+                        </div>
                       </div>
-                      
-                      <div className="space-y-1 mb-4">
-                        <p className="text-sm font-medium text-foreground">
-                          Generated: <span className="font-bold">{format(new Date(token.createdAt), 'MMM dd, yyyy HH:mm')}</span>
-                        </p>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Expires: <span className="font-bold text-foreground">{format(new Date(token.expiresAt), 'MMM dd, yyyy HH:mm')}</span>
+                      <button
+                        onClick={() => handleDelete(token.id)}
+                        disabled={deletingId === token.id}
+                        className="h-10 w-10 border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 flex items-center justify-center transition-all"
+                        title="Revoke Token"
+                      >
+                        {deletingId === token.id ? <Spinner size="sm" /> : <Trash2 size={16} />}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Created On</p>
+                        <p className="text-sm font-black uppercase font-mono">{format(new Date(token.createdAt), 'yyyy-MM-dd HH:mm')}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary uppercase tracking-widest">Expires On</p>
+                        <p className={`text-sm font-black uppercase font-mono ${isExpired ? 'text-destructive' : 'text-foreground'}`}>
+                          {format(new Date(token.expiresAt), 'yyyy-MM-dd HH:mm')}
                         </p>
                       </div>
                     </div>
-                    
-                    <div className="mt-auto">
-                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
-                        <button 
-                          onClick={() => copyUrl(localUrl)}
-                          className="flex-1 py-2 flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg transition-colors"
-                        >
-                          <Copy size={14} /> Copy Link
-                        </button>
-                        <a 
-                          href={localUrl} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="py-2 px-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-lg transition-colors border border-border"
-                          title="Open Link"
-                        >
-                          <ExternalLink size={14} />
-                        </a>
-                      </div>
+
+                    <div className="flex items-center gap-3 pt-4 border-t border-border">
+                      <button 
+                        onClick={() => copyUrl(localUrl)}
+                        className="h-10 px-6 border border-border bg-muted/20 text-[9px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center gap-2"
+                      >
+                        <Copy size={14} /> Copy Link
+                      </button>
+                      <a 
+                        href={localUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="h-10 px-4 border border-border text-muted-foreground hover:text-primary transition-all flex items-center justify-center"
+                        title="Open Link"
+                      >
+                        <ExternalLink size={14} />
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -210,65 +250,86 @@ export default function QRCodesPage() {
         )}
       </div>
 
-      <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Your New Access Token" size="md">
-        {previewData && (
-          <div className="flex flex-col items-center text-center pb-2">
-            <div className="bg-white p-3 rounded-2xl border border-border shadow-sm mb-4 inline-block relative group">
+      {/* Security Note */}
+      <div className="bg-muted/30 border border-border rounded p-10 space-y-4">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Shield size={16} className="text-primary" />
+          <h4 className="text-[9px] font-black uppercase tracking-[0.4em]">Security Note</h4>
+        </div>
+        <p className="text-[11px] text-muted-foreground font-mono font-medium leading-relaxed max-w-4xl uppercase tracking-widest">
+          Sharing your QR code gives someone temporary access to view your verified academic records. 
+          You can revoke this access at any time.
+        </p>
+      </div>
+
+      {/* NEW TOKEN PREVIEW (MODAL) */}
+      <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="New Access Token" size="md">
+        <div className="space-y-8">
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="bg-white p-4 rounded border border-border shadow-sm group relative">
               <img 
-                src={previewData.qrCode} 
-                alt="Verification QR Code" 
-                className="w-40 h-40 md:w-48 md:h-48 object-contain rounded-xl"
+                src={previewData?.qrCode} 
+                alt="QR" 
+                className="w-48 h-48 md:w-56 md:h-56 object-contain"
               />
               <button
-                onClick={() => downloadImage(previewData.qrCode, `dar_qr_${previewData.rawToken.substring(0,6)}_${format(new Date(), 'yyyyMMdd_HHmm')}.png`)}
-                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl text-white font-bold gap-2"
+                onClick={() => downloadImage(previewData?.qrCode, `qr_${previewData?.rawToken.substring(0,8)}.png`)}
+                className="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all text-primary-foreground font-black text-[10px] uppercase tracking-widest gap-2"
               >
-                <Download size={20} /> Download PNG
+                <Download size={24} />
+                Download Image
               </button>
             </div>
             
-            <h4 className="text-lg font-bold text-foreground mb-1">Scan to Verify</h4>
-            <p className="text-xs font-medium text-muted-foreground mb-4 max-w-xs mx-auto">
-              Share this QR code with employers to grant them secure access to your verified academic records.
-            </p>
-
-            <div className="w-full text-left space-y-1 mb-4">
-              <label className="text-[10px] font-bold text-foreground uppercase tracking-wider ml-1">Or share link</label>
-              <div className="flex items-center gap-2 p-1.5 bg-secondary border border-border rounded-xl">
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={previewData.verificationUrl}
-                  className="flex-1 bg-transparent border-none outline-none text-xs font-mono text-muted-foreground px-2 truncate"
-                />
-                <button 
-                  onClick={() => copyUrl(previewData.verificationUrl)}
-                  className="p-2 bg-background hover:bg-card border border-border rounded-lg shadow-sm transition-colors text-foreground shrink-0"
-                  title="Copy URL"
-                >
-                  {copied ? <CheckCircle2 size={14} className="text-success" /> : <Copy size={14} />}
-                </button>
-                <a 
-                  href={previewData.verificationUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="p-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-sm transition-colors shrink-0"
-                  title="Open Link"
-                >
-                  <ExternalLink size={14} />
-                </a>
-              </div>
-            </div>
-
-            <div className="w-full bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-3 rounded-xl flex items-start gap-2.5 text-left">
-              <ShieldCheck size={16} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-bold text-blue-800 dark:text-blue-300">Security Note</p>
-                <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400 mt-0.5">This token will expire on <strong>{format(new Date(previewData.expiresAt), 'MMM dd, yyyy')}</strong>. You can revoke it anytime from the dashboard.</p>
-              </div>
+            <div className="space-y-2">
+              <h4 className="text-2xl font-black uppercase tracking-tight">Token Ready</h4>
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest max-w-xs">
+                You can now share this QR code for verification.
+              </p>
             </div>
           </div>
-        )}
+
+          <div className="space-y-4">
+             <div className="space-y-2">
+                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-1">Direct Link</label>
+                <div className="flex items-center gap-2 p-1 bg-muted/50 border border-border rounded">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={previewData?.verificationUrl}
+                    className="flex-1 bg-transparent border-none outline-none text-xs font-mono text-primary px-3 truncate"
+                  />
+                  <button 
+                    onClick={() => copyUrl(previewData?.verificationUrl)}
+                    className="h-10 px-4 bg-background border border-border text-[9px] font-black uppercase tracking-widest hover:bg-muted transition-all"
+                  >
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+             </div>
+
+             <div className="p-6 bg-primary/5 border border-primary/20 rounded">
+                <div className="flex items-start gap-3 text-primary">
+                  <Shield size={18} className="shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest">Expiration</p>
+                    <p className="text-xs font-medium uppercase tracking-tight">
+                      This token expires on <strong className="text-primary">{previewData?.expiresAt && format(new Date(previewData.expiresAt), 'MMMM dd, yyyy')}</strong>.
+                    </p>
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="flex justify-center pt-4">
+             <button 
+                onClick={() => setPreviewOpen(false)}
+                className="h-12 px-12 border border-border text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all"
+             >
+                Close
+             </button>
+          </div>
+        </div>
       </Modal>
     </div>
   )

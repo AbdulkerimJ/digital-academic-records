@@ -3,7 +3,7 @@ import FetchingIndicator from "../../components/common/FetchingIndicator"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { listInstitutions, listInstitutionTypes, deleteInstitution, updateInstitution } from "../../api/institutions.api"
 import { Button } from "../../components/ui/button"
-import { Plus, Building2, GraduationCap, AlertTriangle } from "lucide-react"
+import { Plus, Building2, Activity, Clock, AlertTriangle, ShieldCheck } from "lucide-react"
 import { Card } from "../../components/ui/card"
 import { toast } from "sonner"
 
@@ -11,11 +11,9 @@ import InstitutionFilters from "./InstitutionFilters"
 import InstitutionTable from "./InstitutionTable"
 import InstitutionModal from "./InstitutionModal"
 import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
-import PageLoader from "../../components/common/PageLoader"
-import TableSkeleton from "../../components/common/TableSkeleton"
 import useDebounce from "../../hooks/useDebounce"
-
 import { useSearchParams } from "react-router-dom"
+import { cn } from "../../lib/utils"
 
 export default function InstitutionsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -34,12 +32,12 @@ export default function InstitutionsPage() {
     setIsDeleting(true)
     try {
       await deleteInstitution(institutionToDelete.id)
-      toast.success("Institution deleted successfully")
+      toast.success("Record deleted.")
       queryClient.invalidateQueries(["institutions"])
       setIsDeleteModalOpen(false)
       setInstitutionToDelete(null)
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete institution")
+      toast.error(err.response?.data?.message || "Delete failed")
     } finally {
       setIsDeleting(false)
     }
@@ -48,20 +46,17 @@ export default function InstitutionsPage() {
   const handleToggleStatus = async (institution) => {
     try {
       await updateInstitution(institution.id, { isActive: !institution.isActive })
-      toast.success(`Institution ${institution.isActive ? 'deactivated' : 'activated'} successfully`)
+      toast.success(`${institution.name} ${institution.isActive ? 'deactivated' : 'activated'}.`)
       queryClient.invalidateQueries(["institutions"])
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update institution status")
+      toast.error(err.response?.data?.message || "Update failed")
     }
   }
   
-  // Filter & Pagination derived from searchParams
   const searchTerm = searchParams.get("search") || ""
   const debouncedSearch = useDebounce(searchTerm, 500)
-  
   const typeFilter = searchParams.get("type") || "all"
   const statusFilter = searchParams.get("status") || "all"
-  
   const page = parseInt(searchParams.get("page") || "1", 10)
   const limit = parseInt(searchParams.get("limit") || "10", 10)
   const sortBy = searchParams.get("sortBy") || "name"
@@ -108,7 +103,7 @@ export default function InstitutionsPage() {
     setSearchParams({})
   }
 
-  const { data: instData, isLoading, error, isFetching } = useQuery({
+  const { data: instData, error, isFetching } = useQuery({
     queryKey: ["institutions", { page, limit, sortBy, sortDir, searchTerm: debouncedSearch, typeFilter, statusFilter }],
     queryFn: () => listInstitutions({ 
       page, 
@@ -127,80 +122,52 @@ export default function InstitutionsPage() {
     queryFn: listInstitutionTypes
   })
 
-  const institutionsRaw = instData?.data?.institutions
-  const institutions = Array.isArray(institutionsRaw) ? institutionsRaw : []
+  const institutions = Array.isArray(instData?.data?.institutions) ? instData.data.institutions : []
   const totalCount = instData?.data?.count || 0
-  const institutionTypesRaw = typesData?.data?.types
-  const institutionTypes = Array.isArray(institutionTypesRaw) ? institutionTypesRaw : []
-
-  // Predictive Prefetching for next/prev pages
-  useEffect(() => {
-    const totalPages = Math.ceil(totalCount / limit)
-    const commonParams = { 
-      limit, 
-      sortBy, 
-      sortDir, 
-      search: debouncedSearch, 
-      type: typeFilter, 
-      status: statusFilter 
-    }
-    
-    // Prefetch Next Page
-    if (page < totalPages) {
-      queryClient.prefetchQuery({
-        queryKey: ["institutions", { ...commonParams, page: page + 1, offset: page * limit }],
-        queryFn: () => listInstitutions({ ...commonParams, page: page + 1, offset: page * limit })
-      })
-    }
-
-    // Prefetch Previous Page
-    if (page > 1) {
-      queryClient.prefetchQuery({
-        queryKey: ["institutions", { ...commonParams, page: page - 1, offset: (page - 2) * limit }],
-        queryFn: () => listInstitutions({ ...commonParams, page: page - 1, offset: (page - 2) * limit })
-      })
-    }
-  }, [page, limit, sortBy, sortDir, debouncedSearch, typeFilter, statusFilter, totalCount, queryClient])
-
+  const institutionTypes = Array.isArray(typesData?.data?.types) ? typesData.data.types : []
 
   if (error) return (
-    <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5">
+    <Card className="p-12 flex flex-col items-center justify-center text-center border-destructive/20 bg-destructive/5 rounded-none">
       <AlertTriangle size={48} className="text-destructive mb-4" />
-      <h3 className="text-xl font-bold text-destructive mb-2">Failed to load institutions</h3>
-      <p className="text-muted-foreground">{error.response?.data?.message || error.message}</p>
+      <h3 className="text-sm font-black uppercase tracking-widest text-destructive mb-2">Error Loading Data</h3>
+      <p className="text-xs font-bold text-muted-foreground uppercase opacity-70">{error.response?.data?.message || error.message}</p>
     </Card>
   )
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 rounded-2xl border border-primary/10 shadow-sm relative overflow-hidden">
-        <FetchingIndicator isFetching={isFetching} />
-        <div className="absolute -right-12 -top-12 text-primary/5 rotate-12 pointer-events-none">
-          <Building2 size={200} />
+    <div className="space-y-10 pb-20">
+      
+      {/* 1. Header (Keep Uppercase) */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Activity size={10} /> SYSTEM ONLINE
+            </div>
+            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Clock size={10} /> {new Date().toLocaleDateString()}
+            </div>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+            Institution <span className="text-primary">List</span>
+          </h2>
+          <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
+            Manage partner universities and academic boards.
+          </p>
         </div>
         
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="p-3.5 bg-background shadow-sm rounded-xl text-primary border border-primary/10">
-            <GraduationCap size={28} />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground font-serif">Institutions Registry</h2>
-            <p className="text-muted-foreground mt-1">Manage partner universities, exam boards, and regional offices.</p>
-          </div>
-        </div>
         <Button 
           onClick={() => {
             setInstitutionToEdit(null)
             setIsModalOpen(true)
           }} 
-          className="gap-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 relative z-10 h-11 px-6 rounded-xl font-semibold"
+          className="rounded-none h-11 px-8 gap-3 font-bold text-xs shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
         >
-          <Plus size={18} />
-          New Institution
+          <Plus size={14} /> Add institution
         </Button>
       </div>
 
+      {/* 2. Filters */}
       <InstitutionFilters 
         searchTerm={searchTerm}
         setSearchTerm={(val) => updateFilters({ search: val })}
@@ -212,30 +179,33 @@ export default function InstitutionsPage() {
         institutionTypes={institutionTypes}
       />
 
-      <InstitutionTable 
-        institutions={institutions}
-        totalCount={totalCount}
-        currentPage={page}
-        onPageChange={setPage}
-        itemsPerPage={limit}
-        onItemsPerPageChange={setLimit}
-        sortBy={sortBy}
-        sortDir={sortDir}
-        onSort={setSort}
-        isFiltered={searchTerm || typeFilter !== "all" || statusFilter !== "all"}
-        isFetching={isFetching}
-        onEdit={(inst) => {
-          setInstitutionToEdit(inst)
-          setIsModalOpen(true)
-        }}
-        onDelete={(inst) => {
-          setInstitutionToDelete(inst)
-          setIsDeleteModalOpen(true)
-        }}
-        onToggleStatus={handleToggleStatus}
-        onAdd={() => setIsModalOpen(true)}
-        onClearFilters={clearFilters}
-      />
+      {/* 3. Data Table */}
+      <div className="bg-card border border-border shadow-sm p-1">
+        <InstitutionTable 
+          institutions={institutions}
+          totalCount={totalCount}
+          currentPage={page}
+          onPageChange={setPage}
+          itemsPerPage={limit}
+          onItemsPerPageChange={setLimit}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={setSort}
+          isFiltered={searchTerm || typeFilter !== "all" || statusFilter !== "all"}
+          isFetching={isFetching}
+          onEdit={(inst) => {
+            setInstitutionToEdit(inst)
+            setIsModalOpen(true)
+          }}
+          onDelete={(inst) => {
+            setInstitutionToDelete(inst)
+            setIsDeleteModalOpen(true)
+          }}
+          onToggleStatus={handleToggleStatus}
+          onAdd={() => setIsModalOpen(true)}
+          onClearFilters={clearFilters}
+        />
+      </div>
 
       <InstitutionModal 
         isOpen={isModalOpen} 
@@ -254,8 +224,8 @@ export default function InstitutionsPage() {
           setInstitutionToDelete(null)
         }}
         onConfirm={handleDelete}
-        title="Delete Institution"
-        description={`Are you sure you want to delete ${institutionToDelete?.name}? This action will also delete all linked colleges and departments. This cannot be undone.`}
+        title="Delete record"
+        description={`Are you sure you want to delete ${institutionToDelete?.name}? This action will be logged.`}
         isDeleting={isDeleting}
       />
     </div>

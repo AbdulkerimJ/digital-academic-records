@@ -7,9 +7,8 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card"
-import { Avatar, AvatarFallback } from "../../components/ui/avatar"
-import { Badge } from "../../components/ui/badge"
-import { User, Mail, Lock, Shield, Building2, Save, KeyRound } from "lucide-react"
+import { Building2, Shield, Save, KeyRound, Activity, Fingerprint, Lock } from "lucide-react"
+import { cn } from "../../lib/utils"
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -76,140 +75,173 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500 pb-20">
-      {/* Profile Header */}
-      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 bg-card border border-border/60 rounded-2xl shadow-sm">
-        <Avatar className="h-20 w-20 border-2 border-background shadow-sm">
-          <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
+    <div className="space-y-10 pb-20 max-w-6xl mx-auto">
+      {/* 1. Technical Profile Header */}
+      <div className="flex flex-col md:flex-row gap-10 items-center md:items-end p-10 bg-card border border-border shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-10">
+           <div className="flex items-center gap-2.5 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Shield size={12} /> Account verified
+           </div>
+        </div>
+
+        <div className="h-32 w-32 bg-primary flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-primary/20 shrink-0 font-mono">
+          {getInitials()}
+        </div>
         
-        <div className="flex-1 text-center md:text-left space-y-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-2">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">{user?.firstName} {user?.lastName}</h2>
-            <Badge variant="outline" className="w-fit mx-auto md:mx-0 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-muted/30">
-              {user?.roleName?.replace("_", " ")}
-            </Badge>
+        <div className="flex-1 text-center md:text-left space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
+              {user?.firstName} {user?.lastName}
+            </h2>
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
+               <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-3 py-1 border border-primary/20">
+                  {user?.roleName?.replace("_", " ").toLowerCase()}
+               </div>
+               <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <Building2 size={12} className="opacity-40" />
+                  {user?.institutionName || "Global administration"}
+               </div>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">{user?.email}</p>
-          <div className="flex items-center justify-center md:justify-start gap-2 pt-1 text-xs text-muted-foreground">
-            <Building2 size={14} className="opacity-70" />
-            <span className="font-medium tracking-tight">{user?.institutionName || "Global Administration"}</span>
+          
+          <div className="flex items-center justify-center md:justify-start gap-4 pt-2 border-t border-border/50">
+             <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter opacity-40">System id:</span>
+                <code className="text-[10px] font-bold text-primary/60 font-mono uppercase tracking-widest">{user?.id?.slice(0, 8)}</code>
+             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Account Details */}
-        <Card className="rounded-2xl border-border/60 shadow-sm overflow-hidden">
-          <CardHeader className="pb-4 border-b border-muted/20">
-            <CardTitle className="text-lg font-bold tracking-tight">Account Details</CardTitle>
-            <CardDescription className="text-xs font-medium">Update your personal information.</CardDescription>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* 2. Account Information */}
+        <Card className="rounded-none border-border shadow-sm overflow-hidden bg-card">
+          <CardHeader className="p-8 border-b border-border bg-muted/10">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-primary/10 border border-primary/20 text-primary">
+                <Fingerprint size={20} />
+              </div>
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black tracking-tighter uppercase leading-none text-foreground">Identity record</CardTitle>
+                <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight opacity-70">Update your administrative profile data.</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <form id="profile-form" onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">First Name</Label>
+          <CardContent className="p-8 space-y-8">
+            <form id="profile-form" onSubmit={handleProfileSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="firstName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">First name</Label>
                   <Input 
                     id="firstName"
                     value={profileData.firstName}
                     onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                    className="h-11 rounded-xl bg-muted/10 border-muted focus-visible:ring-primary/20"
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm uppercase tracking-tight"
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Last Name</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="lastName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Last name</Label>
                   <Input 
                     id="lastName"
                     value={profileData.lastName}
                     onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                    className="h-11 rounded-xl bg-muted/10 border-muted focus-visible:ring-primary/20"
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold text-sm uppercase tracking-tight"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email-display" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Email Address (Read-only)</Label>
-                <Input 
-                  id="email-display"
-                  value={profileData.email}
-                  disabled
-                  className="h-11 rounded-xl bg-muted/40 border-dashed cursor-not-allowed opacity-80"
-                />
+              <div className="space-y-3">
+                <Label htmlFor="email-display" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Email address (locked)</Label>
+                <div className="relative">
+                   <Input 
+                    id="email-display"
+                    value={profileData.email}
+                    disabled
+                    className="h-12 rounded-none bg-muted/20 border-dashed border-border cursor-not-allowed opacity-60 font-mono text-xs font-bold"
+                  />
+                  <Lock size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/30" />
+                </div>
               </div>
             </form>
           </CardContent>
-          <CardFooter className="pt-2">
+          <CardFooter className="p-8 pt-0">
             <Button 
               form="profile-form" 
               disabled={updateProfileMutation.isPending}
-              className="w-full md:w-auto ml-auto rounded-xl h-11 px-8 font-bold shadow-sm transition-all hover:shadow-md"
+              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:brightness-110"
             >
-              {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+              {updateProfileMutation.isPending ? "Processing..." : "Save changes"}
             </Button>
           </CardFooter>
         </Card>
 
-        {/* Security */}
-        <Card className="rounded-2xl border-border/60 shadow-sm overflow-hidden">
-          <CardHeader className="pb-4 border-b border-muted/20">
-            <CardTitle className="text-lg font-bold tracking-tight">Security Settings</CardTitle>
-            <CardDescription className="text-xs font-medium">Manage your account access.</CardDescription>
+        {/* 3. Security & Access */}
+        <Card className="rounded-none border-border shadow-sm overflow-hidden bg-card">
+          <CardHeader className="p-8 border-b border-border bg-muted/10">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600">
+                <Activity size={20} />
+              </div>
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black tracking-tighter uppercase leading-none text-foreground">Security access</CardTitle>
+                <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight opacity-70">Manage your administrative credentials.</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Current Password</Label>
+          <CardContent className="p-8 space-y-8">
+            <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-8">
+              <div className="space-y-3">
+                <Label htmlFor="currentPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Current password</Label>
                 <Input 
                   id="currentPassword"
                   type="password"
                   placeholder="••••••••"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                  className="h-11 rounded-xl bg-muted/10 border-muted focus-visible:ring-primary/20"
+                  className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
                   required
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">New Password</Label>
-                <Input 
-                  id="newPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                  className="h-11 rounded-xl bg-muted/10 border-muted focus-visible:ring-primary/20"
-                  required
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="newPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">New password</Label>
+                  <Input 
+                    id="newPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Confirm New Password</Label>
-                <Input 
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                  className="h-11 rounded-xl bg-muted/10 border-muted focus-visible:ring-primary/20"
-                  required
-                />
+                <div className="space-y-3">
+                  <Label htmlFor="confirmPassword" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">Confirm password</Label>
+                  <Input 
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
+                    required
+                  />
+                </div>
               </div>
             </form>
           </CardContent>
-          <CardFooter className="pt-2">
+          <CardFooter className="p-8 pt-0">
             <Button 
               form="password-form" 
               disabled={changePasswordMutation.isPending}
               variant="outline"
-              className="w-full md:w-auto ml-auto rounded-xl h-11 px-8 font-bold border-muted-foreground/20 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
+              className="w-full md:w-auto ml-auto rounded-none h-12 px-10 font-black text-[10px] uppercase tracking-widest border-border hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all shadow-sm"
             >
-              {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
+              {changePasswordMutation.isPending ? "Updating credentials..." : "Update password"}
             </Button>
           </CardFooter>
         </Card>

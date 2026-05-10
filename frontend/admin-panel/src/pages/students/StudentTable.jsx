@@ -1,43 +1,32 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { listStudents, deleteStudent } from "../../api/students.api"
 import { toast } from "sonner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
-import { Card } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../../components/ui/select"
-import { 
   Search, 
-  UserCircle2, 
   ExternalLink, 
-  Filter, 
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   Trash2,
-  Loader2
+  Activity,
+  ArrowRight,
+  User,
+  Fingerprint
 } from "lucide-react"
 import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import useDebounce from "../../hooks/useDebounce"
 import Pagination from "../../components/common/Pagination"
-
 import { useSearchParams } from "react-router-dom"
-
 import FetchingIndicator from "../../components/common/FetchingIndicator"
+import { cn } from "../../lib/utils"
 
 export default function StudentTable({ onSelectStudent }) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
   
   const page = parseInt(searchParams.get("page") || "1", 10)
   const limit = parseInt(searchParams.get("limit") || "10", 10)
@@ -47,7 +36,7 @@ export default function StudentTable({ onSelectStudent }) {
   const [studentToDelete, setStudentToDelete] = useState(null)
   const debouncedSearch = useDebounce(searchTerm, 500)
 
-  const { data: studentsData, isLoading, isPlaceholderData, isFetching } = useQuery({
+  const { data: studentsData, isLoading, isFetching } = useQuery({
     queryKey: ["students", debouncedSearch, page, limit],
     queryFn: () => listStudents({ 
       search: debouncedSearch, 
@@ -59,55 +48,20 @@ export default function StudentTable({ onSelectStudent }) {
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteStudent(id),
     onSuccess: () => {
-      toast.success("Student deleted successfully.")
+      toast.success("Record deleted.")
       queryClient.invalidateQueries({ queryKey: ["students"] })
       setIsDeleteModalOpen(false)
       setStudentToDelete(null)
     },
-    onError: (err) => toast.error(err.response?.data?.message || "Failed to delete student")
+    onError: (err) => toast.error(err.response?.data?.message || "Delete failed")
   })
 
-  const queryClient = useQueryClient()
   const studentsRaw = studentsData?.data?.students
   const students = Array.isArray(studentsRaw) ? studentsRaw : []
   const totalCount = studentsData?.data?.count || 0
   const totalPages = Math.ceil(totalCount / limit)
 
-  // Predictive Prefetching for next/prev pages
-  useEffect(() => {
-    const commonParams = { search: debouncedSearch, limit }
-    
-    // Prefetch Next Page
-    if (page < totalPages) {
-      queryClient.prefetchQuery({
-        queryKey: ["students", debouncedSearch, page + 1, limit],
-        queryFn: () => listStudents({ ...commonParams, page: page + 1, limit })
-      })
-    }
-
-    // Prefetch Previous Page
-    if (page > 1) {
-      queryClient.prefetchQuery({
-        queryKey: ["students", debouncedSearch, page - 1, limit],
-        queryFn: () => listStudents({ ...commonParams, page: page - 1, limit })
-      })
-    }
-  }, [page, debouncedSearch, limit, totalPages, queryClient])
-
   const getInitials = (s) => `${s.firstName?.[0] || ""}${s.lastName?.[0] || ""}`.toUpperCase()
-
-  const setPage = (newPage) => {
-    const newParams = new URLSearchParams(searchParams)
-    newParams.set("page", newPage.toString())
-    setSearchParams(newParams)
-  }
-
-  const setLimit = (newLimit) => {
-    const newParams = new URLSearchParams(searchParams)
-    newParams.set("limit", newLimit.toString())
-    newParams.set("page", "1") // Reset to page 1 on limit change
-    setSearchParams(newParams)
-  }
 
   const handleSearchChange = (value) => {
     const newParams = new URLSearchParams(searchParams)
@@ -116,18 +70,8 @@ export default function StudentTable({ onSelectStudent }) {
     } else {
       newParams.delete("search")
     }
-    newParams.set("page", "1") // Reset to page 1 on search
+    newParams.set("page", "1")
     setSearchParams(newParams)
-  }
-
-  const onPageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage)
-    }
-  }
-
-  const onItemsPerPageChange = (newLimit) => {
-    setLimit(newLimit)
   }
 
   const handleDeleteClick = (e, student) => {
@@ -146,137 +90,162 @@ export default function StudentTable({ onSelectStudent }) {
   const endRange = Math.min(page * limit, totalCount)
 
   return (
-    <div className="space-y-4">
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card border border-border/60 p-4 rounded-2xl shadow-sm relative overflow-hidden">
+    <div className="bg-card border border-border shadow-sm p-1">
+      {/* 1. Search Section */}
+      <div className="flex flex-col md:flex-row gap-6 items-center justify-between bg-muted/10 border-b border-border p-5 relative overflow-hidden">
         <FetchingIndicator isFetching={isFetching} />
-        <div className="relative w-full md:max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+        <div className="relative w-full md:max-w-lg group">
+          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
           <Input 
-            placeholder="Search by name or National ID..." 
+            placeholder="Search students by name or ID..." 
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="h-11 pl-10 rounded-xl bg-muted/20 border-none focus-visible:ring-primary/20 text-sm font-medium"
+            className="h-12 pl-12 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold tracking-tight placeholder:text-muted-foreground/30"
           />
         </div>
         
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground font-bold whitespace-nowrap px-4 lowercase tracking-tight">
-            showing {totalCount > 0 ? startRange : 0} to {endRange} of {totalCount} students
-          </span>
+        <div className="flex items-center gap-6">
+           <div className="flex items-center gap-2 px-3 py-1 bg-muted/20 border border-border text-[9px] font-bold text-muted-foreground tracking-widest">
+              <Activity size={10} className="text-primary" /> 
+              Showing {startRange}—{endRange} of {totalCount}
+           </div>
         </div>
       </div>
 
-      {/* Table Container */}
-      <Card className="rounded-3xl border-border/60 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-muted/60">
-                <TableHead className="w-[80px] pl-6"></TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Full Name</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">National ID</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Date of Birth</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Gender</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</TableHead>
-                <TableHead className="text-right pr-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Action</TableHead>
+      {/* 2. Data Table */}
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <TableHead className="py-4 px-8 text-[10px] font-black tracking-widest text-muted-foreground border-r border-border/50 w-[350px]">Student name</TableHead>
+              <TableHead className="py-4 px-8 text-[10px] font-black tracking-widest text-muted-foreground border-r border-border/50 w-[200px]">ID number</TableHead>
+              <TableHead className="py-4 px-8 text-[10px] font-black tracking-widest text-muted-foreground border-r border-border/50 w-[200px]">Date of birth</TableHead>
+              <TableHead className="py-4 px-8 text-[10px] font-black tracking-widest text-muted-foreground border-r border-border/50 w-[150px] text-center">Status</TableHead>
+              <TableHead className="text-right pr-10 py-4 text-[10px] font-black tracking-widest text-muted-foreground">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableBodySkeleton rows={limit} columns={5} />
+            ) : students.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-96 text-center border-none">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
+                    <div className="w-16 h-16 bg-muted/30 flex items-center justify-center mb-6 border border-border">
+                      <Fingerprint size={32} className="text-muted-foreground/30" />
+                    </div>
+                    <p className="text-xs font-bold text-foreground">No students found</p>
+                    <p className="text-[10px] font-bold text-muted-foreground max-w-xs mt-2 mb-8 leading-relaxed tracking-tight">No student records were found matching your search.</p>
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(isFetching && students.length === 0) ? (
-                <TableBodySkeleton rows={limit} columns={7} />
-              ) : students.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-40 text-center text-muted-foreground italic">
-                    <div className="flex flex-col items-center gap-2">
-                      <UserCircle2 size={40} className="opacity-20" />
-                      <span>No students found matching your criteria.</span>
+            ) : (
+              students.map((student) => (
+                <TableRow 
+                  key={student.id} 
+                  className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0" 
+                  onClick={() => onSelectStudent(student.id)}
+                >
+                  <TableCell className="py-3 px-8">
+                    <div className="flex items-center gap-5">
+                      <div className="h-10 w-10 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-xs shrink-0 font-mono group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/30 transition-all">
+                        {getInitials(student)}
+                      </div>
+                      <div className="flex flex-col min-w-0 text-left">
+                        <span className="font-black text-xs tracking-tighter text-foreground group-hover:text-primary transition-colors truncate">
+                          {student.firstName} {student.lastName}
+                        </span>
+                        <code className="text-[9px] font-bold text-muted-foreground/40 mt-0.5 truncate font-mono">Verified student</code>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-8">
+                    <div className="flex items-center gap-2">
+                      <Fingerprint size={12} className="text-primary opacity-30" />
+                      <code className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
+                        {student.nationalId}
+                      </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-8">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/70 font-mono tracking-tighter">
+                      <Calendar size={12} className="opacity-30" />
+                      {new Date(student.dateOfBirth).toLocaleDateString()}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-8 text-center">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Active
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right pr-10 py-3">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all"
+                      >
+                        <Eye size={14} />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => handleDeleteClick(e, student)}
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/20 transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                      <ArrowRight size={14} className="ml-2 text-muted-foreground/20 transition-all group-hover:translate-x-1 group-hover:text-primary" />
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                students.map((student) => (
-                  <TableRow key={student.id} className="border-muted/40 hover:bg-muted/5 transition-colors group cursor-pointer" onClick={() => onSelectStudent(student.id)}>
-                    <TableCell className="pl-6 py-4">
-                      <Avatar className="h-10 w-10 border-2 border-background shadow-sm ring-1 ring-primary/5">
-                        <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold uppercase">
-                          {getInitials(student)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-sm tracking-tight">{student.firstName} {student.lastName}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Verified Identity</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <code className="text-xs font-bold text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md">
-                        {student.nationalId}
-                      </code>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                        <Calendar size={12} className="opacity-70" />
-                        {new Date(student.dateOfBirth).toLocaleDateString()}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <Badge variant="ghost" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                        {student.gender || "N/A"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <Badge variant="outline" className="rounded-md bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] uppercase font-bold tracking-widest px-2">
-                        Active
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right pr-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/5 hover:text-primary"
-                        >
-                          <Eye size={14} />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={(e) => handleDeleteClick(e, student)}
-                          className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      
+      {/* 3. Pagination */}
+      <div className="px-8 py-4 border-t border-border bg-muted/5">
         <Pagination 
           page={page} 
           totalPages={totalPages} 
-          setPage={onPageChange} 
+          setPage={(p) => {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.set("page", p.toString())
+            setSearchParams(newParams)
+          }} 
           limit={limit} 
-          setLimit={onItemsPerPageChange} 
+          setLimit={(l) => {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.set("limit", l.toString())
+            newParams.set("page", "1")
+            setSearchParams(newParams)
+          }} 
           totalCount={totalCount} 
           itemName="students" 
           isFetching={isFetching} 
         />
-      </Card>
+      </div>
+
       {isDeleteModalOpen && (
         <ConfirmDeleteModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleConfirmDelete}
           isDeleting={deleteMutation.isPending}
-          itemName={`${studentToDelete?.firstName} ${studentToDelete?.lastName}`}
-          title="Delete Student Account"
-          description="Are you sure you want to delete this student? They will no longer be able to access their records, but their academic history will be preserved as a 'soft-deleted' record."
+          title="Delete student"
+          description={
+            <div className="space-y-4">
+              <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+                Are you sure you want to delete the student record for <span className="text-foreground font-black underline underline-offset-4 decoration-primary/30">"{studentToDelete?.firstName} {studentToDelete?.lastName}"</span>?
+              </p>
+              <div className="bg-destructive/5 border-l-2 border-destructive p-4">
+                <p className="text-[10px] font-bold text-destructive tracking-widest">Warning: Permanent action</p>
+                <p className="text-[10px] font-bold text-destructive/70 mt-1">This will remove the student from the system. This cannot be undone.</p>
+              </div>
+            </div>
+          }
         />
       )}
     </div>

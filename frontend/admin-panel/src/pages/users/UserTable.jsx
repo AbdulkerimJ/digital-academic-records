@@ -4,15 +4,14 @@ import {
   Ban, 
   CheckCircle, 
   Trash2, 
-  ShieldAlert, 
   SearchX,
   Pencil,
   UserPlus,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  ChevronLeft,
-  ChevronRight
+  Shield,
+  User
 } from "lucide-react"
 import { 
   Table, 
@@ -31,15 +30,7 @@ import {
   DropdownMenuTrigger 
 } from "../../components/ui/dropdown-menu"
 import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import { Card } from "../../components/ui/card"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../../components/ui/select"
+import { cn } from "../../lib/utils"
 
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import Pagination from "../../components/common/Pagination"
@@ -68,18 +59,39 @@ export default function UserTable({
   const totalPages = Math.ceil(totalCount / itemsPerPage)
   
   const getStatusBadge = (status) => {
-    const badgeClass = "w-24 justify-center shadow-sm text-[10px] uppercase tracking-wider font-bold"
     switch (status) {
-      case "ACTIVE":
-        return <Badge className={`bg-emerald-500 hover:bg-emerald-600 text-white border-none ${badgeClass}`}>Active</Badge>
-      case "PENDING":
-        return <Badge variant="outline" className={`text-amber-600 border-amber-200 bg-amber-50 ${badgeClass}`}>Pending</Badge>
-      case "SUSPENDED":
-        return <Badge variant="destructive" className={`border-none ${badgeClass}`}>Suspended</Badge>
-      case "REVOKED":
-        return <Badge variant="secondary" className={`bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent ${badgeClass}`}>Revoked</Badge>
+      case "Active":
+        return (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest">
+            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+            Active account
+          </div>
+        )
+      case "Pending":
+        return (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-500/10 border border-slate-500/20 text-[9px] font-bold text-slate-600 tracking-widest">
+            Pending invite
+          </div>
+        )
+      case "Suspended":
+        return (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-700 tracking-widest">
+            <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+            Suspended
+          </div>
+        )
+      case "Revoked":
+        return (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-red-500/10 border border-red-500/20 text-[9px] font-bold text-red-700 tracking-widest">
+            Revoked
+          </div>
+        )
       default:
-        return <Badge variant="outline" className={badgeClass}>{status}</Badge>
+        return (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-muted/20 border border-border text-[9px] font-bold text-muted-foreground tracking-widest">
+            {status}
+          </div>
+        )
     }
   }
 
@@ -87,180 +99,188 @@ export default function UserTable({
     const isSorted = sortBy === field
     return (
       <TableHead 
-        className={`cursor-pointer transition-colors hover:text-foreground group ${className}`}
+        className={cn(
+          "cursor-pointer transition-all hover:bg-muted/10 border-r border-border/50 last:border-0",
+          className
+        )}
         onClick={() => onSort(field)}
       >
-        <div className="flex items-center gap-1.5 py-5 pl-8 text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
           {label}
-          {isSorted ? (
-            sortDir === "ASC" ? <ArrowUp size={14} className="text-primary" /> : <ArrowDown size={14} className="text-primary" />
-          ) : (
-            <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-50" />
-          )}
+          <div className="flex flex-col gap-0.5">
+            {isSorted ? (
+              sortDir === "ASC" ? <ArrowUp size={10} className="text-primary" /> : <ArrowDown size={10} className="text-primary" />
+            ) : (
+              <ArrowUpDown size={10} className="opacity-20" />
+            )}
+          </div>
         </div>
       </TableHead>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="shadow-sm border-muted/60 overflow-hidden rounded-2xl relative">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-muted/60">
-                <SortHeader field="firstName" label="User Details" />
-                <SortHeader field="roleName" label="System Role" className="pl-0" />
-                <SortHeader field="institutionName" label="Affiliated Institution" className="pl-0" />
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Account Status</TableHead>
-                <TableHead className="text-right pr-8 text-xs font-bold uppercase tracking-wider text-muted-foreground">Actions</TableHead>
+    <div className="bg-card border border-border shadow-sm p-1">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <SortHeader field="firstName" label="User details" className="w-[300px]" />
+              <SortHeader field="roleName" label="System role" className="w-[180px]" />
+              <SortHeader field="institutionName" label="Institution" className="w-[250px]" />
+              <TableHead className="py-4 px-6 text-[10px] font-bold text-muted-foreground border-r border-border/50 w-[150px] uppercase tracking-widest">Status</TableHead>
+              <TableHead className="text-right pr-8 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {(isFetching && users.length === 0) ? (
+              <TableBodySkeleton rows={itemsPerPage} columns={5} />
+            ) : users.length === 0 ? (
+              <TableRow>
+                 <TableCell colSpan={5} className="h-96 text-center border-none">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
+                    <div className="w-16 h-16 bg-muted/30 flex items-center justify-center mb-6 border border-border">
+                      <SearchX size={32} className="text-muted-foreground/30" />
+                    </div>
+                    <p className="text-xs font-black text-foreground uppercase tracking-widest">
+                      {isFiltered ? "No matching records" : "Registry empty"}
+                    </p>
+                    <p className="text-[10px] font-bold text-muted-foreground max-w-xs mt-2 mb-8 leading-relaxed tracking-tight">
+                      {isFiltered
+                        ? "Adjust filters to locate the specific identity record."
+                        : "There are currently no administrative users registered. Start by inviting a registrar."}
+                    </p>
+                    {!isFiltered ? (
+                      <Button variant="outline" className="rounded-none gap-2 font-bold text-[10px] border-border shadow-sm uppercase tracking-widest" onClick={onInvite}>
+                        <UserPlus size={14} /> Invite first user
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="rounded-none font-bold text-[10px] border-border shadow-sm uppercase tracking-widest" onClick={onClearFilters}>Reset filters</Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(isFetching && users.length === 0) ? (
-                <TableBodySkeleton rows={itemsPerPage} columns={5} />
-              ) : users.length === 0 ? (
-                <TableRow>
-                   <TableCell colSpan={5} className="h-72 text-center border-none">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
-                      <div className="p-4 bg-muted/30 rounded-full mb-4">
-                        <SearchX size={48} className="text-muted-foreground/50" />
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id} className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0">
+                  <TableCell className="py-3 px-6">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-xs shrink-0 font-mono">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
                       </div>
-                      <p className="text-lg font-medium text-foreground">
-                        {isFiltered ? "No matching users found" : "No users found"}
-                      </p>
-                      <p className="text-sm max-w-sm mt-1 mb-6">
-                        {isFiltered
-                          ? "Try adjusting your search terms or filters to find what you're looking for."
-                          : "There are currently no administrative users registered in the system. Start by inviting an institution registrar."}
-                      </p>
-                      {!isFiltered ? (
-                        <Button variant="outline" className="gap-2 shadow-sm" onClick={onInvite}>
-                          <UserPlus size={16} /> Invite your first user
-                        </Button>
-                      ) : (
-                        <Button variant="outline" onClick={onClearFilters}>Clear all filters</Button>
-                      )}
+                      <div className="flex flex-col min-w-0 text-left">
+                        <span className="font-black text-xs tracking-tighter text-foreground uppercase group-hover:text-primary transition-colors truncate">
+                          {user.firstName} {user.lastName}
+                        </span>
+                        <code className="text-[10px] font-bold text-muted-foreground/50 mt-0.5 truncate font-mono">{user.email}</code>
+                      </div>
                     </div>
                   </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user.id} className="group transition-colors hover:bg-muted/40 cursor-pointer border-muted/60">
-                    <TableCell className="py-4 pl-8">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/10 shadow-sm shrink-0">
-                          {user.firstName?.[0]}{user.lastName?.[0]}
-                        </div>
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">
-                            {user.firstName} {user.lastName}
-                          </span>
-                          <span className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">{user.email}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 font-medium text-sm">
-                        {user.roleName === "SUPER_ADMIN" ? (
-                          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 gap-1.5 justify-center w-32 rounded-md px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider shadow-sm">
-                            <ShieldAlert size={12} />
-                            {user.roleName.replace("_", " ")}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-muted w-32 justify-center px-2 py-0.5 rounded-md font-medium text-[10px] uppercase tracking-wider">
-                            {user.roleName.replace("_", " ")}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium text-foreground/80 truncate max-w-[180px] block">
-                        {user.institutionName || "-"}
+                  <TableCell className="px-6">
+                    <div className="flex items-center gap-2">
+                      <Shield size={12} className={cn(
+                        "opacity-30",
+                        user.roleName === "SUPER_ADMIN" ? "text-primary opacity-100" : "text-muted-foreground"
+                      )} />
+                      <span className={cn(
+                        "text-[10px] font-bold uppercase tracking-widest",
+                        user.roleName === "SUPER_ADMIN" ? "text-primary font-black" : "text-muted-foreground/70"
+                      )}>
+                        {user.roleName.replace("_", " ").toLowerCase()}
                       </span>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(user.status)}</TableCell>
-                    <TableCell className="text-right pr-8">
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6">
+                    <div className="flex items-center gap-2 text-foreground/80">
+                      <User size={12} className="opacity-20" />
+                      <span className="text-[10px] font-bold tracking-tight uppercase truncate max-w-[200px]">
+                        {user.institutionName || "System managed"}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6">{getStatusBadge(user.status)}</TableCell>
+                  <TableCell className="text-right pr-8">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <span className="sr-only">Open menu</span>
+                          <Button variant="ghost" className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-52 rounded-xl shadow-xl border-muted/60">
-                          <DropdownMenuLabel className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 px-3 py-2">Account Actions</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-56 rounded-none border border-border shadow-2xl p-2">
+                          <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground/50 px-3 py-2 border-b border-border mb-2 uppercase tracking-widest">Account control</DropdownMenuLabel>
                           
-                          {user.status === "PENDING" && (
+                          {user.status === "Pending" && (
                             <>
                               <DropdownMenuItem 
                                 onClick={() => onResend(user.id)}
-                                className="gap-2 cursor-pointer"
+                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all uppercase tracking-widest"
                               >
-                                <RefreshCw size={14} className="text-muted-foreground" /> Resend Invitation
+                                <RefreshCw size={14} /> Resend invite
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => onRevoke(user.id)}
-                                className="gap-2 text-amber-600 cursor-pointer focus:text-amber-700 focus:bg-amber-50"
+                                className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all uppercase tracking-widest"
                               >
-                                <Ban size={14} /> Revoke Invitation
+                                <Ban size={14} /> Revoke invite
                               </DropdownMenuItem>
                             </>
                           )}
 
-                          {user.status === "ACTIVE" && (
+                          {user.status === "Active" && (
                             <DropdownMenuItem 
                               onClick={() => onSuspend(user.id)}
-                              className="gap-2 text-amber-600 cursor-pointer focus:text-amber-700 focus:bg-amber-50"
+                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-amber-600 focus:bg-amber-50 focus:text-amber-700 transition-all uppercase tracking-widest"
                             >
-                              <Ban size={14} /> Suspend Account
+                              <Ban size={14} /> Suspend account
                             </DropdownMenuItem>
                           )}
 
-                          {user.status === "SUSPENDED" && (
+                          {user.status === "Suspended" && (
                             <DropdownMenuItem 
                               onClick={() => onUnsuspend(user.id)}
-                              className="gap-2 text-emerald-600 cursor-pointer focus:text-emerald-700 focus:bg-emerald-50"
+                              className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700 transition-all uppercase tracking-widest"
                             >
-                              <CheckCircle size={14} /> Unsuspend Account
+                              <CheckCircle size={14} /> Unsuspend account
                             </DropdownMenuItem>
                           )}
 
                           <DropdownMenuItem 
                             onClick={() => onEdit(user)}
-                            className="gap-2 cursor-pointer"
+                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 focus:bg-primary/5 focus:text-primary transition-all uppercase tracking-widest"
                           >
-                            <Pencil size={14} className="text-muted-foreground" /> Edit Details
+                            <Pencil size={14} /> Edit details
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator />
+                          <DropdownMenuSeparator className="bg-border my-2" />
                           <DropdownMenuItem 
                             onClick={() => onDelete(user)}
-                            className="gap-2 text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive"
+                            className="gap-3 cursor-pointer rounded-none text-[10px] font-bold p-3 text-destructive focus:bg-destructive/5 focus:text-destructive transition-all uppercase tracking-widest"
                           >
-                            <Trash2 size={14} /> Delete Account
+                            <Trash2 size={14} /> Delete record
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        
-        <Pagination 
-          page={currentPage} 
-          totalPages={totalPages} 
-          setPage={onPageChange} 
-          limit={itemsPerPage} 
-          setLimit={onItemsPerPageChange} 
-          totalCount={totalCount} 
-          itemName="users" 
-          isFetching={isFetching} 
-        />
-      </Card>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      
+      <Pagination 
+        page={currentPage} 
+        totalPages={totalPages} 
+        setPage={onPageChange} 
+        limit={itemsPerPage} 
+        setLimit={onItemsPerPageChange} 
+        totalCount={totalCount} 
+        itemName="users" 
+        isFetching={isFetching} 
+        className="px-6 py-4 border-t border-border bg-muted/5 rounded-none"
+      />
     </div>
   )
 }

@@ -3,12 +3,12 @@ import { format } from 'date-fns'
 import { 
   ClipboardList, AlertCircle, CheckCircle2, 
   Clock, FileText, XCircle, ChevronRight, 
-  Trash2, ArrowUpRight, GraduationCap, BookOpen 
+  Trash2, ArrowUpRight, GraduationCap, BookOpen,
+  Shield, Activity, Hash, Cpu, ArrowLeft
 } from 'lucide-react'
 import { getMyRequests, cancelCorrectionRequest } from '../../api/student.api'
 import { toast } from 'sonner'
 import Spinner from '../../components/ui/Spinner'
-import Badge from '../../components/ui/Badge'
 
 export default function RequestsPage() {
   const queryClient = useQueryClient()
@@ -29,19 +29,15 @@ export default function RequestsPage() {
   })
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" className="text-primary" /></div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">Querying Request Ledger...</p>
+      </div>
+    )
   }
 
   const requests = data?.data?.requests || []
-
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'PENDING':  return <Badge variant="warning" className="flex items-center gap-1.5"><Clock size={12}/> Pending Review</Badge>
-      case 'APPROVED': return <Badge variant="success" className="flex items-center gap-1.5"><CheckCircle2 size={12}/> Approved</Badge>
-      case 'REJECTED': return <Badge variant="danger" className="flex items-center gap-1.5"><XCircle size={12}/> Rejected</Badge>
-      default:         return <Badge>{status}</Badge>
-    }
-  }
 
   const handleCancel = (id) => {
     if (window.confirm('Are you sure you want to withdraw this correction request?')) {
@@ -49,147 +45,177 @@ export default function RequestsPage() {
     }
   }
 
+  const getStatusStyle = (status) => {
+    switch(status) {
+      case 'PENDING':  return 'bg-amber-500/10 border-amber-500/20 text-amber-500'
+      case 'APPROVED': return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+      case 'REJECTED': return 'bg-destructive/10 border-destructive/20 text-destructive'
+      default:         return 'bg-muted border-border text-muted-foreground'
+    }
+  }
+
   return (
-    <div className="animate-fade-in-up space-y-8 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card border border-border p-8 rounded-[2rem] shadow-sm">
-        <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 shadow-inner">
-            <ClipboardList size={32} />
+    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+      
+      {/* 1. Module Header */}
+      <div className="space-y-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+                <ClipboardList size={22} className="text-primary-foreground" />
+             </div>
+             <div className="flex flex-col">
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Correction Requests</h2>
+                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Record Correction Module</span>
+             </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-foreground tracking-tight">Correction Requests</h1>
-            <p className="text-muted-foreground font-medium mt-1">Track and manage your reported record errors.</p>
+          <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-muted/30 rounded text-[9px] font-black uppercase tracking-widest">
+            <Activity size={12} className="text-primary" /> Tracking {requests.length} active cases
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-secondary/50 p-2 rounded-2xl border border-border/50">
-          <div className="px-4 py-2 text-center">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total</p>
-            <p className="text-xl font-black text-foreground">{requests.length}</p>
+
+        <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+              Audit <br/>
+              <span className="text-muted-foreground">Dispute Ledger</span>
+            </h1>
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest leading-relaxed border-l-2 border-primary pl-6">
+              Official module for reporting discrepancies in national academic records. 
+              Submissions are cryptographically bound to your identity and routed to institutional registrars for immediate review.
+            </p>
           </div>
-          <div className="w-px h-8 bg-border" />
-          <div className="px-4 py-2 text-center">
-            <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending</p>
-            <p className="text-xl font-black text-foreground">{requests.filter(r => r.status === 'PENDING').length}</p>
+          
+          <div className="grid grid-cols-2 gap-2 w-full md:w-auto">
+             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest mb-1">TOTAL_CASES</p>
+                <p className="text-3xl font-black font-mono tracking-tighter">{requests.length.toString().padStart(2, '0')}</p>
+             </div>
+             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-[9px] font-mono text-amber-500 uppercase tracking-widest mb-1">PENDING</p>
+                <p className="text-3xl font-black font-mono tracking-tighter">{requests.filter(r => r.status === 'PENDING').length.toString().padStart(2, '0')}</p>
+             </div>
           </div>
         </div>
       </div>
 
+      {/* 2. Requests Feed */}
       <div className="space-y-6">
         {requests.length === 0 ? (
-          <div className="bg-card border border-border border-dashed rounded-[2.5rem] p-20 text-center flex flex-col items-center">
-            <div className="w-20 h-20 rounded-3xl bg-secondary flex items-center justify-center mb-6">
-              <ClipboardList size={40} className="text-muted-foreground/40" />
-            </div>
-            <h3 className="text-2xl font-black text-foreground">No Requests Found</h3>
-            <p className="text-muted-foreground mt-3 max-w-md font-medium leading-relaxed">
-              If you find any discrepancy in your official degrees or exam results, you can report them directly from your <strong className="text-primary">Records</strong> page.
-            </p>
+          <div className="bg-muted/10 border border-border border-dashed rounded p-20 text-center flex flex-col items-center">
+            <Shield size={48} className="text-muted-foreground/20 mb-6" />
+            <h3 className="text-xl font-black uppercase tracking-tight">No Disputes Logged</h3>
+            <p className="text-xs font-mono text-muted-foreground mt-2 uppercase tracking-widest">All academic indices are currently synchronized with the national ledger.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {requests.map((req) => (
-              <div key={req.id} className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row group">
+              <div key={req.id} className="bg-card border border-border rounded overflow-hidden flex flex-col md:flex-row group">
                 
-                {/* Left Panel: Request Content */}
-                <div className="flex-1 p-8 space-y-6">
+                {/* Audit Content */}
+                <div className="flex-1 p-8 space-y-8">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {getStatusBadge(req.status)}
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary border border-border text-[10px] font-black text-muted-foreground uppercase tracking-wider">
-                        {req.recordType === 'DEGREE' ? <GraduationCap size={12}/> : <BookOpen size={12}/>}
-                        {req.recordType} Record
+                      <div className={`px-2 py-1 border text-[9px] font-black uppercase tracking-widest rounded ${getStatusStyle(req.status)}`}>
+                        {req.status}
+                      </div>
+                      <div className="flex items-center gap-2 px-2 py-1 border border-border bg-muted/50 text-[9px] font-mono text-muted-foreground uppercase tracking-widest rounded">
+                        {req.recordType === 'DEGREE' ? <GraduationCap size={10}/> : <BookOpen size={10}/>} {req.recordType}
                       </div>
                     </div>
-                    <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.2em] font-mono">
-                      #{req.id.substring(0,8)}
+                    <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">
+                      ID: #{req.id.substring(0, 12).toUpperCase()}
                     </span>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
-                      <FileText size={16} />
-                      Your reported issue:
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 text-[10px] font-mono text-primary uppercase tracking-widest">
+                       <Activity size={12} /> Reported Discrepancy
                     </div>
-                    <p className="text-lg font-bold text-foreground leading-relaxed pl-6 border-l-4 border-primary/20 italic">
+                    <p className="text-xl font-black tracking-tight text-foreground uppercase border-l-4 border-muted pl-6 py-1">
                       "{req.requestText}"
                     </p>
                   </div>
 
+                  {/* Feedback Modules */}
                   {req.status === 'REJECTED' && req.rejectionReason && (
-                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 p-6 rounded-2xl animate-fade-in">
-                      <div className="flex items-center gap-2 text-red-800 dark:text-red-400 font-black text-xs uppercase tracking-widest mb-2">
-                        <XCircle size={16} /> Rejection Feedback
+                    <div className="bg-destructive/5 border border-destructive/20 p-6 rounded relative overflow-hidden">
+                      <div className="flex items-center gap-2 text-destructive text-[10px] font-black uppercase tracking-widest mb-3">
+                        <XCircle size={14} /> Registrar Feedback
                       </div>
-                      <p className="text-red-900 dark:text-red-300 font-medium">
+                      <p className="text-sm font-medium text-foreground leading-relaxed uppercase tracking-tight">
                         {req.rejectionReason}
                       </p>
                     </div>
                   )}
 
                   {req.status === 'APPROVED' && (
-                    <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 p-6 rounded-2xl animate-fade-in">
-                      <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-black text-xs uppercase tracking-widest mb-2">
-                        <CheckCircle2 size={16} /> Update Applied
+                    <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded relative overflow-hidden">
+                      <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-3">
+                        <CheckCircle2 size={14} /> Registry Updated
                       </div>
-                      <p className="text-emerald-900 dark:text-emerald-300 font-medium">
-                        The institution has reviewed your request and successfully updated your official records.
+                      <p className="text-sm font-medium text-foreground leading-relaxed uppercase tracking-tight">
+                        The institution has verified your dispute and successfully synchronized the academic ledger.
                       </p>
                     </div>
                   )}
                 </div>
 
-                {/* Right Panel: Metadata & Actions */}
-                <div className="md:w-72 shrink-0 bg-secondary/30 border-l border-border p-8 flex flex-col justify-between gap-8">
-                  <div className="space-y-6">
+                {/* Audit Metadata & Actions */}
+                <div className="md:w-80 shrink-0 bg-muted/30 border-l border-border p-8 flex flex-col justify-between gap-10">
+                  <div className="space-y-8">
                     <div className="space-y-4">
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Timeline</p>
-                        <div className="space-y-3 pt-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-primary/10" />
+                      <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">Timeline Protocol</p>
+                      <div className="space-y-4 relative">
+                        <div className="absolute left-[5px] top-2 bottom-2 w-px bg-border/50" />
+                        
+                        <div className="flex items-start gap-4 relative z-10">
+                          <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1" />
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black uppercase tracking-tight">Case Initialized</span>
+                            <span className="text-[9px] font-mono text-muted-foreground">{format(new Date(req.createdAt), 'yyyy-MM-dd HH:mm')}</span>
+                          </div>
+                        </div>
+
+                        {req.reviewedAt ? (
+                          <div className="flex items-start gap-4 relative z-10">
+                            <div className={`w-2.5 h-2.5 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-500' : 'bg-destructive'} mt-1`} />
                             <div className="flex flex-col">
-                              <span className="text-xs font-bold text-foreground">Submitted</span>
-                              <span className="text-[10px] font-medium text-muted-foreground">{format(new Date(req.createdAt), 'MMM dd, yyyy')}</span>
+                              <span className="text-[10px] font-black uppercase tracking-tight">Registrar Review</span>
+                              <span className="text-[9px] font-mono text-muted-foreground">{format(new Date(req.reviewedAt), 'yyyy-MM-dd HH:mm')}</span>
                             </div>
                           </div>
-                          {req.reviewedAt ? (
-                            <div className="flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full ${req.status === 'APPROVED' ? 'bg-emerald-500 ring-emerald-500/10' : 'bg-red-500 ring-red-500/10'} ring-4`} />
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-foreground">Reviewed</span>
-                                <span className="text-[10px] font-medium text-muted-foreground">{format(new Date(req.reviewedAt), 'MMM dd, yyyy')}</span>
-                              </div>
+                        ) : (
+                          <div className="flex items-start gap-4 relative z-10 opacity-30">
+                            <div className="w-2.5 h-2.5 rounded-full bg-muted border border-border mt-1" />
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black uppercase tracking-tight">Pending Review</span>
+                              <span className="text-[9px] font-mono text-muted-foreground italic">In Queue...</span>
                             </div>
-                          ) : (
-                            <div className="flex items-center gap-3 opacity-50">
-                              <div className="w-2 h-2 rounded-full bg-muted border border-border" />
-                              <span className="text-xs font-bold text-muted-foreground">Under Review</span>
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {req.status === 'PENDING' && (
                       <button 
                         onClick={() => handleCancel(req.id)}
                         disabled={cancelMutation.isPending}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-red-50 text-red-600 font-bold rounded-xl border border-border hover:border-red-200 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                        className="w-full h-12 border border-destructive/30 text-destructive text-[10px] font-black uppercase tracking-widest hover:bg-destructive hover:text-destructive-foreground transition-all flex items-center justify-center gap-2"
                       >
                         {cancelMutation.isPending && cancelMutation.variables === req.id ? (
                           <Spinner size="sm" />
                         ) : (
                           <>
-                            <Trash2 size={16} />
-                            Withdraw
+                            <Trash2 size={14} /> Withdraw Protocol
                           </>
                         )}
                       </button>
                     )}
-                    <div className="p-3 rounded-xl bg-secondary text-[10px] font-bold text-center text-muted-foreground">
-                      Managed by National Records Authority
+                    <div className="p-3 bg-muted border border-border text-[8px] font-mono text-center text-muted-foreground uppercase tracking-widest leading-relaxed">
+                      This case is managed by the National Records Authority.
                     </div>
                   </div>
                 </div>

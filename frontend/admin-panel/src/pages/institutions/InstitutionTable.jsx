@@ -6,11 +6,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  ChevronLeft,
-  ChevronRight,
-  Hash,
   Trash,
-  Power
+  Power,
+  Activity,
+  Fingerprint
 } from "lucide-react"
 import { 
   Table, 
@@ -28,18 +27,9 @@ import {
   DropdownMenuTrigger 
 } from "../../components/ui/dropdown-menu"
 import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import { Card } from "../../components/ui/card"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../../components/ui/select"
-
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import Pagination from "../../components/common/Pagination"
+import { cn } from "../../lib/utils"
 
 export default function InstitutionTable({ 
   institutions, 
@@ -61,28 +51,19 @@ export default function InstitutionTable({
 }) {
   const totalPages = Math.ceil(totalCount / itemsPerPage)
   
-  const getStatusBadge = (isActive) => {
-    const badgeClass = "w-24 justify-center shadow-sm text-[10px] uppercase tracking-wider font-bold"
-    return isActive ? (
-      <Badge className={`bg-emerald-500 hover:bg-emerald-600 text-white border-none ${badgeClass}`}>Active</Badge>
-    ) : (
-      <Badge variant="secondary" className={`bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent ${badgeClass}`}>Inactive</Badge>
-    )
-  }
-
   const SortHeader = ({ field, label, className = "" }) => {
     const isSorted = sortBy === field
     return (
       <TableHead 
-        className={`cursor-pointer transition-colors hover:text-foreground group ${className}`}
+        className={cn("cursor-pointer transition-colors hover:text-primary group border-r border-border/50 last:border-0", className)}
         onClick={() => onSort(field)}
       >
-        <div className="flex items-center gap-1.5 py-5 pl-8 text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-black tracking-widest text-muted-foreground group-hover:text-primary">
           {label}
           {isSorted ? (
-            sortDir === "ASC" ? <ArrowUp size={14} className="text-primary" /> : <ArrowDown size={14} className="text-primary" />
+            sortDir === "ASC" ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />
           ) : (
-            <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-50" />
+            <ArrowUpDown size={12} className="opacity-20 group-hover:opacity-100 transition-opacity" />
           )}
         </div>
       </TableHead>
@@ -90,114 +71,130 @@ export default function InstitutionTable({
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="shadow-sm border-muted/60 overflow-hidden rounded-2xl relative">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-muted/60">
-                <SortHeader field="name" label="Institution Name" />
-                <SortHeader field="code" label="Identity Code" className="pl-0" />
-                <SortHeader field="type" label="Category" className="pl-0" />
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                <TableHead className="text-right pr-8 text-xs font-bold uppercase tracking-wider text-muted-foreground">Actions</TableHead>
+    <div className="bg-card border border-border shadow-sm p-1">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <SortHeader field="name" label="Institution" className="w-[400px]" />
+              <SortHeader field="code" label="Institution code" className="w-[200px]" />
+              <SortHeader field="type" label="Category" className="w-[200px]" />
+              <TableHead className="text-[10px] font-black tracking-widest text-muted-foreground py-4 px-6 border-r border-border/50 w-[150px]">Status</TableHead>
+              <TableHead className="text-right pr-10 py-4 text-[10px] font-black tracking-widest text-muted-foreground">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isFetching && institutions.length === 0 ? (
+              <TableBodySkeleton rows={itemsPerPage} columns={5} />
+            ) : institutions.length === 0 ? (
+              <TableRow>
+                 <TableCell colSpan={5} className="h-96 text-center border-none">
+                  <div className="flex flex-col items-center justify-center gap-6 py-12">
+                    <div className="w-16 h-16 bg-muted/30 border border-border flex items-center justify-center text-muted-foreground/30">
+                      <Building2 size={32} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-black text-foreground">Registry empty</p>
+                      <p className="text-[10px] font-bold text-muted-foreground max-w-xs tracking-tight">No institutions found matching the current criteria.</p>
+                    </div>
+                    {!isFiltered ? (
+                      <Button variant="outline" className="h-10 px-6 rounded-none text-[10px] font-black tracking-widest border-border shadow-sm" onClick={onAdd}>
+                        Add institution
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="h-10 px-6 rounded-none text-[10px] font-black tracking-widest border-border shadow-sm" onClick={onClearFilters}>Reset filters</Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(isFetching && institutions.length === 0) ? (
-                <TableBodySkeleton rows={itemsPerPage} columns={5} />
-              ) : institutions.length === 0 ? (
-                <TableRow>
-                   <TableCell colSpan={5} className="h-72 text-center border-none">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
-                      <div className="p-4 bg-muted/30 rounded-full mb-4">
-                        <SearchX size={48} className="text-muted-foreground/50" />
+            ) : (
+              institutions.map((inst) => (
+                <TableRow 
+                  key={inst.id} 
+                  className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
+                >
+                  <TableCell className="py-3 px-6">
+                    <div className="flex items-center gap-5">
+                      <div className="h-10 w-10 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-xs shrink-0 font-mono group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/30 transition-all">
+                        <Building2 size={16} />
                       </div>
-                      <p className="text-lg font-medium text-foreground">
-                        {isFiltered ? "No matching institutions found" : "No institutions found"}
-                      </p>
-                      <p className="text-sm max-w-sm mt-1 mb-6">
-                        {isFiltered
-                          ? "Try adjusting your search terms or filters."
-                          : "There are currently no institutions registered. Start by adding a new university or board."}
-                      </p>
-                      {!isFiltered ? (
-                        <Button variant="outline" className="gap-2 shadow-sm" onClick={onAdd}>
-                          <Building2 size={16} /> Add your first institution
-                        </Button>
-                      ) : (
-                        <Button variant="outline" onClick={onClearFilters}>Clear all filters</Button>
-                      )}
+                      <div className="flex flex-col text-left min-w-0">
+                        <span className="font-black text-xs tracking-tighter text-foreground group-hover:text-primary transition-colors truncate">
+                          {inst.name}
+                        </span>
+                        <code className="text-[9px] font-bold text-muted-foreground/40 mt-0.5 tracking-tighter">Verified record</code>
+                      </div>
                     </div>
                   </TableCell>
-                </TableRow>
-              ) : (
-                institutions.map((inst) => (
-                  <TableRow key={inst.id} className="group transition-colors hover:bg-muted/40 cursor-pointer border-muted/60">
-                    <TableCell className="py-4 pl-8">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/10 shadow-sm shrink-0">
-                          <Building2 size={18} />
-                        </div>
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[300px]">
-                            {inst.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground mt-0.5">Established Entity</span>
-                        </div>
+                  <TableCell className="py-3 px-6">
+                    <div className="flex items-center gap-2">
+                       <Fingerprint size={12} className="text-primary opacity-30" />
+                       <code className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
+                         {inst.code}
+                       </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-6 text-[10px] font-bold text-muted-foreground/70 tracking-widest">
+                    {inst.typeName || inst.type}
+                  </TableCell>
+                  <TableCell className="py-3 px-6">
+                    {inst.isActive ? (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Active
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 font-medium text-sm text-muted-foreground">
-                        <Hash size={14} className="text-muted-foreground/50" />
-                        {inst.code}
+                    ) : (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-700 tracking-widest">
+                         Disabled
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-muted w-32 justify-center px-2 py-0.5 rounded-md font-medium text-[10px] uppercase tracking-wider">
-                        {inst.typeName || inst.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(inst.isActive)}</TableCell>
-                    <TableCell className="text-right pr-8">
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right pr-10 py-3">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => { e.stopPropagation(); onEdit(inst); }}
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all"
+                      >
+                        <Pencil size={14} />
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <span className="sr-only">Open menu</span>
+                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none border border-transparent hover:border-border transition-all">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-muted/60">
-                          <DropdownMenuLabel className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70 px-3 py-2">Management</DropdownMenuLabel>
-                          <DropdownMenuItem 
-                            onClick={() => onEdit(inst)}
-                            className="gap-2 cursor-pointer"
-                          >
-                            <Pencil size={14} className="text-muted-foreground" /> Edit Details
-                          </DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="w-64 rounded-none border-border shadow-2xl p-2">
+                          <DropdownMenuLabel className="px-4 py-3 border-b border-border mb-2 text-[9px] font-black tracking-widest text-muted-foreground/50">Registry control</DropdownMenuLabel>
                           <DropdownMenuItem 
                             onClick={() => onToggleStatus(inst)}
-                            className="gap-2 cursor-pointer"
+                            className={cn(
+                              "flex items-center gap-4 px-4 py-3 cursor-pointer rounded-none text-[10px] font-bold tracking-widest focus:bg-primary/5 transition-all",
+                              inst.isActive ? "text-amber-600 focus:text-amber-700 focus:bg-amber-50" : "text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50"
+                            )}
                           >
-                            <Power size={14} className={inst.isActive ? "text-amber-500" : "text-emerald-500"} /> 
-                            {inst.isActive ? "Deactivate" : "Activate"} Institution
+                            <Power size={14} /> 
+                            {inst.isActive ? "Deactivate" : "Activate"}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => onDelete(inst)}
-                            className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                            className="flex items-center gap-4 px-4 py-3 cursor-pointer text-destructive focus:bg-destructive/5 focus:text-destructive rounded-none text-[10px] font-bold tracking-widest transition-all"
                           >
-                            <Trash size={14} /> Delete Institution
+                            <Trash size={14} />
+                            Delete record
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      
+      <div className="px-6 py-4 border-t border-border bg-muted/5 rounded-none">
         <Pagination 
           page={currentPage} 
           totalPages={totalPages} 
@@ -208,7 +205,7 @@ export default function InstitutionTable({
           itemName="institutions" 
           isFetching={isFetching} 
         />
-      </Card>
+      </div>
     </div>
   )
 }

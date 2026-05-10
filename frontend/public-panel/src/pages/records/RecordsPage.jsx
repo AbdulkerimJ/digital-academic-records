@@ -2,35 +2,29 @@ import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-import { GraduationCap, BookOpen, AlertCircle, Calendar, ArrowUpRight } from 'lucide-react'
+import { 
+  GraduationCap, BookOpen, AlertCircle, Calendar, 
+  ArrowUpRight, ShieldCheck, CheckCircle2, Database,
+  Activity, Hash, Search, Filter, Shield, Info,
+  AlertTriangle, X
+} from 'lucide-react'
 import { getMyExams, getMyDegrees, submitCorrectionRequest } from '../../api/student.api'
 import { toast } from 'sonner'
 import Spinner from '../../components/ui/Spinner'
-import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 
 export default function RecordsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialTab = searchParams.get('tab') === 'exams' ? 'exams' : 'degrees'
   
-  const { data: examsData, isLoading: examsLoading, refetch: refetchExams } = useQuery({ queryKey: ['my-exams'], queryFn: getMyExams })
-  const { data: degreesData, isLoading: degreesLoading, refetch: refetchDegrees } = useQuery({ queryKey: ['my-degrees'], queryFn: getMyDegrees })
+  // Use URL Search Params as the single source of truth for the active tab
+  const activeTab = searchParams.get('tab') === 'exams' ? 'exams' : 'degrees'
+  
+  const { data: examsData, isLoading: examsLoading } = useQuery({ queryKey: ['my-exams'], queryFn: getMyExams })
+  const { data: degreesData, isLoading: degreesLoading } = useQuery({ queryKey: ['my-degrees'], queryFn: getMyDegrees })
 
-  const [activeTab, setActiveTab] = useState(initialTab)
-  
-  // Sync tab state with URL
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
     setSearchParams({ tab })
   }
-
-  // Update tab if URL changes externally
-  useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (tab && (tab === 'degrees' || tab === 'exams')) {
-      setActiveTab(tab)
-    }
-  }, [searchParams])
 
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState(null)
@@ -62,94 +56,136 @@ export default function RecordsPage() {
   }
 
   if (examsLoading || degreesLoading) {
-    return <div className="flex items-center justify-center min-h-[60vh]"><Spinner size="lg" className="text-primary" /></div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Spinner size="lg" className="text-primary" />
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">Synchronizing Asset Registry...</p>
+      </div>
+    )
   }
 
   const degrees = degreesData?.data?.degrees || []
   const exams = examsData?.data?.exams || []
 
   return (
-    <div className="animate-fade-in-up space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">Academic Records</h1>
-          <p className="text-muted-foreground font-medium mt-2">View your verified degrees, certifications, and exam results.</p>
+    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+      
+      {/* 1. Module Header */}
+      <div className="space-y-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+                <Database size={22} className="text-primary-foreground" />
+             </div>
+             <div className="flex flex-col">
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Academic Asset Registry</h2>
+                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Verified Ledger</span>
+             </div>
+          </div>
+          <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded">
+            <ShieldCheck size={12} /> Registry Synchronized
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-8 items-end justify-between border-b border-border pb-10">
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+              Official <br/>
+              <span className="text-muted-foreground">Credentials</span>
+            </h1>
+            <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest leading-relaxed border-l-2 border-primary pl-6">
+              Primary repository for all verified degrees, qualifications, and national assessment results. 
+              These records are cryptographically secured and legally recognized by the Ministry of Education.
+            </p>
+          </div>
+
+          {/* Technical Tab Switcher (State derived from URL) */}
+          <div className="flex p-1 bg-muted/30 border border-border rounded w-full md:w-auto">
+            <button
+              onClick={() => handleTabChange('degrees')}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+                activeTab === 'degrees' 
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              <GraduationCap size={16} /> Degrees
+            </button>
+            <button
+              onClick={() => handleTabChange('exams')}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+                activeTab === 'exams' 
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              <BookOpen size={16} /> Examinations
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex p-1 bg-secondary border border-border rounded-xl w-fit">
-        <button
-          onClick={() => handleTabChange('degrees')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === 'degrees' 
-              ? 'bg-background text-foreground shadow-sm' 
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <GraduationCap size={18} />
-          Degrees ({degrees.length})
-        </button>
-        <button
-          onClick={() => handleTabChange('exams')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === 'exams' 
-              ? 'bg-background text-foreground shadow-sm' 
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <BookOpen size={18} />
-          Exams ({exams.length})
-        </button>
-      </div>
-
+      {/* 2. Records Inventory */}
       <div className="space-y-6">
         {activeTab === 'degrees' && (
           degrees.length === 0 ? (
-            <div className="bg-card border border-border border-dashed rounded-3xl p-12 text-center flex flex-col items-center">
-              <GraduationCap size={48} className="text-muted-foreground/30 mb-4" />
-              <h3 className="text-xl font-bold text-foreground">No degrees found</h3>
-              <p className="text-muted-foreground mt-2 max-w-md">Your registered institutions have not issued any degrees or certifications to your profile yet.</p>
+            <div className="bg-muted/10 border border-border border-dashed rounded p-20 text-center flex flex-col items-center">
+              <GraduationCap size={48} className="text-muted-foreground/20 mb-6" />
+              <h3 className="text-xl font-black uppercase tracking-tight">No Degrees Indexed</h3>
+              <p className="text-xs font-mono text-muted-foreground mt-2 uppercase tracking-widest">The national registry contains no tertiary qualifications for this identity.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {degrees.map((degree) => (
-                <div key={degree.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <GraduationCap size={80} />
+                <div key={degree.id} className="bg-card border border-border rounded overflow-hidden group hover:border-primary/50 transition-all">
+                  <div className="bg-muted/30 px-8 py-4 border-b border-border flex justify-between items-center">
+                    <span className="text-[10px] font-mono text-primary font-black uppercase tracking-[0.2em]">Asset_ID: DEG_{degree.id.substring(0, 12).toUpperCase()}</span>
+                    <div className="flex items-center gap-2 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
+                      <CheckCircle2 size={12} /> Registry Verified
+                    </div>
                   </div>
-                  <div className="relative z-10">
-                    <Badge variant="primary" className="mb-4 text-[10px] uppercase tracking-widest">{degree.degreeLevelCode || 'Degree'}</Badge>
-                    <h3 className="text-xl font-black text-foreground leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer">
-                      <Link to={`/dashboard/records/degree/${degree.id}`}>
-                        {degree.degreeTitle}
-                      </Link>
-                    </h3>
-                    {degree.departmentName && <p className="text-sm font-bold text-muted-foreground mb-6">Department: {degree.departmentName}</p>}
-                    
-                    <div className="space-y-3 pt-6 border-t border-border/60">
-                      <div className="flex items-center gap-3 text-sm font-medium text-foreground">
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                          <Calendar size={14} className="text-muted-foreground" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Graduation Date</span>
-                          {degree.graduationDate ? format(new Date(degree.graduationDate), 'MMM dd, yyyy') : 'N/A'}
-                        </div>
+                  
+                  <div className="p-8 md:p-10 space-y-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Qualification Title</p>
+                          <h4 className="text-3xl font-black tracking-tight uppercase leading-none text-foreground">{degree.degreeTitle}</h4>
+                       </div>
+                       <div className="flex items-center gap-3 shrink-0">
+                          <button 
+                            onClick={() => openCorrection(degree, 'DEGREE')}
+                            className="h-12 w-12 border border-border text-muted-foreground hover:text-amber-500 hover:border-amber-500/30 flex items-center justify-center transition-all"
+                            title="Report Record Discrepancy"
+                          >
+                            <AlertCircle size={20} />
+                          </button>
+                          <Link 
+                            to={`/dashboard/records/degree/${degree.id}`}
+                            className="h-12 px-6 bg-primary text-primary-foreground rounded flex items-center gap-3 text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-primary/10"
+                          >
+                            Access Full Audit <ArrowUpRight size={16} />
+                          </Link>
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Institution</p>
+                        <p className="text-sm font-black uppercase leading-tight">{degree.institutionName}</p>
                       </div>
-                      
-                      <div className="flex items-center justify-between mt-6">
-                        <button 
-                          onClick={() => openCorrection(degree, 'DEGREE')}
-                          className="flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
-                        >
-                          <AlertCircle size={14} /> Correction
-                        </button>
-                        <Link 
-                          to={`/dashboard/records/degree/${degree.id}`}
-                          className="flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-widest hover:underline"
-                        >
-                          View Details <ArrowUpRight size={14} />
-                        </Link>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Department</p>
+                        <p className="text-sm font-black uppercase leading-tight">{degree.departmentName || 'GENERAL'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Level</p>
+                        <p className="text-sm font-black uppercase leading-tight font-mono">{degree.degreeLevelCode || 'N/A'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Issue Date</p>
+                        <p className="text-sm font-black uppercase leading-tight font-mono">
+                          {degree.graduationDate ? format(new Date(degree.graduationDate), 'yyyy-MM-dd') : 'N/A'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -161,51 +197,61 @@ export default function RecordsPage() {
 
         {activeTab === 'exams' && (
           exams.length === 0 ? (
-            <div className="bg-card border border-border border-dashed rounded-3xl p-12 text-center flex flex-col items-center">
-              <BookOpen size={48} className="text-muted-foreground/30 mb-4" />
-              <h3 className="text-xl font-bold text-foreground">No exam records found</h3>
-              <p className="text-muted-foreground mt-2 max-w-md">No examination boards have published results for your profile.</p>
+            <div className="bg-muted/10 border border-border border-dashed rounded p-20 text-center flex flex-col items-center">
+              <BookOpen size={48} className="text-muted-foreground/20 mb-6" />
+              <h3 className="text-xl font-black uppercase tracking-tight">No Examinations Indexed</h3>
+              <p className="text-xs font-mono text-muted-foreground mt-2 uppercase tracking-widest">No national examination results have been published for this subject.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {exams.map((exam) => (
-                <div key={exam.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <BookOpen size={80} />
+                <div key={exam.id} className="bg-card border border-border rounded overflow-hidden group hover:border-primary/50 transition-all">
+                  <div className="bg-muted/30 px-8 py-4 border-b border-border flex justify-between items-center">
+                    <span className="text-[10px] font-mono text-primary font-black uppercase tracking-[0.2em]">Asset_ID: EXM_{exam.id.substring(0, 12).toUpperCase()}</span>
+                    <div className="flex items-center gap-2 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
+                      <CheckCircle2 size={12} /> Registry Verified
+                    </div>
                   </div>
-                  <div className="relative z-10">
-                    <Badge variant="secondary" className="mb-4 text-[10px] uppercase tracking-widest">{exam.examLevelCode || 'Exam'}</Badge>
-                    <h3 className="text-xl font-black text-foreground leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer">
-                      <Link to={`/dashboard/records/exam/${exam.id}`}>
-                        {exam.examLevelName || 'General Exam'}
-                      </Link>
-                    </h3>
-                    <p className="text-sm font-bold text-muted-foreground mb-6">Score: <span className="text-primary text-base">{exam.totalScore}</span></p>
-                    
-                    <div className="space-y-3 pt-6 border-t border-border/60">
-                      <div className="flex items-center gap-3 text-sm font-medium text-foreground">
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                          <Calendar size={14} className="text-muted-foreground" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Academic Year</span>
-                          {exam.year || 'N/A'}
-                        </div>
+                  
+                  <div className="p-8 md:p-10 space-y-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Exam Category</p>
+                          <h4 className="text-3xl font-black tracking-tight uppercase leading-none text-foreground">{exam.examLevelName}</h4>
+                       </div>
+                       <div className="flex items-center gap-3 shrink-0">
+                          <button 
+                            onClick={() => openCorrection(exam, 'EXAM')}
+                            className="h-12 w-12 border border-border text-muted-foreground hover:text-amber-500 hover:border-amber-500/30 flex items-center justify-center transition-all"
+                            title="Report Record Discrepancy"
+                          >
+                            <AlertCircle size={20} />
+                          </button>
+                          <Link 
+                            to={`/dashboard/records/exam/${exam.id}`}
+                            className="h-12 px-6 bg-primary text-primary-foreground rounded flex items-center gap-3 text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-primary/10"
+                          >
+                            Access Full Audit <ArrowUpRight size={16} />
+                          </Link>
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Issuing Body</p>
+                        <p className="text-sm font-black uppercase leading-tight">{exam.institutionName}</p>
                       </div>
-                      
-                      <div className="flex items-center justify-between mt-6">
-                        <button 
-                          onClick={() => openCorrection(exam, 'EXAM')}
-                          className="flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
-                        >
-                          <AlertCircle size={14} /> Correction
-                        </button>
-                        <Link 
-                          to={`/dashboard/records/exam/${exam.id}`}
-                          className="flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-widest hover:underline"
-                        >
-                          View Details <ArrowUpRight size={14} />
-                        </Link>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Assessment Year</p>
+                        <p className="text-sm font-black uppercase leading-tight font-mono">{exam.year}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Final Score</p>
+                        <p className="text-xl font-black text-primary leading-tight font-mono">{exam.totalScore}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-primary/60 uppercase tracking-widest">Registry Status</p>
+                        <p className="text-sm font-black uppercase leading-tight text-emerald-500">AUTHENTIC</p>
                       </div>
                     </div>
                   </div>
@@ -216,47 +262,79 @@ export default function RecordsPage() {
         )}
       </div>
 
-      <Modal open={correctionModalOpen} onClose={() => !submitting && setCorrectionModalOpen(false)} title="Request Record Correction" size="md">
-        <div className="mb-6">
-          <p className="text-sm text-muted-foreground font-medium mb-4">
-            If you spotted an error in your <strong className="text-foreground">{selectedRecord?.type === 'DEGREE' ? selectedRecord?.title : selectedRecord?.subjectName}</strong> record, submit a correction request to the issuing institution.
-          </p>
-          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex gap-3 text-sm text-amber-700 dark:text-amber-400 font-medium">
-            <AlertCircle size={18} className="shrink-0" />
-            <p>False claims or frivolous requests may lead to account suspension. Please describe the issue clearly.</p>
-          </div>
+      {/* Technical Disclaimer */}
+      <div className="bg-muted/30 border border-border rounded p-10 space-y-6 relative overflow-hidden">
+        <div className="flex items-center gap-3 text-muted-foreground relative z-10">
+          <Shield size={16} className="text-primary" />
+          <h4 className="text-[9px] font-black uppercase tracking-[0.4em]">Operational Asset Disclaimer</h4>
         </div>
-        
-        <form onSubmit={handleCorrectionSubmit} className="space-y-5">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="correctionText" className="text-sm font-bold text-foreground">Describe the error</label>
-            <textarea
-              id="correctionText"
-              className="w-full min-h-[120px] p-4 bg-background border border-border rounded-xl text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-y"
-              placeholder="e.g. My graduation year is incorrectly listed as 2023 instead of 2024..."
-              value={correctionText}
-              onChange={(e) => setCorrectionText(e.target.value)}
-              required
-            />
+        <p className="text-[11px] text-muted-foreground font-mono font-medium leading-relaxed max-w-4xl relative z-10 uppercase tracking-widest">
+          The records displayed in this registry are authoritative and cryptographically derived from official institutional ledgers. 
+          Any unauthorized modification or tampering with these assets is a federal offense under the National Digital Identity Act.
+        </p>
+      </div>
+
+      {/* DISCREPANCY REPORTING PROTOCOL (MODAL) */}
+      <Modal open={correctionModalOpen} onClose={() => !submitting && setCorrectionModalOpen(false)} title="DISCREPANCY_REPORTING_PROTOCOL" size="md">
+        <div className="space-y-8">
+          <div className="space-y-6">
+            <div className="flex items-start gap-4 p-4 border border-amber-500/20 bg-amber-500/5 text-amber-600 rounded relative overflow-hidden">
+              <AlertTriangle size={20} className="shrink-0" />
+              <div className="space-y-1 relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-widest">Mandatory Disclosure</p>
+                <p className="text-xs font-medium leading-relaxed uppercase tracking-tight">
+                  False discrepancy reporting or frivolous claims may lead to identity protocol suspension. 
+                  Provide clear, factual details regarding the data discrepancy.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 bg-muted/30 border border-border rounded space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">Target Asset</p>
+                <span className="text-[9px] font-mono text-primary font-black uppercase tracking-widest">ID: #{selectedRecord?.id?.substring(0,12).toUpperCase()}</span>
+              </div>
+              <p className="text-lg font-black uppercase tracking-tight text-foreground leading-none">
+                {selectedRecord?.degreeTitle || selectedRecord?.examLevelName}
+              </p>
+            </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <button 
-              type="button" 
-              className="px-5 py-2.5 rounded-xl font-semibold text-muted-foreground hover:bg-secondary transition-colors"
-              onClick={() => setCorrectionModalOpen(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="px-5 py-2.5 rounded-xl font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center gap-2"
-              disabled={submitting}
-            >
-              {submitting ? <><Spinner size="sm"/> Submitting...</> : 'Submit Request'}
-            </button>
-          </div>
-        </form>
+          
+          <form onSubmit={handleCorrectionSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="correctionText" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Discrepancy Description</label>
+                <span className="text-[9px] font-mono text-muted-foreground/40 uppercase">Required_Field</span>
+              </div>
+              <textarea
+                id="correctionText"
+                className="w-full min-h-[160px] p-6 bg-muted/20 border border-border rounded text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all resize-y uppercase tracking-tight"
+                placeholder="E.G. RECORDED GRADUATION YEAR IS 2023, ACTUAL DATE IS 2024..."
+                value={correctionText}
+                onChange={(e) => setCorrectionText(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-border">
+              <button 
+                type="button" 
+                className="h-12 px-8 border border-transparent text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:bg-muted transition-all"
+                onClick={() => setCorrectionModalOpen(false)}
+                disabled={submitting}
+              >
+                Cancel Protocol
+              </button>
+              <button 
+                type="submit" 
+                className="h-12 px-10 bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                disabled={submitting}
+              >
+                {submitting ? <><Spinner size="sm"/> PROCESSING...</> : 'Submit Discrepancy'}
+              </button>
+            </div>
+          </form>
+        </div>
       </Modal>
     </div>
   )

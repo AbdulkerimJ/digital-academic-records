@@ -1,4 +1,4 @@
-import { Search, Filter, X, Building2, Tag } from "lucide-react"
+import { Search, Filter, X, Building2, Tag, Activity } from "lucide-react"
 import { Input } from "../../components/ui/input"
 import { 
   Select, 
@@ -22,44 +22,50 @@ export default function InstitutionFilters({
   const isFiltered = searchTerm || typeFilter !== "all" || statusFilter !== "all"
 
   return (
-    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 bg-background p-3 rounded-2xl border border-muted shadow-sm">
-      <div className="relative flex-grow lg:flex-[2]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 bg-muted/20 border border-border p-2">
+      
+      {/* Search Input */}
+      <div className="relative flex-grow lg:flex-[2] group">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors" size={14} />
         <Input 
-          placeholder="Search by name or code..." 
-          className="pl-10 h-11 bg-muted/30 border-none focus-visible:ring-primary/20 rounded-xl"
+          placeholder="Search by name or ID..." 
+          className="pl-10 h-10 bg-card border-border rounded-none focus-visible:ring-primary/20 text-xs font-bold"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 flex-grow lg:flex-[3]">
+      <div className="flex flex-wrap md:flex-nowrap items-center gap-2 flex-grow lg:flex-[3]">
+        {/* Type Select */}
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-11 bg-muted/30 border-none rounded-xl flex-grow md:w-48">
+          <SelectTrigger className="h-10 bg-card border-border rounded-none flex-grow md:w-48 text-xs font-bold text-muted-foreground group">
             <div className="flex items-center gap-2">
-              <Building2 size={16} className="text-muted-foreground" />
-              <SelectValue placeholder="Institution Type" />
+              <Building2 size={12} className="text-primary/60" />
+              <SelectValue placeholder="Category" />
             </div>
           </SelectTrigger>
-          <SelectContent className="rounded-xl shadow-xl">
-            <SelectItem value="all">All Types</SelectItem>
+          <SelectContent className="rounded-none border-border shadow-2xl">
+            <SelectItem value="all" className="text-xs font-bold">All categories</SelectItem>
             {institutionTypes.map(type => (
-              <SelectItem key={type.code} value={type.code}>{type.name}</SelectItem>
+              <SelectItem key={type.code} value={type.code} className="text-xs font-bold">
+                {type.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
+        {/* Status Select */}
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-11 bg-muted/30 border-none rounded-xl flex-grow md:w-40">
+          <SelectTrigger className="h-10 bg-card border-border rounded-none flex-grow md:w-40 text-xs font-bold text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Filter size={16} className="text-muted-foreground" />
+              <Activity size={12} className="text-primary/60" />
               <SelectValue placeholder="Status" />
             </div>
           </SelectTrigger>
-          <SelectContent className="rounded-xl shadow-xl">
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
+          <SelectContent className="rounded-none border-border shadow-2xl">
+            <SelectItem value="all" className="text-xs font-bold">All statuses</SelectItem>
+            <SelectItem value="ACTIVE" className="text-xs font-bold text-emerald-600">Active</SelectItem>
+            <SelectItem value="INACTIVE" className="text-xs font-bold text-amber-600">Inactive</SelectItem>
           </SelectContent>
         </Select>
 
@@ -68,10 +74,10 @@ export default function InstitutionFilters({
             variant="ghost" 
             onClick={onClear}
             size="sm"
-            className="h-9 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg gap-1.5 transition-all animate-in fade-in slide-in-from-right-2 shrink-0"
+            className="h-10 px-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none border border-transparent hover:border-destructive/20 transition-all flex gap-2"
           >
-            <X size={14} /> 
-            <span className="text-xs font-medium">Clear</span>
+            <X size={12} /> 
+            <span className="text-[10px] font-bold">Clear filters</span>
           </Button>
         )}
       </div>

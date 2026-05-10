@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import jsQR from 'jsqr'
 import { toast } from 'sonner'
-import { QrCode, ShieldCheck, Search, GraduationCap, ArrowRight, Upload, KeyRound, Camera } from 'lucide-react'
+import { 
+  QrCode, ShieldCheck, Search, GraduationCap, 
+  ArrowRight, Upload, KeyRound, Camera, User,
+  Moon, Sun, HelpCircle, ChevronRight, Fingerprint, Lock,
+  Shield, Database, Cpu
+} from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import { requestOtp, verifyOtp } from '../../api/student.api'
 import Spinner from '../../components/ui/Spinner'
 import Modal from '../../components/ui/Modal'
@@ -11,6 +17,7 @@ import QRScanner from '../../components/ui/QRScanner'
 
 export default function LandingPage() {
   const { isAuthenticated, setStudent, setIsAuth } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   
   // Verification states
@@ -28,7 +35,18 @@ export default function LandingPage() {
   const handleVerify = (e) => {
     e.preventDefault()
     if (!token.trim()) return
-    navigate(`/verify/${token.trim()}`)
+    
+    // Smart Parsing: If it's a URL, extract the last segment
+    let extractedToken = token.trim()
+    if (extractedToken.includes('/') || extractedToken.includes('http')) {
+      extractedToken = extractedToken.split('/').filter(Boolean).pop()
+    }
+    
+    if (extractedToken) {
+      navigate(`/verify/${extractedToken}`)
+    } else {
+      toast.error('Invalid verification format.')
+    }
   }
 
   const handleRequestOtp = async (e) => {
@@ -134,145 +152,160 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden transition-colors duration-500 font-sans">
+      {/* Technical Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,var(--color-primary),transparent)] opacity-[0.03] pointer-events-none" />
+
+      {/* Floating Theme Toggle (Restored to Top) */}
+      <div className="fixed top-8 right-8 z-50 flex items-center gap-4">
+        <button 
+          onClick={toggleTheme}
+          className="w-10 h-10 border border-border rounded bg-card/50 backdrop-blur-md flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all shadow-sm"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </div>
+
       {/* Camera Scanner Modal */}
-      <Modal open={cameraOpen} onClose={() => setCameraOpen(false)} title="Scan QR Code" size="sm">
+      <Modal open={cameraOpen} onClose={() => setCameraOpen(false)} title="Security Scanner" size="sm">
         <QRScanner onScan={handleCameraScan} onClose={() => setCameraOpen(false)} />
       </Modal>
 
-      {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-lg">
-              <GraduationCap size={18} />
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-8 md:p-16 flex flex-col gap-12 relative z-20">
+        
+        {/* Hero Area */}
+        <div className="space-y-10">
+          {/* Integrated Branding */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-primary rounded flex items-center justify-center">
+              <GraduationCap size={28} className="text-primary-foreground" />
             </div>
-            <span className="text-lg font-black tracking-tight text-foreground">DAR Public</span>
-          </Link>
-          <div>
-            {isAuthenticated ? (
-              <Link to="/dashboard" className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-                Go to Dashboard
-              </Link>
-            ) : (
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Verification Center
-              </span>
-            )}
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-black tracking-tighter leading-none">DAR.SYSTEM</h1>
+              <span className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National Infrastructure</span>
+            </div>
           </div>
-        </div>
-      </header>
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-3xl w-full space-y-12">
-          <div className="space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-blue-100 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 mb-2 shadow-inner">
-              <ShieldCheck size={32} />
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-3 px-3 py-1 bg-muted border border-border rounded text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+              <Shield size={12} className="text-primary" /> Secure Institutional Access
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
-              Verify Academic Records instantly.
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
-              Employers can verify records using a QR token, or students can sign in below to manage their digital profile.
+            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+              The Digital <br/>
+              <span className="text-muted-foreground">Academic Records</span>
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground font-mono font-medium max-w-2xl leading-relaxed border-l-2 border-primary pl-6 tracking-tight">
+              Official centralized repository for the verification and management of national academic credentials. 
+              Synchronized with the National ID (Fayda) biometric framework.
             </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            {/* Verification Panel */}
-            <div className="bg-card border border-border p-8 rounded-[2rem] shadow-sm space-y-6">
-              <div className="text-left space-y-1">
-                <h2 className="text-xl font-bold text-foreground">Employer Verification</h2>
-                <p className="text-sm text-muted-foreground">Enter token or upload QR image</p>
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* 1. Verifier Tile */}
+          <div className="lg:col-span-7 bg-card border border-border rounded p-10 md:p-14 relative group overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-5">
+              <Database size={120} />
+            </div>
+            
+            <div className="relative z-10 space-y-12">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight text-foreground uppercase">Verify Record</h3>
+                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">Module ID: 0X-VERIFIER</p>
               </div>
 
-              <form onSubmit={handleVerify} className="relative">
-                <div className="relative flex items-center shadow-sm rounded-2xl overflow-hidden focus-within:ring-4 focus-within:ring-primary/20 transition-all border border-border bg-background">
-                  <div className="pl-4 pr-2 text-muted-foreground">
-                    <QrCode size={20} />
+              <form onSubmit={handleVerify} className="space-y-6">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-muted-foreground">
+                    <span className="text-[10px] font-mono tracking-tighter">CMD_</span>
+                    <QrCode size={18} />
                   </div>
                   <input
                     type="text"
-                    placeholder="Token..."
+                    name="token"
+                    id="token"
+                    placeholder="Enter Verification URL..."
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
-                    className="flex-1 bg-transparent py-4 text-foreground placeholder:text-muted-foreground outline-none text-sm font-mono"
+                    className="w-full h-16 bg-muted/30 border border-border rounded pl-20 pr-6 text-xl font-bold tracking-tight focus:outline-none focus:border-primary transition-all font-mono"
                     required
                   />
-                  <div className="pr-2">
-                    <button
-                      type="submit"
-                      disabled={!token.trim() || scanning}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
-                    >
-                      Verify
-                    </button>
-                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full h-14 bg-primary text-primary-foreground flex items-center justify-center gap-3 rounded font-black text-[10px] uppercase tracking-[0.3em] hover:brightness-110 transition-all shadow-lg shadow-primary/10"
+                >
+                  <ShieldCheck size={18} /> Run System Verification
+                </button>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setCameraOpen(true)}
+                    className="h-12 flex items-center justify-center gap-3 border border-border rounded text-[9px] font-black uppercase tracking-[0.2em] hover:bg-muted transition-all"
+                  >
+                    <Camera size={16} /> Scan QR
+                  </button>
+                  <label 
+                    htmlFor="qr-upload"
+                    className="h-12 flex items-center justify-center gap-3 border border-border rounded text-[9px] font-black uppercase tracking-[0.2em] cursor-pointer hover:bg-muted transition-all"
+                  >
+                    <Upload size={16} /> Upload QR
+                  </label>
+                  <input type="file" id="qr-upload" name="qr-upload" className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </div>
               </form>
+            </div>
+          </div>
 
-              <div className="flex items-center gap-4 justify-center">
-                <div className="h-px bg-border flex-1" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">OR</span>
-                <div className="h-px bg-border flex-1" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => setCameraOpen(true)}
-                  className="flex items-center justify-center gap-2 px-4 py-3.5 bg-primary/10 hover:bg-primary/20 text-primary font-bold rounded-xl transition-colors border border-primary/20"
-                >
-                  <Camera size={18} /> 
-                  Scan
-                </button>
-                <label 
-                  htmlFor="qr-upload" 
-                  className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3.5 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-xl transition-colors border border-border ${scanning ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  <Upload size={18} className={scanning ? 'animate-bounce text-primary' : 'text-muted-foreground'} /> 
-                  Upload
-                </label>
-              </div>
-              <input 
-                type="file" 
-                accept="image/*" 
-                className="hidden" 
-                id="qr-upload" 
-                onChange={handleFileUpload} 
-              />
+          {/* 2. Student Tile */}
+          <div className="lg:col-span-5 bg-card border border-border rounded p-10 flex flex-col justify-between relative group overflow-hidden">
+            <div className="absolute bottom-0 right-0 p-6 opacity-5">
+              <Cpu size={120} />
             </div>
 
-            {/* Login Panel */}
-            <div className="bg-card border border-border p-8 rounded-[2rem] shadow-sm space-y-6">
+            <div className="relative z-10 space-y-10">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-primary border border-border">
+                  <Fingerprint size={24} />
+                </div>
+                {isAuthenticated && (
+                   <span className="text-[9px] font-mono text-emerald-500 uppercase tracking-widest border border-emerald-500/20 px-2 py-1 rounded">Session: AUTHENTICATED</span>
+                )}
+              </div>
+
               {isAuthenticated ? (
-                <div className="h-full flex flex-col items-center justify-center py-12 space-y-6">
-                  <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-                    <GraduationCap size={40} />
+                <div className="space-y-8">
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-black tracking-tight text-foreground uppercase">Student Access</h3>
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Biometric Identity Verified</p>
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">You are signed in</h3>
-                    <p className="text-sm text-muted-foreground">Access your private dashboard to view your full records.</p>
-                  </div>
-                  <Link to="/dashboard" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
-                    Go to Dashboard <ArrowRight size={18} />
+                  <Link to="/dashboard" className="w-full h-14 bg-foreground text-background flex items-center justify-center gap-3 rounded font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary hover:text-primary-foreground transition-all">
+                    Go to Dashboard <ChevronRight size={16} />
                   </Link>
                 </div>
               ) : (
-                <>
-                  <div className="text-left space-y-1">
-                    <h2 className="text-xl font-bold text-foreground">Student Sign In</h2>
-                    <p className="text-sm text-muted-foreground">Sign in with Fayda National ID</p>
+                <div className="space-y-8">
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-black tracking-tight text-foreground uppercase">Student Login</h3>
+                    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">OTP Authentication Required</p>
                   </div>
 
                   {step === 'id' ? (
                     <form onSubmit={handleRequestOtp} className="space-y-4">
-                      <div className="text-left">
-                        <label className="text-xs font-bold text-foreground uppercase tracking-wider ml-1" htmlFor="faydaId">Fayda ID</label>
+                      <div className="relative">
+                        <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <input
-                          id="faydaId"
                           type="text"
-                          className="w-full h-12 mt-1 px-4 bg-background border border-border rounded-xl text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                          placeholder="e.g. ETH-12345678"
+                          name="faydaId"
+                          id="faydaId"
+                          placeholder="Enter Fayda ID..."
+                          className="w-full h-14 bg-muted/30 border border-border rounded pl-12 pr-6 text-xs font-bold tracking-tight focus:outline-none focus:border-primary transition-all font-mono"
                           value={faydaId}
                           onChange={(e) => setFaydaId(e.target.value)}
                           required
@@ -280,56 +313,59 @@ export default function LandingPage() {
                       </div>
                       <button 
                         type="submit" 
-                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20 disabled:opacity-50" 
+                        className="w-full h-14 bg-foreground text-background flex items-center justify-center gap-3 rounded font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-50"
                         disabled={loading}
                       >
-                        {loading ? <Spinner size="sm" /> : <><ArrowRight size={18} /> Send OTP</>}
+                        {loading ? <Spinner size="sm" /> : 'Send Login OTP'}
                       </button>
                     </form>
                   ) : (
                     <form onSubmit={handleVerifyOtp} className="space-y-4">
-                      <div className="text-left">
-                        <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider ml-1" htmlFor="otp">
-                          <KeyRound size={14} className="text-muted-foreground" />
-                          Passcode
-                        </label>
-                        <input
-                          id="otp"
-                          type="text"
-                          inputMode="numeric"
-                          className="w-full h-12 mt-1 px-4 bg-background border border-border rounded-xl text-center text-xl font-black tracking-[0.3em] focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-                          placeholder="••••••••"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          required
-                          maxLength={8}
-                        />
-                      </div>
-                      <div className="flex gap-2">
+                      <input
+                        type="text"
+                        name="otp"
+                        id="otp"
+                        placeholder="000000"
+                        className="w-full h-14 bg-muted/30 border border-border rounded text-center text-2xl font-black tracking-[0.5em] focus:outline-none focus:border-primary transition-all font-mono"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                        maxLength={8}
+                      />
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
                           onClick={() => setStep('id')}
-                          className="h-12 px-4 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-xl border border-border transition-colors"
+                          className="h-12 border border-border rounded text-[9px] font-black uppercase tracking-widest hover:bg-muted"
                         >
-                          Back
+                          Cancel
                         </button>
                         <button 
                           type="submit" 
-                          className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20 disabled:opacity-50" 
+                          className="h-12 bg-primary text-primary-foreground flex items-center justify-center rounded font-black text-[9px] uppercase tracking-widest transition-all"
                           disabled={loading}
                         >
-                          {loading ? <Spinner size="sm" /> : 'Sign In'}
+                          {loading ? <Spinner size="sm" /> : 'Verify & Login'}
                         </button>
                       </div>
                     </form>
                   )}
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                    Identity Verified by Fayda
-                  </p>
-                </>
+                </div>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Technical Footer */}
+        <div className="mt-auto pt-12 border-t border-border flex items-center justify-between opacity-40 hover:opacity-100 transition-opacity">
+           <div className="flex items-center gap-6">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">© {new Date().getFullYear()} National Academic Registry</p>
+              <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest cursor-default">Help Center</span>
+           </div>
+           <div className="flex items-center gap-6">
+              <span className="text-[10px] font-mono uppercase tracking-widest">DAR.OS v2.4.0</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+           </div>
         </div>
       </main>
     </div>

@@ -9,20 +9,20 @@ import {
   DialogDescription
 } from "../../components/ui/dialog"
 import { Card } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback } from "../../components/ui/avatar"
 import { Skeleton } from "../../components/ui/skeleton"
 import { 
   GraduationCap, 
   BookOpen, 
-  UserCircle2, 
   Calendar, 
-  MapPin, 
   ShieldCheck,
   Building2,
   Award,
-  AlertCircle
+  AlertCircle,
+  Fingerprint,
+  Activity,
+  History
 } from "lucide-react"
+import { cn } from "../../lib/utils"
 
 export default function StudentDetailModal({ studentId, isOpen, onClose }) {
   const { user } = useAuth()
@@ -44,119 +44,126 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-[2.5rem]">
-        {/* Header Section */}
-        <div className="bg-primary/5 p-8 border-b border-primary/10">
-          <DialogHeader className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border border-border bg-card shadow-2xl rounded-none">
+        {/* 1. Identity Header Section */}
+        <div className="bg-muted/10 py-4 px-8 border-b border-border relative">
+          <div className="absolute top-0 right-0 py-4 px-8">
+             <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                <ShieldCheck size={12} /> Verified record
+             </div>
+          </div>
+
+          <DialogHeader className="flex flex-col md:flex-row items-start gap-8 text-left">
             {isLoading ? (
-              <Skeleton className="h-20 w-20 rounded-full shrink-0" />
+              <Skeleton className="h-16 w-16 rounded-none shrink-0" />
             ) : (
-              <Avatar className="h-20 w-20 border-4 border-background shadow-xl ring-2 ring-primary/5 shrink-0">
-                <AvatarFallback className="bg-primary/5 text-primary text-2xl font-black">
-                  {getInitials(student)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="h-16 w-16 bg-primary flex items-center justify-center text-white text-xl font-black shadow-2xl shadow-primary/20 shrink-0 font-mono">
+                {getInitials(student)}
+              </div>
             )}
             
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-4">
               {isLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-8 w-64 mx-auto md:mx-0" />
-                  <Skeleton className="h-4 w-48 mx-auto md:mx-0" />
+                <div className="space-y-3">
+                  <Skeleton className="h-10 w-80" />
+                  <Skeleton className="h-4 w-60" />
                 </div>
               ) : isError ? (
-                <div className="flex items-center gap-2 text-destructive font-bold">
+                <div className="flex items-center gap-3 text-destructive font-bold text-xs">
                   <AlertCircle size={18} /> Error loading student data
                 </div>
               ) : (
                 <>
-                  <div className="flex flex-col md:flex-row items-center gap-3">
-                    <DialogTitle className="text-3xl font-black tracking-tight text-primary/90">
+                  <div className="space-y-1">
+                    <DialogTitle className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">
                       {student?.firstName} {student?.lastName}
                     </DialogTitle>
-                    <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 rounded-full text-[10px] uppercase font-black px-3 tracking-widest flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 border-none">
-                      <ShieldCheck size={12} /> Verified
-                    </Badge>
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                       <div className="flex items-center gap-1.5">
+                          <Fingerprint size={12} className="text-primary/40" /> {student?.nationalId}
+                       </div>
+                       <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                       <div className="flex items-center gap-1.5">
+                          <Calendar size={12} className="text-primary/40" /> {student?.dateOfBirth && new Date(student.dateOfBirth).toLocaleDateString()}
+                       </div>
+                    </div>
                   </div>
-                  <DialogDescription className="text-sm font-bold text-muted-foreground/80 flex flex-wrap justify-center md:justify-start items-center gap-4">
-                    <span className="flex items-center gap-1.5">
-                      <UserCircle2 size={14} className="text-primary/40" /> {student?.nationalId}
-                    </span>
-                    <span className="h-1 w-1 rounded-full bg-muted-foreground/30 hidden sm:block" />
-                    <span className="flex items-center gap-1.5">
-                      <Calendar size={14} className="text-primary/40" /> {student?.dateOfBirth && new Date(student.dateOfBirth).toLocaleDateString()}
-                    </span>
-                    <span className="h-1 w-1 rounded-full bg-muted-foreground/30 hidden sm:block" />
-                    <span className="flex items-center gap-1.5 uppercase">
-                      <span className="text-[10px] font-black text-primary/40">GENDER:</span> {student?.gender || "N/A"}
-                    </span>
-                  </DialogDescription>
+                  
+                  <div className="flex items-center gap-4 border-t border-border/50 pt-4">
+                     <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">System id:</span>
+                        <code className="text-[10px] font-bold text-primary/60 font-mono uppercase tracking-widest">{student?.id?.slice(0, 8)}...</code>
+                     </div>
+                  </div>
                 </>
               )}
             </div>
           </DialogHeader>
         </div>
 
-        {/* Content Section */}
-        <div className="p-8 max-h-[70vh] overflow-y-auto space-y-8 scrollbar-hide">
+        {/* 2. Records Content Section */}
+        <div className="p-10 max-h-[70vh] overflow-y-auto space-y-12 scrollbar-hide">
           {isLoading ? (
-            <div className="space-y-8">
+            <div className="space-y-10">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="space-y-4">
-                  <Skeleton className="h-6 w-40" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Skeleton className="h-32 rounded-[1.5rem]" />
-                    <Skeleton className="h-32 rounded-[1.5rem]" />
+                <div key={i} className="space-y-6">
+                  <Skeleton className="h-8 w-64 rounded-none" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Skeleton className="h-40 rounded-none" />
+                    <Skeleton className="h-40 rounded-none" />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <>
-              {/* Degree Records Section - Hidden for Exam Board Admins */}
+              {/* University Records */}
               {(user?.roleName === "SUPER_ADMIN" || user?.institutionType === "COLLEGE") && (
-                <section className="space-y-4">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
-                      <GraduationCap size={20} />
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-border pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-500/20">
+                        <GraduationCap size={20} />
+                      </div>
+                      <h3 className="text-sm font-black tracking-widest uppercase">University degrees</h3>
                     </div>
-                    <h3 className="text-lg font-black tracking-tight uppercase">University (College) Degrees</h3>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                       <History size={12} /> {degrees.length} records
+                    </div>
                   </div>
                   
                   {degrees.length === 0 ? (
-                    <Card className="p-12 text-center border-dashed border-2 border-muted/50 bg-muted/5 rounded-[2rem]">
-                      <p className="text-muted-foreground text-sm font-bold">No university records found for this student.</p>
-                    </Card>
+                    <div className="p-16 text-center border border-dashed border-border bg-muted/5 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[10px] font-bold text-muted-foreground/50 relative z-10">No university degrees found.</p>
+                    </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {degrees.map((degree) => (
-                        <Card key={degree.id} className="relative overflow-hidden group border-border/60 hover:border-primary/40 transition-all rounded-[1.5rem] p-6 shadow-sm hover:shadow-md">
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
-                          <div className="relative space-y-4">
+                        <Card key={degree.id} className="relative overflow-hidden group border border-border bg-card p-6 rounded-none transition-all hover:border-primary/40 shadow-sm hover:shadow-xl">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.03] rounded-bl-full -mr-16 -mt-16 transition-all group-hover:bg-primary/[0.07]" />
+                          <div className="relative space-y-6">
                             <div className="flex justify-between items-start">
-                              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none text-[10px] font-black tracking-tighter uppercase px-2 rounded-lg">
+                              <div className="px-3 py-1 bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary uppercase tracking-widest">
                                 {degree.degreeLevelCode}
-                              </Badge>
-                              <span className="text-[10px] font-black text-muted-foreground/60 uppercase">Issued {new Date(degree.createdAt).getFullYear()}</span>
+                              </div>
+                              <span className="text-[9px] font-bold text-muted-foreground font-mono uppercase tracking-tighter">Year {new Date(degree.createdAt).getFullYear()}</span>
                             </div>
-                            <div>
-                              <h4 className="font-black text-lg tracking-tight leading-tight mb-1">{degree.degreeTitle}</h4>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
-                                  <Building2 size={12} className="text-primary/40" />
-                                  {degree.institutionName}
-                                </div>
-                                {degree.collegeName && (
-                                  <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground/70 ml-5">
-                                    <span className="h-1 w-1 rounded-full bg-primary/20" />
-                                    {degree.collegeName}
-                                  </div>
-                                )}
+                            
+                            <div className="space-y-2">
+                              <h4 className="font-black text-base tracking-tighter uppercase leading-tight group-hover:text-primary transition-colors">{degree.degreeTitle}</h4>
+                              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                <Building2 size={12} className="text-primary/30" />
+                                {degree.institutionName}
                               </div>
                             </div>
-                            <div className="pt-2 border-t border-border/40 flex items-center justify-between">
-                              <div className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">CGPA</div>
-                              <div className="text-sm font-black text-primary">{degree.cgpa?.toFixed(2) || "N/A"}</div>
+
+                            <div className="pt-4 border-t border-border flex items-center justify-between">
+                              <div className="flex flex-col">
+                                 <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">CGPA</span>
+                                 <div className="text-xl font-black text-primary font-mono">{degree.cgpa?.toFixed(2) || "N/A"}</div>
+                              </div>
+                              <Award size={24} className="text-primary opacity-10 group-hover:opacity-100 transition-all transform group-hover:scale-110" />
                             </div>
                           </div>
                         </Card>
@@ -166,40 +173,56 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                 </section>
               )}
 
-              {/* Exam Records Section - Hidden for College Admins */}
+              {/* Examination Records */}
               {(user?.roleName === "SUPER_ADMIN" || user?.institutionType === "EXAM_BOARD") && (
-                <section className="space-y-4">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-amber-500/10 rounded-xl text-amber-600">
-                      <BookOpen size={20} />
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-border pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/20">
+                        <BookOpen size={20} />
+                      </div>
+                      <h3 className="text-sm font-black tracking-widest uppercase">National exams</h3>
                     </div>
-                    <h3 className="text-lg font-black tracking-tight uppercase">National Examinations</h3>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                       <History size={12} /> {exams.length} records
+                    </div>
                   </div>
 
                   {exams.length === 0 ? (
-                    <Card className="p-12 text-center border-dashed border-2 border-muted/50 bg-muted/5 rounded-[2rem]">
-                      <p className="text-muted-foreground text-sm font-bold">No examination records found for this student.</p>
-                    </Card>
+                    <div className="p-16 text-center border border-dashed border-border bg-muted/5 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <p className="text-[10px] font-bold text-muted-foreground/50 relative z-10">No exam history found.</p>
+                    </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {exams.map((exam) => (
-                        <Card key={exam.id} className="flex items-center gap-6 p-5 border-border/60 rounded-2xl hover:bg-muted/5 transition-all shadow-sm">
-                          <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
-                            <Award size={24} />
+                        <div key={exam.id} className="group flex items-center gap-8 p-6 border border-border bg-card rounded-none hover:bg-primary/[0.02] hover:border-primary/20 transition-all">
+                          <div className="h-14 w-14 bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                            <Award size={28} />
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-black text-sm tracking-tight">{exam.examLevelName}</h4>
-                              <Badge variant="outline" className="text-[9px] font-black border-muted/60 uppercase px-2 py-0">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-black text-sm tracking-widest uppercase text-foreground group-hover:text-primary transition-colors">{exam.examLevelName}</h4>
+                              <div className="text-[10px] font-bold text-muted-foreground font-mono bg-muted/20 px-3 py-1 border border-border uppercase tracking-widest">
                                 Year {exam.year}
-                              </Badge>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest">
-                              <span>Total Score: <span className="text-primary text-xs font-black">{exam.totalScore || "N/A"}</span></span>
-                              {exam.averageScore && <span>Avg: <span className="text-primary text-xs font-black">{exam.averageScore}</span></span>}
+                            <div className="flex items-center gap-6 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                              <div className="flex items-center gap-2">
+                                <span className="opacity-40">Total score:</span> 
+                                <span className="text-primary font-black text-xs font-mono">{exam.totalScore || "N/A"}</span>
+                              </div>
+                              <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                              <div className="flex items-center gap-2">
+                                <span className="opacity-40">Average score:</span> 
+                                <span className="text-primary font-black text-xs font-mono">{exam.averageScore || "N/A"}</span>
+                              </div>
                             </div>
                           </div>
-                        </Card>
+                          <div className="flex flex-col items-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                             <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-bold text-emerald-700 uppercase tracking-widest">Verified</div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -212,4 +235,3 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
     </Dialog>
   )
 }
-

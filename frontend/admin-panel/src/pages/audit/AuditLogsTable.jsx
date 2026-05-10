@@ -1,34 +1,26 @@
 import { 
-  History, 
-  ChevronRight, 
   Eye, 
-  Search,
-  User,
-  Shield,
-  ExternalLink
+  User, 
+  Terminal, 
+  Clock, 
+  Shield, 
+  Globe, 
+  Activity,
+  ArrowRight
 } from "lucide-react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from "../../components/ui/table"
-import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
+import { Badge } from "../../components/ui/badge"
+import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import Pagination from "../../components/common/Pagination"
-import TableSkeleton from "../../components/common/TableSkeleton"
-import { Card } from "../../components/ui/card"
-
-const getActionColor = (action) => {
-  if (action.includes("CREATE") || action.includes("REGISTER") || action.includes("ISSUE")) return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-  if (action.includes("UPDATE")) return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-  if (action.includes("DELETE") || action.includes("REVOKE") || action.includes("SUSPEND")) return "bg-destructive/10 text-destructive border-destructive/20";
-  if (action.includes("RESTORE") || action.includes("UNSUSPEND")) return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-  if (action.includes("LOGIN")) return "bg-primary/10 text-primary border-primary/20";
-  return "bg-muted text-muted-foreground";
-}
+import { cn } from "../../lib/utils"
 
 export default function AuditLogsTable({ 
   logs, 
@@ -38,102 +30,133 @@ export default function AuditLogsTable({
   itemsPerPage, 
   onItemsPerPageChange,
   isFetching,
-  onViewDetails
+  onViewDetails 
 }) {
-  if (isFetching && logs.length === 0) {
-    return <TableSkeleton columns={6} rows={10} />
-  }
+  const totalPages = Math.ceil(totalCount / itemsPerPage)
 
-  if (logs.length === 0) {
-    return (
-      <Card className="p-20 flex flex-col items-center justify-center text-center border-dashed border-2">
-        <div className="p-4 bg-muted rounded-full mb-4">
-          <Search size={32} className="text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-bold">No activity logs found</h3>
-        <p className="text-muted-foreground max-w-xs mx-auto mt-2">
-          Try adjusting your filters or search terms to find what you're looking for.
-        </p>
-      </Card>
-    )
+  const getActionStyle = (action) => {
+    const act = action?.toLowerCase() || ""
+    if (act.includes("delete") || act.includes("remove")) return "bg-destructive/10 text-destructive border-destructive/20"
+    if (act.includes("create") || act.includes("register") || act.includes("upload")) return "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
+    if (act.includes("update") || act.includes("edit") || act.includes("change")) return "bg-amber-500/10 text-amber-700 border-amber-500/20"
+    return "bg-muted/50 text-muted-foreground border-border"
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-primary/10 bg-card overflow-hidden shadow-sm">
+      <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead>Actor</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Entity</TableHead>
-              <TableHead className="hidden md:table-cell">IP Address</TableHead>
-              <TableHead className="text-right">Details</TableHead>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <TableHead className="w-[240px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Administrator</TableHead>
+              <TableHead className="w-[180px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Action type</TableHead>
+              <TableHead className="w-[200px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Target entity</TableHead>
+              <TableHead className="w-[180px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">IP address</TableHead>
+              <TableHead className="w-[180px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Timestamp</TableHead>
+              <TableHead className="text-right pr-8 text-xs font-bold text-muted-foreground py-4">Details</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {logs.map((log) => (
-              <TableRow key={log.id} className="hover:bg-primary/5 transition-colors group">
-                <TableCell className="font-medium text-xs">
-                  <div className="flex flex-col">
-                    <span>{new Date(log.createdAt).toLocaleDateString()}</span>
-                    <span className="text-muted-foreground">{new Date(log.createdAt).toLocaleTimeString()}</span>
+            {isFetching && logs.length === 0 ? (
+              <TableBodySkeleton rows={itemsPerPage} columns={6} />
+            ) : logs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-64 text-center border-none">
+                  <div className="flex flex-col items-center justify-center gap-3 opacity-30">
+                    <Shield size={48} strokeWidth={1} />
+                    <p className="text-xs font-bold">No activity logs found</p>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <User size={14} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold">
-                        {log.actorFirstName || log.actorLastName ? `${log.actorFirstName || ''} ${log.actorLastName || ''}`.trim() : "System"}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">{log.actorEmail || "system@internal"}</span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={`font-mono text-[10px] px-2 py-0 h-5 border-none shadow-none uppercase ${getActionColor(log.action)}`}>
-                    {log.action.replace(/_/g, ' ')}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold">{log.entityType}</span>
-                    <span className="text-[10px] text-muted-foreground font-mono">ID: {log.entityId}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Shield size={12} className="text-primary/50" />
-                    <span className="text-xs font-mono">{log.ipAddress || "N/A"}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onViewDetails(log)}
-                    className="rounded-full hover:bg-primary hover:text-primary-foreground h-8 w-8"
-                  >
-                    <ExternalLink size={14} />
-                  </Button>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              logs.map((log) => (
+                <TableRow 
+                  key={log.id} 
+                  className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
+                  onClick={() => onViewDetails(log)}
+                >
+                  <TableCell className="py-2 pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 bg-muted/30 border border-border flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all">
+                        <User size={14} />
+                      </div>
+                      <div className="flex flex-col text-left overflow-hidden">
+                        <span className="font-bold text-sm tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
+                          {log.actorFirstName} {log.actorLastName}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground font-bold truncate">
+                          {log.actorEmail}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold",
+                      getActionStyle(log.action)
+                    )}>
+                      {log.action}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className="flex flex-col text-left">
+                      <span className="font-bold text-[10px] tracking-tight text-foreground uppercase">
+                        {log.entityType}
+                      </span>
+                      <code className="text-[9px] font-bold text-muted-foreground/40 font-mono">
+                        ID: {log.entityId?.slice(0, 12)}
+                      </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Globe size={12} className="opacity-40" />
+                      <code className="text-[10px] font-bold font-mono tracking-tighter">
+                        {log.ipAddress || "Unknown"}
+                      </code>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2 px-6">
+                    <div className="flex flex-col">
+                      <div className="text-[10px] font-bold text-foreground font-mono">
+                        {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+                      </div>
+                      <div className="text-[8px] font-bold text-muted-foreground uppercase">
+                        {new Date(log.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right pr-8 py-2">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all"
+                      >
+                        <ArrowRight size={14} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
-
-      <Pagination 
-        currentPage={currentPage}
-        totalCount={totalCount}
-        pageSize={itemsPerPage}
-        onPageChange={onPageChange}
-        onPageSizeChange={onItemsPerPageChange}
-      />
+      
+      {/* Pagination */}
+      <div className="p-4 border-t border-border bg-muted/5">
+        <Pagination 
+          page={currentPage} 
+          totalPages={totalPages} 
+          setPage={onPageChange} 
+          limit={itemsPerPage} 
+          setLimit={onItemsPerPageChange} 
+          totalCount={totalCount} 
+          itemName="logs" 
+          isFetching={isFetching} 
+        />
+      </div>
     </div>
   )
 }
