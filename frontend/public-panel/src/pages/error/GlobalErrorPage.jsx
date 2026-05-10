@@ -26,7 +26,7 @@ export default function GlobalErrorPage() {
 
         <div className="p-8 space-y-8">
           <div className="space-y-2 text-left">
-            <h1 className="text-2xl font-black tracking-tight text-foreground uppercase">Application Error</h1>
+            <h1 className="text-xl font-black tracking-tight text-foreground">Application error</h1>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight opacity-60">The requested operation encountered a runtime exception.</p>
           </div>
           

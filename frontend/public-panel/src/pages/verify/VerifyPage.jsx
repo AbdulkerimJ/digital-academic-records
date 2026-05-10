@@ -81,8 +81,8 @@ export default function VerifyPage() {
                 <GraduationCap size={22} className="text-primary-foreground" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-black tracking-tighter leading-none">DAR.SYSTEM</h1>
-                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Audit Module</span>
+                <h1 className="text-xl font-black tracking-tighter leading-none">NAR</h1>
+                <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National academic registry</span>
               </div>
             </Link>
             <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest rounded">
@@ -90,10 +90,10 @@ export default function VerifyPage() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h2 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
-              Audit Summary <br/>
-              <span className="text-muted-foreground">Record Indices</span>
+          <div className="space-y-4">
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
+              Audit summary <br/>
+              <span className="text-muted-foreground">record indices</span>
             </h2>
             <div className="flex flex-wrap gap-4 items-center font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
               <div className="flex items-center gap-2 border-r border-border pr-4">
@@ -112,7 +112,7 @@ export default function VerifyPage() {
             <div className="w-8 h-8 rounded border border-border flex items-center justify-center text-primary bg-muted/50">
               <span className="text-xs font-black">01</span>
             </div>
-            <h3 className="text-xl font-black uppercase tracking-tight">Subject Identity</h3>
+            <h3 className="text-xl font-black tracking-tight">Subject identity</h3>
             <div className="h-px flex-1 bg-border/50" />
           </div>
 
@@ -123,11 +123,11 @@ export default function VerifyPage() {
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12">
               <div className="space-y-2">
                 <p className="text-[10px] font-mono text-primary uppercase tracking-[0.3em]">Full Legal Name</p>
-                <p className="text-3xl font-black tracking-tight uppercase">{student?.firstName} {student?.lastName}</p>
+                <p className="text-2xl font-black tracking-tight">{student?.firstName} {student?.lastName}</p>
               </div>
               <div className="space-y-2">
                 <p className="text-[10px] font-mono text-primary uppercase tracking-[0.3em]">National ID (Fayda)</p>
-                <p className="text-3xl font-mono font-black tracking-tighter">{student?.nationalId}</p>
+                <p className="text-2xl font-mono font-black tracking-tighter">{student?.nationalId}</p>
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function VerifyPage() {
             <div className="w-8 h-8 rounded border border-border flex items-center justify-center text-primary bg-muted/50">
               <span className="text-xs font-black">02</span>
             </div>
-            <h3 className="text-xl font-black uppercase tracking-tight">Degrees</h3>
+            <h3 className="text-xl font-black tracking-tight">Degrees</h3>
             <div className="h-px flex-1 bg-border/50" />
           </div>
 
@@ -157,7 +157,7 @@ export default function VerifyPage() {
                         <GraduationCap size={24} />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-xl font-black tracking-tight uppercase leading-tight">{deg.degreeTitle}</h4>
+                        <h4 className="text-xl font-black tracking-tight leading-tight">{deg.degreeTitle}</h4>
                         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                           {deg.institutionName} • {deg.degreeLevelCode}
                         </p>
@@ -182,7 +182,7 @@ export default function VerifyPage() {
             <div className="w-8 h-8 rounded border border-border flex items-center justify-center text-primary bg-muted/50">
               <span className="text-xs font-black">03</span>
             </div>
-            <h3 className="text-xl font-black uppercase tracking-tight">Examinations</h3>
+            <h3 className="text-xl font-black tracking-tight">Examinations</h3>
             <div className="h-px flex-1 bg-border/50" />
           </div>
 
@@ -200,7 +200,7 @@ export default function VerifyPage() {
                         <BookOpen size={24} />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-xl font-black tracking-tight uppercase leading-tight">{exam.examLevelName}</h4>
+                        <h4 className="text-xl font-black tracking-tight leading-tight">{exam.examLevelName}</h4>
                         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                           Assessment Year: {exam.year} • Score: {exam.totalScore}
                         </p>

@@ -68,17 +68,17 @@ export default function RecordsPage() {
   const exams = examsData?.data?.exams || []
 
   return (
-    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+    <div className="space-y-8 pb-10 max-w-6xl mx-auto">
       
       {/* 1. Module Header */}
-      <div className="space-y-10">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
                 <Database size={22} className="text-primary-foreground" />
              </div>
              <div className="flex flex-col">
-                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Academic Asset Registry</h2>
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Access Registry Audit</h2>
                 <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Verified Ledger</span>
              </div>
           </div>
@@ -87,15 +87,14 @@ export default function RecordsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 items-end justify-between border-b border-border pb-10">
-          <div className="space-y-4 max-w-2xl">
-            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+        <div className="flex flex-col md:flex-row gap-8 items-end justify-between border-b border-border pb-6">
+          <div className="space-y-2 max-w-2xl">
+            <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
               Official <br/>
-              <span className="text-muted-foreground">Credentials</span>
+              <span className="text-muted-foreground">credentials</span>
             </h1>
             <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest leading-relaxed border-l-2 border-primary pl-6">
               Primary repository for all verified degrees, qualifications, and national assessment results. 
-              These records are cryptographically secured and legally recognized by the Ministry of Education.
             </p>
           </div>
 

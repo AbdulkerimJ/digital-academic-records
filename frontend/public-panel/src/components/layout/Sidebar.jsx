@@ -67,8 +67,8 @@ export default function Sidebar({ isOpen, onClose }) {
             <GraduationCap size={22} />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-xl font-black tracking-tighter leading-none">DAR.SYSTEM</h1>
-            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Institutional</span>
+            <h1 className="text-xl font-black tracking-tighter leading-none">NAR</h1>
+            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">National academic registry</span>
           </div>
         </Link>
       </div>

@@ -36,17 +36,17 @@ export default function DashboardPage() {
   const qrCount = qrData?.data?.count || 0
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-8 pb-10">
       
       {/* 1. Header Protocol Section */}
-      <div className="space-y-10">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
                 <Cpu size={22} className="text-primary-foreground" />
              </div>
              <div className="flex flex-col">
-                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Record Command Center</h2>
+                <h2 className="text-xl font-black tracking-tighter leading-none uppercase">Security Protocols</h2>
                 <span className="text-[8px] font-bold text-primary uppercase tracking-[0.4em] mt-1">Operational Module</span>
              </div>
           </div>
@@ -55,8 +55,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+        <div className="space-y-2">
+          <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
             Welcome, <br/>
             <span className="text-muted-foreground">{student?.firstName} {student?.lastName}</span>
           </h1>
@@ -149,14 +149,14 @@ export default function DashboardPage() {
         <div className="lg:col-span-4 space-y-6">
           <div className="flex items-center gap-4">
              <Shield size={18} className="text-primary" />
-             <h3 className="text-xl font-black uppercase tracking-tight">Security Protocols</h3>
+             <h3 className="text-xl font-black tracking-tight">Quick Actions</h3>
           </div>
           
           <div className="space-y-3">
             <Link to="/dashboard/records" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all">
               <div className="flex items-center gap-4">
                 <FileText size={18} className="text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Access Registry Audit</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Academic Records</span>
               </div>
               <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Link>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
             <Link to="/dashboard/qr-codes" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all">
               <div className="flex items-center gap-4">
                 <QrCode size={18} className="text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Initialize Security Token</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">QR Access Tokens</span>
               </div>
               <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Link>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
             <Link to="/dashboard/requests" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all">
               <div className="flex items-center gap-4">
                 <ClipboardList size={18} className="text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Protocol Corrections</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Correction Requests</span>
               </div>
               <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Link>

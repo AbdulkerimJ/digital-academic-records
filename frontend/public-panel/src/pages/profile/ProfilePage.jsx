@@ -26,10 +26,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-12 pb-20 max-w-6xl mx-auto">
+    <div className="space-y-8 pb-10 max-w-6xl mx-auto">
       
       {/* 1. Identity Header */}
-      <div className="space-y-10">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
@@ -45,7 +45,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 items-center justify-between border-b border-border pb-10 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-8 items-center justify-between border-b border-border pb-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">
              <Fingerprint size={240} />
           </div>
@@ -57,8 +57,8 @@ export default function ProfilePage() {
                   <CheckCircle2 size={18} />
                </div>
             </div>
-            <div className="text-center md:text-left space-y-4">
-              <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.85] text-foreground uppercase">
+            <div className="text-center md:text-left space-y-2">
+              <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
                 {student.firstName} <br/>
                 <span className="text-muted-foreground">{student.lastName}</span>
               </h1>

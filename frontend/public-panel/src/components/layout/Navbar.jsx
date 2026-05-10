@@ -18,15 +18,6 @@ export default function Navbar({ onMenuToggle }) {
         >
           <Menu size={20} />
         </button>
-
-        <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-muted/30 border border-border rounded text-muted-foreground group focus-within:border-primary/50 transition-all">
-          <Search size={16} className="group-focus-within:text-primary transition-colors" />
-          <input 
-            type="text" 
-            placeholder="Search records..." 
-            className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest w-48 lg:w-64"
-          />
-        </div>
       </div>
 
       <div className="flex items-center gap-3 md:gap-6">
@@ -37,21 +28,16 @@ export default function Navbar({ onMenuToggle }) {
         >
           {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
-        
-        <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors">
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_var(--color-primary)]" />
-        </button>
 
-        <Link to="/dashboard/profile" className="flex items-center gap-3 group">
+        <Link to="/dashboard/profile" className="flex items-center gap-4 group">
           <div className="hidden md:flex flex-col items-end">
-            <span className="text-[10px] font-black text-foreground uppercase tracking-tight">
+            <span className="text-xs font-black text-foreground uppercase tracking-tight">
               {student?.firstName} {student?.lastName}
             </span>
-            <span className="text-[8px] font-bold text-primary uppercase tracking-[0.2em]">Verified Student</span>
+            <span className="text-[9px] font-bold text-primary uppercase tracking-[0.2em]">Verified Student</span>
           </div>
-          <div className="w-10 h-10 bg-muted/50 border border-border group-hover:border-primary/50 flex items-center justify-center transition-all">
-            <User size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
+          <div className="w-12 h-12 bg-muted/50 border border-border group-hover:border-primary/50 flex items-center justify-center transition-all">
+            <User size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
         </Link>
       </div>
