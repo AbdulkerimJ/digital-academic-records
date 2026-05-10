@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { listStudents } from "../../api/students.api"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { listStudents, deleteStudent } from "../../api/students.api"
+import { toast } from "sonner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
@@ -24,8 +25,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Trash2,
   Loader2
 } from "lucide-react"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import useDebounce from "../../hooks/useDebounce"
 import Pagination from "../../components/common/Pagination"
 
@@ -40,6 +43,8 @@ export default function StudentTable({ onSelectStudent }) {
   const limit = parseInt(searchParams.get("limit") || "10", 10)
   const searchTerm = searchParams.get("search") || ""
   
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [studentToDelete, setStudentToDelete] = useState(null)
   const debouncedSearch = useDebounce(searchTerm, 500)
 
   const { data: studentsData, isLoading, isPlaceholderData, isFetching } = useQuery({
@@ -49,6 +54,17 @@ export default function StudentTable({ onSelectStudent }) {
       page, 
       limit
     })
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteStudent(id),
+    onSuccess: () => {
+      toast.success("Student deleted successfully.")
+      queryClient.invalidateQueries({ queryKey: ["students"] })
+      setIsDeleteModalOpen(false)
+      setStudentToDelete(null)
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to delete student")
   })
 
   const queryClient = useQueryClient()
@@ -112,6 +128,18 @@ export default function StudentTable({ onSelectStudent }) {
 
   const onItemsPerPageChange = (newLimit) => {
     setLimit(newLimit)
+  }
+
+  const handleDeleteClick = (e, student) => {
+    e.stopPropagation()
+    setStudentToDelete(student)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (studentToDelete) {
+      deleteMutation.mutate(studentToDelete.id)
+    }
   }
 
   const startRange = (page - 1) * limit + 1
@@ -204,9 +232,23 @@ export default function StudentTable({ onSelectStudent }) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right pr-6 py-4">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/5 hover:text-primary">
-                        <ExternalLink size={14} />
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/5 hover:text-primary"
+                        >
+                          <Eye size={14} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={(e) => handleDeleteClick(e, student)}
+                          className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -226,6 +268,17 @@ export default function StudentTable({ onSelectStudent }) {
           isFetching={isFetching} 
         />
       </Card>
+      {isDeleteModalOpen && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
+          itemName={`${studentToDelete?.firstName} ${studentToDelete?.lastName}`}
+          title="Delete Student Account"
+          description="Are you sure you want to delete this student? They will no longer be able to access their records, but their academic history will be preserved as a 'soft-deleted' record."
+        />
+      )}
     </div>
   )
 }

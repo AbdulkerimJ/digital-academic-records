@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import ExamAddEditModal from "./ExamAddEditModal"
 import BulkUploadModal from "../../components/common/BulkUploadModal"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import Pagination from "../../components/common/Pagination"
 import { useSearchParams } from "react-router-dom"
 
@@ -34,7 +35,9 @@ export default function ExamRecordsTable() {
   const [searchInput, setSearchInput] = useState(searchQuery)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isBulkOpen, setIsBulkOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [editingExam, setEditingExam] = useState(null)
+  const [recordToDelete, setRecordToDelete] = useState(null)
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["exams", page, limit, searchQuery],
@@ -72,6 +75,8 @@ export default function ExamRecordsTable() {
     onSuccess: () => {
       toast.success("Exam record deleted successfully.")
       queryClient.invalidateQueries({ queryKey: ["exams"] })
+      setIsDeleteModalOpen(false)
+      setRecordToDelete(null)
     },
     onError: (err) => toast.error(err.response?.data?.message || "Failed to delete exam"),
   })
@@ -106,9 +111,14 @@ export default function ExamRecordsTable() {
     setSearchParams(newParams)
   }
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this exam record? This action cannot be undone.")) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (record) => {
+    setRecordToDelete(record)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (recordToDelete) {
+      deleteMutation.mutate(recordToDelete.id)
     }
   }
 
@@ -217,7 +227,7 @@ export default function ExamRecordsTable() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(exam.id)}
+                          onClick={() => handleDeleteClick(exam)}
                           className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
                         >
                           <Trash2 size={14} />
@@ -231,6 +241,17 @@ export default function ExamRecordsTable() {
           </Table>
         </div>
       </Card>
+
+      {isDeleteModalOpen && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
+          itemName={`${recordToDelete?.studentFirstName} ${recordToDelete?.studentLastName}'s ${recordToDelete?.examLevelName}`}
+          title="Delete Exam Record"
+        />
+      )}
 
       <Pagination 
         page={page} 

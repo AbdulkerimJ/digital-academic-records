@@ -32,6 +32,21 @@ export const getMyDegrees = async () => {
   return res.data
 }
 
+export const getDegreeDetail = async (id) => {
+  const res = await api.get(`/api/students/me/degrees/${id}`)
+  return res.data
+}
+
+export const getExamDetail = async (id) => {
+  const res = await api.get(`/api/students/me/exams/${id}`)
+  return res.data
+}
+
+export const verifyRecordDetail = async (token, type, id) => {
+  const res = await api.get(`/api/qr/verify/${token}/records/${type}/${id}`)
+  return res.data
+}
+
 // Correction Requests
 export const submitCorrectionRequest = async (recordId, payload) => {
   const res = await api.post(`/api/students/records/${recordId}/correction`, payload)
@@ -40,6 +55,11 @@ export const submitCorrectionRequest = async (recordId, payload) => {
 
 export const getMyRequests = async () => {
   const res = await api.get('/api/students/correction-requests')
+  return res.data
+}
+
+export const cancelCorrectionRequest = async (id) => {
+  const res = await api.delete(`/api/students/correction-requests/${id}`)
   return res.data
 }
 

@@ -220,10 +220,14 @@ export const createDegreeService = async ({ user, data = {}, req }) => {
     }
   }
 
-  // Verify Institution is Active
+  // Verify Institution is Active and of correct type
   const institution = await findInstitutionById(institutionId);
   if (!institution || !institution.isActive) {
     throw new AppError("Institution not found or is currently inactive.", 400);
+  }
+
+  if (institution.type !== 'COLLEGE') {
+    throw new AppError(`Institution '${institution.name}' is of type '${institution.type}'. Only 'COLLEGE' type institutions can issue degree records.`, 403);
   }
 
   // 2. Resolve Student

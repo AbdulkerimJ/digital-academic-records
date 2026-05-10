@@ -59,7 +59,12 @@ api.interceptors.response.use(
       }
     }
 
-    return Promise.reject(error)
+    // Extract backend error message if available
+    const backendMessage = error.response?.data?.message || error.message || "An unexpected error occurred"
+    const enhancedError = new Error(backendMessage)
+    enhancedError.response = error.response // Keep response for status checking if needed
+    
+    return Promise.reject(enhancedError)
   }
 )
 

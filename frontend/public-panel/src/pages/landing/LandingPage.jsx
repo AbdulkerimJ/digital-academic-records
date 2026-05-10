@@ -156,7 +156,7 @@ export default function LandingPage() {
               </Link>
             ) : (
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Student Access
+                Verification Center
               </span>
             )}
           </div>

@@ -19,6 +19,7 @@ import { toast } from "sonner"
 import { TableBodySkeleton } from "../../components/common/TableSkeleton"
 import DegreeAddEditModal from "./DegreeAddEditModal"
 import BulkUploadModal from "../../components/common/BulkUploadModal"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import Pagination from "../../components/common/Pagination"
 import { useSearchParams } from "react-router-dom"
 
@@ -34,7 +35,9 @@ export default function DegreeRecordsTable() {
   const [searchInput, setSearchInput] = useState(searchQuery)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isBulkOpen, setIsBulkOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [editingDegree, setEditingDegree] = useState(null)
+  const [recordToDelete, setRecordToDelete] = useState(null)
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["degrees", page, limit, searchQuery],
@@ -72,6 +75,8 @@ export default function DegreeRecordsTable() {
     onSuccess: () => {
       toast.success("Degree record deleted successfully.")
       queryClient.invalidateQueries({ queryKey: ["degrees"] })
+      setIsDeleteModalOpen(false)
+      setRecordToDelete(null)
     },
     onError: (err) => toast.error(err.response?.data?.message || "Failed to delete degree"),
   })
@@ -106,9 +111,14 @@ export default function DegreeRecordsTable() {
     setSearchParams(newParams)
   }
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this degree record? This action cannot be undone.")) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (record) => {
+    setRecordToDelete(record)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (recordToDelete) {
+      deleteMutation.mutate(recordToDelete.id)
     }
   }
 
@@ -214,7 +224,7 @@ export default function DegreeRecordsTable() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(record.id)}
+                          onClick={() => handleDeleteClick(record)}
                           className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
                         >
                           <Trash2 size={14} />
@@ -228,6 +238,17 @@ export default function DegreeRecordsTable() {
           </Table>
         </div>
       </Card>
+
+      {isDeleteModalOpen && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
+          itemName={`${recordToDelete?.studentFirstName} ${recordToDelete?.studentLastName}'s ${recordToDelete?.degreeTitle}`}
+          title="Delete Degree Record"
+        />
+      )}
 
       <Pagination 
         page={page} 

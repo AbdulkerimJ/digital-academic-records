@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { GraduationCap, ShieldCheck, CheckCircle2, XCircle, BookOpen, Calendar, AlertCircle } from 'lucide-react'
+import { GraduationCap, ShieldCheck, CheckCircle2, XCircle, BookOpen, Calendar, AlertCircle, ArrowUpRight } from 'lucide-react'
 import { verifyQrToken } from '../../api/student.api'
 import Spinner from '../../components/ui/Spinner'
 import Badge from '../../components/ui/Badge'
@@ -77,6 +77,16 @@ export default function VerifyPage() {
         </div>
       </div>
 
+      <div className="max-w-4xl mx-auto px-4 md:px-8 pt-8">
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-sm font-bold text-primary/70 hover:text-primary transition-all group"
+        >
+          <ArrowUpRight size={16} className="rotate-[225deg] group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" /> 
+          Back to Verification Portal
+        </Link>
+      </div>
+
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-10 space-y-12">
         {/* Degrees Section */}
         <section>
@@ -95,21 +105,33 @@ export default function VerifyPage() {
           ) : (
             <div className="grid gap-4">
               {degrees.map((deg) => (
-                <div key={deg.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div>
+                <div key={deg.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="secondary" className="uppercase text-[10px] tracking-widest">{deg.degreeLevelCode}</Badge>
                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{deg.institutionName}</span>
                     </div>
-                    <h3 className="text-lg font-black text-foreground mb-1">{deg.degreeTitle}</h3>
+                    <h3 className="text-lg font-black text-foreground mb-1 group-hover:text-primary transition-colors">
+                      <Link to={`/verify/${token}/degree/${deg.id}`}>
+                        {deg.degreeTitle}
+                      </Link>
+                    </h3>
                     {deg.departmentName && <p className="text-sm font-medium text-muted-foreground">{deg.departmentName} - {deg.collegeName}</p>}
                   </div>
-                  <div className="md:text-right shrink-0">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Graduation Date</p>
-                    <p className="text-base font-bold text-foreground flex items-center md:justify-end gap-1.5">
-                      <Calendar size={14} className="text-muted-foreground" />
-                      {format(new Date(deg.graduationDate), 'MMMM yyyy')}
-                    </p>
+                  <div className="flex items-center gap-8">
+                    <div className="md:text-right shrink-0">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Graduation Date</p>
+                      <p className="text-base font-bold text-foreground flex items-center md:justify-end gap-1.5">
+                        <Calendar size={14} className="text-muted-foreground" />
+                        {format(new Date(deg.graduationDate), 'MMMM yyyy')}
+                      </p>
+                    </div>
+                    <Link 
+                      to={`/verify/${token}/degree/${deg.id}`}
+                      className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-all shadow-sm"
+                    >
+                      <ArrowUpRight size={18} />
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -134,26 +156,38 @@ export default function VerifyPage() {
           ) : (
             <div className="grid gap-4">
               {exams.map((exam) => (
-                <div key={exam.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div>
+                <div key={exam.id} className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="secondary" className="uppercase text-[10px] tracking-widest">{exam.examLevelCode}</Badge>
                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{exam.institutionName}</span>
                     </div>
-                    <h3 className="text-lg font-black text-foreground mb-1">{exam.examLevelName}</h3>
+                    <h3 className="text-lg font-black text-foreground mb-1 group-hover:text-primary transition-colors">
+                      <Link to={`/verify/${token}/exam/${exam.id}`}>
+                        {exam.examLevelName}
+                      </Link>
+                    </h3>
                     <p className="text-sm font-medium text-muted-foreground">Administered in {exam.year}</p>
                   </div>
                   <div className="flex items-center gap-8">
-                    {exam.percentile && (
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Percentile</p>
-                        <p className="text-lg font-black text-foreground">{exam.percentile}th</p>
+                    <div className="flex items-center gap-8">
+                      {exam.percentile && (
+                        <div className="text-center">
+                          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Percentile</p>
+                          <p className="text-lg font-black text-foreground">{exam.percentile}th</p>
+                        </div>
+                      )}
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Total Score</p>
+                        <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">{exam.totalScore}</p>
                       </div>
-                    )}
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Total Score</p>
-                      <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">{exam.totalScore}</p>
                     </div>
+                    <Link 
+                      to={`/verify/${token}/exam/${exam.id}`}
+                      className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-all shadow-sm"
+                    >
+                      <ArrowUpRight size={18} />
+                    </Link>
                   </div>
                 </div>
               ))}

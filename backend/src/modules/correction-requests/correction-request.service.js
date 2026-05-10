@@ -92,6 +92,37 @@ export const getStudentCorrectionRequestsService = async (studentId) => {
   return await findCorrectionRequestsByStudentId(studentId);
 };
 
+export const cancelCorrectionRequestService = async ({ id, studentId, req }) => {
+  const request = await findCorrectionRequestById(id);
+  if (!request) {
+    throw new AppError("Correction request not found.", 404);
+  }
+
+  if (request.studentId !== studentId) {
+    throw new AppError("You do not have permission to cancel this request.", 403);
+  }
+
+  if (request.status !== "PENDING") {
+    throw new AppError(`Cannot cancel a request that has already been ${request.status.toLowerCase()}.`, 400);
+  }
+
+  const deleted = await deleteCorrectionRequestById(id);
+  if (!deleted) {
+    throw new AppError("Failed to cancel request.", 500);
+  }
+
+  await logActionService({
+    user: { id: studentId, roleName: "STUDENT" },
+    action: "CANCEL_CORRECTION",
+    entityType: "CORRECTION_REQUEST",
+    entityId: id,
+    oldValues: request,
+    req,
+  });
+
+  return true;
+};
+
 // ===================== ADMIN ACTIONS =====================
 
 export const listAllCorrectionRequestsService = async ({ user, filters }) => {

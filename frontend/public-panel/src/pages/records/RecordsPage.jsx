@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link, useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
-import { GraduationCap, BookOpen, AlertCircle, Calendar } from 'lucide-react'
+import { GraduationCap, BookOpen, AlertCircle, Calendar, ArrowUpRight } from 'lucide-react'
 import { getMyExams, getMyDegrees, submitCorrectionRequest } from '../../api/student.api'
 import { toast } from 'sonner'
 import Spinner from '../../components/ui/Spinner'
@@ -9,11 +10,28 @@ import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 
 export default function RecordsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') === 'exams' ? 'exams' : 'degrees'
+  
   const { data: examsData, isLoading: examsLoading, refetch: refetchExams } = useQuery({ queryKey: ['my-exams'], queryFn: getMyExams })
   const { data: degreesData, isLoading: degreesLoading, refetch: refetchDegrees } = useQuery({ queryKey: ['my-degrees'], queryFn: getMyDegrees })
 
-  const [activeTab, setActiveTab] = useState('degrees') // 'degrees' | 'exams'
+  const [activeTab, setActiveTab] = useState(initialTab)
   
+  // Sync tab state with URL
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    setSearchParams({ tab })
+  }
+
+  // Update tab if URL changes externally
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && (tab === 'degrees' || tab === 'exams')) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
+
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [correctionText, setCorrectionText] = useState('')
@@ -61,7 +79,7 @@ export default function RecordsPage() {
 
       <div className="flex p-1 bg-secondary border border-border rounded-xl w-fit">
         <button
-          onClick={() => setActiveTab('degrees')}
+          onClick={() => handleTabChange('degrees')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'degrees' 
               ? 'bg-background text-foreground shadow-sm' 
@@ -72,7 +90,7 @@ export default function RecordsPage() {
           Degrees ({degrees.length})
         </button>
         <button
-          onClick={() => setActiveTab('exams')}
+          onClick={() => handleTabChange('exams')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'exams' 
               ? 'bg-background text-foreground shadow-sm' 
@@ -100,9 +118,13 @@ export default function RecordsPage() {
                     <GraduationCap size={80} />
                   </div>
                   <div className="relative z-10">
-                    <Badge variant="primary" className="mb-4 text-[10px] uppercase tracking-widest">{degree.level || 'Degree'}</Badge>
-                    <h3 className="text-xl font-black text-foreground leading-tight mb-2">{degree.title}</h3>
-                    {degree.major && <p className="text-sm font-bold text-muted-foreground mb-6">Major: {degree.major}</p>}
+                    <Badge variant="primary" className="mb-4 text-[10px] uppercase tracking-widest">{degree.degreeLevelCode || 'Degree'}</Badge>
+                    <h3 className="text-xl font-black text-foreground leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer">
+                      <Link to={`/dashboard/records/degree/${degree.id}`}>
+                        {degree.degreeTitle}
+                      </Link>
+                    </h3>
+                    {degree.departmentName && <p className="text-sm font-bold text-muted-foreground mb-6">Department: {degree.departmentName}</p>}
                     
                     <div className="space-y-3 pt-6 border-t border-border/60">
                       <div className="flex items-center gap-3 text-sm font-medium text-foreground">
@@ -110,17 +132,25 @@ export default function RecordsPage() {
                           <Calendar size={14} className="text-muted-foreground" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Issue Date</span>
-                          {format(new Date(degree.issueDate), 'MMM dd, yyyy')}
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Graduation Date</span>
+                          {degree.graduationDate ? format(new Date(degree.graduationDate), 'MMM dd, yyyy') : 'N/A'}
                         </div>
                       </div>
                       
-                      <button 
-                        onClick={() => openCorrection(degree, 'DEGREE')}
-                        className="flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors mt-6"
-                      >
-                        <AlertCircle size={14} /> Request Correction
-                      </button>
+                      <div className="flex items-center justify-between mt-6">
+                        <button 
+                          onClick={() => openCorrection(degree, 'DEGREE')}
+                          className="flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
+                        >
+                          <AlertCircle size={14} /> Correction
+                        </button>
+                        <Link 
+                          to={`/dashboard/records/degree/${degree.id}`}
+                          className="flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-widest hover:underline"
+                        >
+                          View Details <ArrowUpRight size={14} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -144,9 +174,13 @@ export default function RecordsPage() {
                     <BookOpen size={80} />
                   </div>
                   <div className="relative z-10">
-                    <Badge variant="secondary" className="mb-4 text-[10px] uppercase tracking-widest">{exam.examType || 'Exam'}</Badge>
-                    <h3 className="text-xl font-black text-foreground leading-tight mb-2">{exam.subjectName || 'General Exam'}</h3>
-                    <p className="text-sm font-bold text-muted-foreground mb-6">Score: <span className="text-primary text-base">{exam.score}</span> / {exam.maxScore || 100}</p>
+                    <Badge variant="secondary" className="mb-4 text-[10px] uppercase tracking-widest">{exam.examLevelCode || 'Exam'}</Badge>
+                    <h3 className="text-xl font-black text-foreground leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer">
+                      <Link to={`/dashboard/records/exam/${exam.id}`}>
+                        {exam.examLevelName || 'General Exam'}
+                      </Link>
+                    </h3>
+                    <p className="text-sm font-bold text-muted-foreground mb-6">Score: <span className="text-primary text-base">{exam.totalScore}</span></p>
                     
                     <div className="space-y-3 pt-6 border-t border-border/60">
                       <div className="flex items-center gap-3 text-sm font-medium text-foreground">
@@ -154,17 +188,25 @@ export default function RecordsPage() {
                           <Calendar size={14} className="text-muted-foreground" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Test Date</span>
-                          {exam.examDate ? format(new Date(exam.examDate), 'MMM dd, yyyy') : 'N/A'}
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Academic Year</span>
+                          {exam.year || 'N/A'}
                         </div>
                       </div>
                       
-                      <button 
-                        onClick={() => openCorrection(exam, 'EXAM')}
-                        className="flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors mt-6"
-                      >
-                        <AlertCircle size={14} /> Request Correction
-                      </button>
+                      <div className="flex items-center justify-between mt-6">
+                        <button 
+                          onClick={() => openCorrection(exam, 'EXAM')}
+                          className="flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
+                        >
+                          <AlertCircle size={14} /> Correction
+                        </button>
+                        <Link 
+                          to={`/dashboard/records/exam/${exam.id}`}
+                          className="flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-widest hover:underline"
+                        >
+                          View Details <ArrowUpRight size={14} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

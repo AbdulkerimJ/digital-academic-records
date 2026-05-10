@@ -1,5 +1,12 @@
 import express from "express";
-import { generateQrCode, getMyQrTokens, verifyQrToken, previewQrCode, deleteQrToken } from "./qr.controller.js";
+import { 
+  generateQrCode, 
+  getMyQrTokens, 
+  verifyQrToken, 
+  verifyRecordDetail, 
+  previewQrCode, 
+  deleteQrToken 
+} from "./qr.controller.js";
 import { qrLimiter } from "../../common/middlewares/rateLimiter.js";
 
 
@@ -17,5 +24,6 @@ router.delete("/:id", protectStudent, deleteQrToken);
 
 // Public — no auth required (employer scans the QR)
 router.get("/verify/:token", qrLimiter, verifyQrToken);
+router.get("/verify/:token/records/:type/:id", qrLimiter, verifyRecordDetail);
 
 export default router;

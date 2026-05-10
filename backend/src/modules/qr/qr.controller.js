@@ -156,3 +156,24 @@ export const verifyQrToken = catchAsync(async (req, res) => {
   const records = await verifyQrTokenService(token);
   return sendSuccess(res, "Student records verified successfully", records);
 });
+
+export const verifyRecordDetail = catchAsync(async (req, res) => {
+  const { token, type, id } = req.params;
+  const qrRecord = await verifyQrTokenService(token);
+  
+  let record;
+  if (type === 'degree') {
+    record = qrRecord.degrees.find(d => d.id === id);
+  } else {
+    record = qrRecord.exams.find(e => e.id === id);
+  }
+
+  if (!record) {
+    return res.status(404).json({ success: false, message: "Record not found or unauthorized" });
+  }
+
+  return sendSuccess(res, "Record detail verified successfully", { 
+    record, 
+    student: qrRecord.student 
+  });
+});

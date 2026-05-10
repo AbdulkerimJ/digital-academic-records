@@ -67,8 +67,8 @@ export default function DashboardPage() {
           <div className="flex items-end gap-3 mb-4">
             <span className="text-4xl font-black text-foreground">{degreesCount}</span>
           </div>
-          <Link to="/records" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-            View records <ChevronRight size={16} />
+          <Link to="/dashboard/records?tab=degrees" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+            View degrees <ChevronRight size={16} />
           </Link>
         </div>
 
@@ -83,7 +83,7 @@ export default function DashboardPage() {
           <div className="flex items-end gap-3 mb-4">
             <span className="text-4xl font-black text-foreground">{examsCount}</span>
           </div>
-          <Link to="/records" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:opacity-80 transition-opacity">
+          <Link to="/dashboard/records?tab=exams" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:opacity-80 transition-opacity">
             View exams <ChevronRight size={16} />
           </Link>
         </div>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
           <div className="flex items-end gap-3 mb-4">
             <span className="text-4xl font-black text-foreground">{qrCount}</span>
           </div>
-          <Link to="/qr-codes" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity">
+          <Link to="/dashboard/qr-codes" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity">
             Manage tokens <ChevronRight size={16} />
           </Link>
         </div>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
           <div className="flex items-end gap-3 mb-4">
             <span className="text-4xl font-black text-foreground">{requestsCount}</span>
           </div>
-          <Link to="/requests" className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity">
+          <Link to="/dashboard/requests" className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity">
             Check status <ChevronRight size={16} />
           </Link>
         </div>

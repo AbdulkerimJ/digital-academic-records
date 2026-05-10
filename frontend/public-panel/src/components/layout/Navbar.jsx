@@ -61,7 +61,9 @@ export default function Navbar() {
           </div>
           <div className="flex flex-col">
             <span className="text-[15px] font-extrabold text-foreground leading-none tracking-tight">DAR Portal</span>
-            <span className="text-[11px] font-medium text-muted-foreground mt-0.5">Student Access</span>
+            <span className="text-[11px] font-medium text-muted-foreground mt-0.5">
+              {student ? 'Student Access' : 'Verification Center'}
+            </span>
           </div>
         </Link>
 
@@ -111,7 +113,7 @@ export default function Navbar() {
                 <div className="h-px bg-border my-1" />
                 <div className="px-1.5">
                   <NavLink 
-                    to="/profile" 
+                    to="/dashboard/profile" 
                     className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors"
                     onClick={() => setDropdown(false)}
                   >
@@ -169,7 +171,7 @@ export default function Navbar() {
           ))}
           <div className="h-px bg-border my-2 mx-2" />
           <NavLink 
-            to="/profile" 
+            to="/dashboard/profile" 
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-secondary transition-colors"
             onClick={() => setMenuOpen(false)}
           >

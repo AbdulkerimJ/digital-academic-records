@@ -3,7 +3,9 @@ import {
 
   getMe,
   getMyExams,
+  getMyExamDetail,
   getMyDegrees,
+  getMyDegreeDetail,
   listStudents,
   getStudentById,
   getStudentRecords,
@@ -21,7 +23,7 @@ import {
 import { protectStudent } from "./student.middleware.js";
 import { protectUser, restrictTo } from "../users/user.middleware.js";
 import upload from "../../common/utils/upload.js";
-import { submitRequest, getMyRequests } from "../correction-requests/correction-request.controller.js";
+import { submitRequest, getMyRequests, cancelRequest } from "../correction-requests/correction-request.controller.js";
 
 const router = express.Router();
 
@@ -34,12 +36,15 @@ router.post("/logout", protectStudent, logout);
 // Student Profile & Records
 router.get("/me", protectStudent, getMe);
 router.get("/me/exams", protectStudent, getMyExams);
+router.get("/me/exams/:id", protectStudent, getMyExamDetail);
 
 router.get("/me/degrees", protectStudent, getMyDegrees);
+router.get("/me/degrees/:id", protectStudent, getMyDegreeDetail);
 
 // Correction Requests (Student facing)
 router.post("/records/:recordId/correction", protectStudent, submitRequest);
 router.get("/correction-requests", protectStudent, getMyRequests);
+router.delete("/correction-requests/:id", protectStudent, cancelRequest);
 
 
 // Admin & Registrar Student Management

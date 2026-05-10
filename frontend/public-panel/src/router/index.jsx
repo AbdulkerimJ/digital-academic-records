@@ -6,6 +6,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage'
 import RecordsPage from '../pages/records/RecordsPage'
 import QRCodesPage from '../pages/qr/QRCodesPage'
 import RequestsPage from '../pages/requests/RequestsPage'
+import ProfilePage from '../pages/profile/ProfilePage'
+import RecordDetailPage from '../pages/records/RecordDetailPage'
 import Spinner from '../components/ui/Spinner'
 
 import LandingPage from '../pages/landing/LandingPage'
@@ -52,6 +54,10 @@ const router = createBrowserRouter([
     path: '/verify/:token',
     element: <VerifyPage />,
   },
+  {
+    path: '/verify/:token/:type/:id',
+    element: <RecordDetailPage />,
+  },
 
   {
     path: '/dashboard',
@@ -70,6 +76,10 @@ const router = createBrowserRouter([
         element: <RecordsPage />,
       },
       {
+        path: 'records/:type/:id',
+        element: <RecordDetailPage />,
+      },
+      {
         path: 'qr-codes',
         element: <QRCodesPage />,
       },
@@ -79,7 +89,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'profile',
-        element: <div className="p-8"><h1 className="text-2xl font-bold">Profile Page</h1><p className="text-muted-foreground mt-2">Coming soon...</p></div>,
+        element: <ProfilePage />,
       }
     ],
   },

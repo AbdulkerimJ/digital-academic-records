@@ -39,3 +39,8 @@ export const registerBulkStudentsStream = async (file) => {
 
   return response
 }
+
+export const deleteStudent = async (id) => {
+  const response = await api.delete(`/api/students/${id}`)
+  return response.data
+}

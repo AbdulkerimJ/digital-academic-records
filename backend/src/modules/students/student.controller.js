@@ -1,6 +1,12 @@
 import catchAsync from "../../common/utils/catchAsync.js";
 import AppError from "../../common/utils/appError.js";
 import { sendSuccess } from "../../common/utils/response.js";
+import { 
+  findExamRecordById 
+} from "../exams/exam.repository.js";
+import { 
+  findDegreeById 
+} from "../degrees/degree.repository.js";
 import {
   getStudentProfileService,
   getMyExamsService,
@@ -28,6 +34,22 @@ export const getMyExams = catchAsync(async (req, res) => {
 export const getMyDegrees = catchAsync(async (req, res) => {
   const { degrees, count } = await getMyDegreesService(req.user.id);
   return sendSuccess(res, "Your degree records fetched successfully", { count, degrees });
+});
+
+export const getMyDegreeDetail = catchAsync(async (req, res) => {
+  const degree = await findDegreeById(req.params.id);
+  if (!degree || degree.studentId !== req.user.id) {
+    throw new AppError("Degree record not found", 404);
+  }
+  return sendSuccess(res, "Degree record fetched successfully", { degree });
+});
+
+export const getMyExamDetail = catchAsync(async (req, res) => {
+  const exam = await findExamRecordById(req.params.id);
+  if (!exam || exam.studentId !== req.user.id) {
+    throw new AppError("Exam record not found", 404);
+  }
+  return sendSuccess(res, "Exam record fetched successfully", { exam });
 });
 
 // ===================== ADMIN AND REGISTRAR HANDLERS =====================

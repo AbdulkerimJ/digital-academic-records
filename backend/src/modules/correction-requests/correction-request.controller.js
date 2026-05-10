@@ -30,6 +30,15 @@ export const getMyRequests = catchAsync(async (req, res) => {
   return sendSuccess(res, "Your correction requests fetched successfully", { count: requests.length, requests });
 });
 
+export const cancelRequest = catchAsync(async (req, res) => {
+  await cancelCorrectionRequestService({
+    id: req.params.id,
+    studentId: req.user.id,
+    req,
+  });
+  return sendSuccess(res, "Correction request cancelled successfully");
+});
+
 // ===================== ADMIN HANDLERS =====================
 
 export const listRequests = catchAsync(async (req, res) => {
