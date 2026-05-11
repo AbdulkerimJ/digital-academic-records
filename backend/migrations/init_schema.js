@@ -248,7 +248,7 @@ async function migrate() {
     ON DELETE RESTRICT,
 
   -- Prevent duplicate degrees
-  UNIQUE (student_id, degree_level_id, degree_title_id, institution_id, graduation_date)
+  UNIQUE (student_id, degree_level_id, degree_title_id, institution_id)
 );
     `);
 

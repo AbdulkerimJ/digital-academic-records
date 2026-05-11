@@ -24,7 +24,7 @@ export const translateDatabaseError = (err) => {
       return new AppError("This student already has an exam record for this level and year at this institution.", 400);
     }
     if (constraint.includes("degrees_student_id") || constraint.includes("degrees_pkey")) {
-      return new AppError("This student already has a degree record for this title and graduation date.", 400);
+      return new AppError("This student already has a degree record for this title at this institution.", 400);
     }
     if (constraint.includes("college_institution_id_code_key")) {
       return new AppError("A college with this code already exists in this institution.", 400);
