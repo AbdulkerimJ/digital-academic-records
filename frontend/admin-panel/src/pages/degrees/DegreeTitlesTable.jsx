@@ -102,34 +102,34 @@ export default function DegreeTitlesTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-bold tracking-tight">Degree Titles</h3>
-          <p className="text-xs text-muted-foreground">Manage specific academic qualifications (e.g., BSc Computer Science).</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-muted/20 border-b border-border p-1.5 gap-4">
+        <div className="pl-2">
+          <h3 className="text-sm font-bold tracking-tight">Degree Titles</h3>
+          <p className="text-[10px] text-muted-foreground font-medium">Manage specific academic qualifications (e.g., BSc Computer Science).</p>
         </div>
-        <Button onClick={() => openModal()} className="rounded-xl gap-2 shadow-sm shrink-0">
-          <Plus size={16} /> Add Title
+        <Button onClick={() => openModal()} className="rounded-none h-9 gap-2 shadow-sm shrink-0 font-bold text-xs">
+          <Plus size={14} /> Add Title
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 bg-card border border-border/60 p-3 rounded-2xl shadow-sm">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+      <div className="flex flex-wrap items-center gap-4 bg-muted/20 border-b border-border p-1.5 relative overflow-hidden">
+        <div className="relative flex-1 md:max-w-md group">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
           <Input 
             placeholder="Search titles or codes..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 pl-10 rounded-xl bg-muted/20 border-none focus-visible:ring-primary/20 text-sm"
+            className="h-9 pl-10 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold"
           />
         </div>
         
         <div className="flex items-center gap-2 shrink-0">
-          <Filter size={14} className="text-muted-foreground" />
+          <Filter size={12} className="text-muted-foreground/50" />
           <Select value={levelFilter} onValueChange={setLevelFilter}>
-            <SelectTrigger className="h-10 w-[160px] rounded-xl bg-muted/20 border-none focus:ring-primary/20 text-xs font-semibold">
+            <SelectTrigger className="h-9 w-[160px] rounded-none bg-card border-border focus:ring-primary/20 text-xs font-bold">
               <SelectValue placeholder="All Levels" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl shadow-xl">
+            <SelectContent className="rounded-none shadow-xl border-border">
               <SelectItem value="all">All Levels</SelectItem>
               {levels.map(l => (
                 <SelectItem key={l.id} value={l.id.toString()}>{l.name}</SelectItem>
@@ -139,15 +139,15 @@ export default function DegreeTitlesTable() {
         </div>
       </div>
 
-      <Card className="rounded-2xl border-border/60 overflow-hidden shadow-sm">
+      <Card className="rounded-none border-border overflow-hidden shadow-sm p-0">
         <Table>
-          <TableHeader className="bg-muted/30">
-            <TableRow className="hover:bg-transparent border-muted/60">
-              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground pl-6">Level</TableHead>
-              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Code</TableHead>
-              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Qualification Title</TableHead>
-              <TableHead className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right pr-6 text-[10px] font-bold capitalize tracking-widest text-muted-foreground">Actions</TableHead>
+          <TableHeader className="bg-muted/10">
+            <TableRow className="hover:bg-transparent border-border border-b-2">
+              <TableHead className="text-[13px] font-bold capitalize tracking-widest text-muted-foreground pl-6 py-2 border-r border-border/50">Level</TableHead>
+              <TableHead className="text-[13px] font-bold capitalize tracking-widest text-muted-foreground py-2 border-r border-border/50">Code</TableHead>
+              <TableHead className="text-[13px] font-bold capitalize tracking-widest text-muted-foreground py-2 border-r border-border/50">Qualification Title</TableHead>
+              <TableHead className="text-[13px] font-bold capitalize tracking-widest text-muted-foreground py-2 border-r border-border/50">Status</TableHead>
+              <TableHead className="text-right pr-6 text-[13px] font-bold capitalize tracking-widest text-muted-foreground py-2">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -167,21 +167,21 @@ export default function DegreeTitlesTable() {
               </TableRow>
             ) : (
               titles.map((t) => (
-                <TableRow key={t.id} className="border-muted/40 hover:bg-muted/5 transition-colors">
-                  <TableCell className="pl-6 font-bold text-xs">
-                    <Badge variant="outline" className="rounded-md bg-muted/30 border-muted font-bold text-[9px] capitalize">
+                <TableRow key={t.id} className="border-border hover:bg-muted/5 transition-colors group">
+                  <TableCell className="py-1.5 pl-6">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-muted/20 border border-border text-[10px] font-bold text-muted-foreground tracking-tight uppercase">
                       {t.levelName || "Unknown"}
-                    </Badge>
+                    </div>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-primary font-semibold">{t.code}</TableCell>
-                  <TableCell className="font-semibold text-sm">{t.title}</TableCell>
-                  <TableCell>
-                    <Badge variant={t.isActive ? "default" : "secondary"} className={`rounded-md text-[10px] capitalize font-bold px-2 ${t.isActive ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20' : ''}`}>
+                  <TableCell className="py-1.5 font-mono text-xs text-primary font-medium">{t.code}</TableCell>
+                  <TableCell className="py-1.5 font-medium text-base tracking-tight">{t.title}</TableCell>
+                  <TableCell className="py-1.5">
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 border text-[11px] font-semibold tracking-widest ${t.isActive ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' : 'bg-muted/20 text-muted-foreground border-border'}`}>
                       {t.isActive ? "Active" : "Disabled"}
-                    </Badge>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5" onClick={() => openModal(t)}>
+                  <TableCell className="py-1.5 text-right pr-6">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(t)}>
                       <Edit2 size={14} />
                     </Button>
                   </TableCell>
@@ -193,14 +193,14 @@ export default function DegreeTitlesTable() {
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[450px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[450px] rounded-none border border-border shadow-2xl p-0 overflow-hidden bg-card">
           <form onSubmit={handleSubmit}>
-            <div className="bg-primary/5 p-8 border-b border-primary/10">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold tracking-tight">
-                  {editingTitle ? "Edit Qualification" : "Add Qualification"}
+            <div className="bg-muted/30 p-8 border-b border-border text-left space-y-4">
+              <DialogHeader className="text-left">
+                <DialogTitle className="text-2xl font-black tracking-tighter capitalize leading-none">
+                  {editingTitle ? "Edit Title" : "Add Title"}
                 </DialogTitle>
-                <DialogDescription className="text-xs">
+                <DialogDescription className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">
                   Define a specific academic title and link it to an educational level.
                 </DialogDescription>
               </DialogHeader>
@@ -210,10 +210,10 @@ export default function DegreeTitlesTable() {
               <div className="space-y-1.5">
                 <Label htmlFor="level" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground ml-1">Educational Level</Label>
                 <Select value={formData.degreeLevelId} onValueChange={(val) => setFormData({...formData, degreeLevelId: val})}>
-                  <SelectTrigger className="h-11 rounded-xl bg-muted/20 border-none focus:ring-primary/20 font-semibold">
+                  <SelectTrigger className="h-11 rounded-none bg-muted/10 border border-border focus:ring-primary/20 font-bold text-xs">
                     <SelectValue placeholder="Select level" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl shadow-xl">
+                  <SelectContent className="rounded-none shadow-xl border-border">
                     {levels.map(l => (
                       <SelectItem key={l.id} value={l.id.toString()}>{l.name}</SelectItem>
                     ))}
@@ -228,7 +228,7 @@ export default function DegreeTitlesTable() {
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   placeholder="e.g. Computer Science & Engineering"
-                  className="h-11 rounded-xl bg-muted/20 border-none focus-visible:ring-primary/20"
+                  className="h-11 rounded-none bg-muted/10 border border-border focus-visible:ring-primary/20 text-xs font-bold"
                   required
                 />
               </div>
@@ -240,24 +240,24 @@ export default function DegreeTitlesTable() {
                   value={formData.code}
                   onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
                   placeholder="e.g. CS-ENG"
-                  className="h-11 rounded-xl bg-muted/20 border-none focus-visible:ring-primary/20 font-mono"
+                  className="h-11 rounded-none bg-muted/10 border border-border focus-visible:ring-primary/20 font-mono text-xs font-bold"
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-muted/50">
+              <div className="flex items-center justify-between p-4 bg-muted/10 rounded-none border border-border">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className={formData.isActive ? "text-emerald-500" : "text-muted-foreground/30"} size={20} />
+                  <CheckCircle2 className={formData.isActive ? "text-primary" : "text-muted-foreground/30"} size={20} />
                   <div>
-                    <p className="text-xs font-bold">Active Status</p>
-                    <p className="text-[10px] text-muted-foreground">Available for student records.</p>
+                    <p className="text-xs font-bold text-foreground">Active Status</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">Available for student records.</p>
                   </div>
                 </div>
                 <Button
                   type="button"
                   variant={formData.isActive ? "default" : "outline"}
                   size="sm"
-                  className={`rounded-lg h-7 px-3 font-bold text-[10px] capitalize tracking-wider ${formData.isActive ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20' : ''}`}
+                  className={`rounded-none h-7 px-3 font-bold text-[10px] capitalize tracking-wider ${formData.isActive ? 'bg-primary hover:brightness-110 shadow-lg shadow-primary/20' : ''}`}
                   onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
                 >
                   {formData.isActive ? "Active" : "Disabled"}
@@ -266,8 +266,8 @@ export default function DegreeTitlesTable() {
             </div>
 
             <DialogFooter className="p-8 pt-0 gap-3">
-              <Button type="button" variant="ghost" onClick={closeModal} className="rounded-xl font-semibold">Cancel</Button>
-              <Button type="submit" disabled={mutation.isPending} className="rounded-xl px-8 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
+              <Button type="button" variant="ghost" onClick={closeModal} className="rounded-none font-bold text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">Cancel</Button>
+              <Button type="submit" disabled={mutation.isPending} className="rounded-none h-11 px-8 font-bold text-xs uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:brightness-110">
                 {mutation.isPending ? "Saving..." : "Save Title"}
               </Button>
             </DialogFooter>

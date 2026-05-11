@@ -71,7 +71,7 @@ export default function CorrectionTable() {
   return (
     <div className="space-y-4">
       {/* 1. Industrial Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/20 border-b border-border p-4 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/20 border-b border-border p-1.5 relative overflow-hidden">
         <FetchingIndicator isFetching={isFetching} />
         <div className="flex items-center gap-0 bg-card border border-border">
           {["pending", "approved", "rejected", "all"].map((status) => (
@@ -81,7 +81,7 @@ export default function CorrectionTable() {
               size="sm"
               onClick={() => setStatusFilter(status)}
               className={cn(
-                "rounded-none h-10 px-6 text-xs font-bold transition-all border-r last:border-0 border-border",
+                "rounded-none h-9 px-6 text-xs font-bold transition-all border-r last:border-0 border-border",
                 statusFilter === status 
                   ? "bg-primary text-white hover:bg-primary hover:text-white" 
                   : "text-muted-foreground hover:bg-muted/50"
@@ -92,8 +92,8 @@ export default function CorrectionTable() {
           ))}
         </div>
         
-        <div className="flex items-center gap-4">
-           <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60">
+        <div className="flex items-center gap-4 pr-4">
+           <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
               <Activity size={10} /> Found {totalCount} requests
            </div>
         </div>
@@ -104,12 +104,12 @@ export default function CorrectionTable() {
         <Table>
           <TableHeader className="bg-muted/10">
             <TableRow className="hover:bg-transparent border-border border-b-2">
-              <TableHead className="w-[280px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Student name</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Institution</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Type</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Details</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground py-4 text-center border-r border-border/50">Status</TableHead>
-              <TableHead className="text-right pr-8 text-xs font-bold text-muted-foreground py-4">Actions</TableHead>
+              <TableHead className="w-[280px] text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Student name</TableHead>
+              <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Institution</TableHead>
+              <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Type</TableHead>
+              <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Details</TableHead>
+              <TableHead className="text-[13px] font-bold text-muted-foreground py-2 text-center border-r border-border/50">Status</TableHead>
+              <TableHead className="text-right pr-8 text-[13px] font-bold text-muted-foreground py-2">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -131,39 +131,39 @@ export default function CorrectionTable() {
                   className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
                   onClick={() => navigate(`/corrections/${request.id}`)}
                 >
-                  <TableCell className="py-2 pl-6">
+                  <TableCell className="py-1.5 pl-6">
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
+                      <span className="font-medium text-base tracking-tight text-foreground group-hover:text-primary transition-colors">
                         {request.studentFirstName} {request.studentLastName}
                       </span>
-                      <code className="text-[10px] font-bold text-muted-foreground font-mono">
+                      <code className="text-xs font-normal text-muted-foreground font-mono">
                         {request.studentNationalId}
                       </code>
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-xs tracking-tight text-foreground line-clamp-1 max-w-[150px]">
+                      <span className="font-medium text-xs tracking-tight text-foreground line-clamp-1 max-w-[150px]">
                         {request.institutionName}
                       </span>
-                      <code className="text-[8px] font-bold text-muted-foreground/40 font-mono">
+                      <code className="text-[10px] font-normal text-muted-foreground/40 font-mono">
                         {request.institutionId?.slice(0, 12)}
                       </code>
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-6">
-                    <div className="inline-flex px-2 py-0.5 bg-muted/50 border border-border text-[9px] font-bold text-muted-foreground capitalize tracking-widest">
+                  <TableCell className="py-1.5 px-6">
+                    <div className="inline-flex px-2 py-0.5 bg-muted/50 border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                       {request.recordType}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-6">
-                    <p className="text-[11px] font-medium text-muted-foreground line-clamp-1 max-w-[200px]">
+                  <TableCell className="py-1.5 px-6">
+                    <p className="text-xs font-medium text-muted-foreground line-clamp-1 max-w-[200px]">
                       {request.requestText}
                     </p>
                   </TableCell>
-                  <TableCell className="py-2 px-6 text-center">
+                  <TableCell className="py-1.5 px-6 text-center">
                     <div className={cn(
-                      "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold",
+                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 border text-[11px] font-semibold tracking-widest",
                       request.status === 'APPROVED' ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" :
                       request.status === 'PENDING' ? "bg-amber-500/10 text-amber-700 border-amber-500/20" :
                       "bg-destructive/10 text-destructive border-destructive/20"
@@ -174,10 +174,10 @@ export default function CorrectionTable() {
                           request.status === 'APPROVED' ? "bg-emerald-500" : "bg-amber-500"
                         )} />
                       )}
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1).toLowerCase()}
+                      {request.status}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right pr-8 py-2">
+                  <TableCell className="text-right pr-8 py-1.5">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <Button 
                         variant="ghost" 
@@ -196,7 +196,7 @@ export default function CorrectionTable() {
       </div>
 
       {/* 3. Standard Pagination */}
-      <div className="p-4 border-t border-border bg-muted/5">
+      <div className="p-1 border-t border-border bg-muted/5">
         <Pagination 
           page={page} 
           totalPages={totalPages} 

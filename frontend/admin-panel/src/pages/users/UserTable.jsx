@@ -62,33 +62,33 @@ export default function UserTable({
     switch (status) {
       case "Active":
         return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-700 tracking-widest">
             <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
             Active account
           </div>
         )
       case "Pending":
         return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-500/10 border border-slate-500/20 text-[9px] font-bold text-slate-600 tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-500/10 border border-slate-500/20 text-[11px] font-semibold text-slate-600 tracking-widest">
             Pending invite
           </div>
         )
       case "Suspended":
         return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-700 tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[11px] font-semibold text-amber-700 tracking-widest">
             <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
             Suspended
           </div>
         )
       case "Revoked":
         return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-red-500/10 border border-red-500/20 text-[9px] font-bold text-red-700 tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-red-500/10 border border-red-500/20 text-[11px] font-semibold text-red-700 tracking-widest">
             Revoked
           </div>
         )
       default:
         return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-muted/20 border border-border text-[9px] font-bold text-muted-foreground tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-muted/20 border border-border text-[11px] font-semibold text-muted-foreground tracking-widest">
             {status}
           </div>
         )
@@ -105,7 +105,7 @@ export default function UserTable({
         )}
         onClick={() => onSort(field)}
       >
-        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">
+        <div className="flex items-center justify-between py-2 px-6 text-[13px] font-bold text-muted-foreground capitalize tracking-widest">
           {label}
           <div className="flex flex-col gap-0.5">
             {isSorted ? (
@@ -128,8 +128,8 @@ export default function UserTable({
               <SortHeader field="firstName" label="User details" className="w-[300px]" />
               <SortHeader field="roleName" label="System role" className="w-[180px]" />
               <SortHeader field="institutionName" label="Institution" className="w-[250px]" />
-              <TableHead className="py-4 px-6 text-[10px] font-bold text-muted-foreground border-r border-border/50 w-[150px] capitalize tracking-widest">Status</TableHead>
-              <TableHead className="text-right pr-8 py-4 text-[10px] font-bold text-muted-foreground capitalize tracking-widest">Actions</TableHead>
+              <TableHead className="py-2 px-6 text-[13px] font-bold text-muted-foreground border-r border-border/50 w-[150px] capitalize tracking-widest">Status</TableHead>
+              <TableHead className="text-right pr-8 py-2 text-[13px] font-bold text-muted-foreground capitalize tracking-widest">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -163,42 +163,42 @@ export default function UserTable({
             ) : (
               users.map((user) => (
                 <TableRow key={user.id} className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0">
-                  <TableCell className="py-3 px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-xs shrink-0 font-mono">
+                      <div className="h-7 w-7 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-[9px] shrink-0 font-mono">
                         {user.firstName?.[0]}{user.lastName?.[0]}
                       </div>
                       <div className="flex flex-col min-w-0 text-left">
-                        <span className="font-black text-xs tracking-tighter text-foreground capitalize group-hover:text-primary transition-colors truncate">
+                        <span className="font-medium text-base tracking-tight text-foreground capitalize group-hover:text-primary transition-colors truncate">
                           {user.firstName} {user.lastName}
                         </span>
-                        <code className="text-[10px] font-bold text-muted-foreground/50 mt-0.5 truncate font-mono">{user.email}</code>
+                        <code className="text-sm font-normal text-muted-foreground/50 mt-0.5 truncate font-mono">{user.email}</code>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex items-center gap-2">
                       <Shield size={12} className={cn(
                         "opacity-30",
                         user.roleName === "SUPER_ADMIN" ? "text-primary opacity-100" : "text-muted-foreground"
                       )} />
                       <span className={cn(
-                        "text-[10px] font-bold capitalize tracking-widest",
-                        user.roleName === "SUPER_ADMIN" ? "text-primary font-black" : "text-muted-foreground/70"
+                        "text-xs font-medium capitalize tracking-widest",
+                        user.roleName === "SUPER_ADMIN" ? "text-primary font-semibold" : "text-muted-foreground/70"
                       )}>
                         {user.roleName.replace("_", " ").toLowerCase()}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex items-center gap-2 text-foreground/80">
                       <User size={12} className="opacity-20" />
-                      <span className="text-[10px] font-bold tracking-tight capitalize truncate max-w-[200px]">
+                      <span className="text-xs font-medium tracking-tight capitalize truncate max-w-[200px]">
                         {user.institutionName || "System managed"}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="px-6">{getStatusBadge(user.status)}</TableCell>
+                  <TableCell className="py-1.5 px-6">{getStatusBadge(user.status)}</TableCell>
                   <TableCell className="text-right pr-8">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <DropdownMenu>
@@ -279,7 +279,7 @@ export default function UserTable({
         totalCount={totalCount} 
         itemName="users" 
         isFetching={isFetching} 
-        className="px-6 py-4 border-t border-border bg-muted/5 rounded-none"
+        className="px-6 py-1 border-t border-border bg-muted/5 rounded-none"
       />
     </div>
   )

@@ -10,10 +10,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ShieldCheck,
-  Activity,
   ArrowUpRight,
   TrendingUp,
-  Clock,
   ChevronRight
 } from "lucide-react";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -88,22 +86,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-4 pb-6">
       
       {/* 1. Refined Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
-        <div className="space-y-3 text-left">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-              <Activity size={10} className="animate-pulse" /> System Online
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
-              <Clock size={10} /> Last Sync: {new Date().toLocaleTimeString()}
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 border-b border-border pb-2">
+        <div className="space-y-1 text-left">
+
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Welcome, <span className="text-primary">{user?.firstName || 'Admin'}</span>
           </h2>
+          <p className="text-muted-foreground font-medium text-xs tracking-tight opacity-70">
+            Overview of your digital academic ecosystem and administrative metrics.
+          </p>
         </div>
       </div>
 
@@ -113,7 +107,7 @@ export default function DashboardPage() {
           <div
             key={i}
             className={cn(
-              "group relative bg-card border border-border p-6 flex flex-col justify-between gap-8 transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1 overflow-hidden",
+              "group relative bg-card border border-border p-5 flex flex-col justify-between gap-6 transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1 overflow-hidden rounded-none",
               stat.urgent && "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]"
             )}
           >
@@ -128,12 +122,12 @@ export default function DashboardPage() {
 
             <div className="flex items-start justify-between relative z-10">
               <div className={cn(
-                "w-11 h-11 flex items-center justify-center border transition-all duration-500",
+                "w-10 h-10 flex items-center justify-center border transition-all duration-500 rounded-none",
                 stat.urgent 
                   ? "bg-amber-500 border-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
                   : "bg-background border-border text-primary group-hover:bg-primary group-hover:border-primary group-hover:text-white group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
               )}>
-                <stat.icon size={20} />
+                <stat.icon size={18} />
               </div>
               <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600/40 capitalize tracking-widest">
                 <ShieldCheck size={12} /> SECURE
@@ -163,18 +157,18 @@ export default function DashboardPage() {
         ))}
 
         {/* 3. Action Protocol Card */}
-        <div className="bg-primary p-6 flex flex-col justify-between text-white group hover:brightness-105 transition-all shadow-xl shadow-primary/20 relative overflow-hidden">
-          <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+        <div className="bg-primary p-5 flex flex-col justify-between text-white group hover:brightness-105 transition-all shadow-xl shadow-primary/20 relative overflow-hidden rounded-none">
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/5 rounded-none blur-3xl group-hover:scale-150 transition-transform duration-700" />
           
           <div className="flex items-center justify-between text-white relative z-10">
             <h4 className="text-sm font-black capitalize tracking-widest">Recent Activity</h4>
             <TrendingUp size={16} className="opacity-50 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
           </div>
           
-          <div className="space-y-4 mt-6 relative z-10 text-left">
+          <div className="space-y-3 mt-4 relative z-10 text-left">
              <p className="text-[10px] font-bold capitalize tracking-[0.2em] text-white/70">Check system actions</p>
              <Link to="/audit-logs">
-               <button className="h-10 w-full bg-white/10 border border-white/20 hover:bg-white hover:text-primary text-[10px] font-black capitalize tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer">
+               <button className="h-9 w-full bg-white/10 border border-white/20 hover:bg-white hover:text-primary text-[10px] font-black capitalize tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer rounded-none">
                   View Logs <ChevronRight size={14} />
                </button>
              </Link>
@@ -183,14 +177,14 @@ export default function DashboardPage() {
       </div>
 
       {/* 4. Refined Privacy Disclaimer */}
-      <div className="bg-card border border-border p-8 text-left shadow-sm relative group overflow-hidden">
+      <div className="bg-card border border-border p-6 text-left shadow-sm relative group overflow-hidden rounded-none">
         <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
         <div className="flex items-center gap-3 text-primary mb-3">
           <ShieldCheck size={18} />
-          <h4 className="text-[11px] font-black capitalize tracking-[0.4em]">Privacy Notice</h4>
+          <h4 className="text-[10px] font-black capitalize tracking-[0.4em] uppercase">Privacy Protocol</h4>
         </div>
-        <p className="text-[13px] text-muted-foreground font-medium tracking-tight max-w-4xl leading-relaxed">
-          This administrative panel is restricted to authorized personnel. Every action you take is automatically logged for security and auditing purposes. Please ensure you logout when your session is finished.
+        <p className="text-xs text-muted-foreground font-medium tracking-tight max-w-4xl leading-relaxed">
+          Restricted access. Every administrative action is logged for security and auditing purposes. Ensure session termination upon completion of tasks.
         </p>
       </div>
 

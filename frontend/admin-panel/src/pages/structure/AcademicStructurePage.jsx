@@ -117,19 +117,12 @@ export default function AcademicStructurePage() {
   })
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-4 pb-6">
       
       {/* 1. Header & Context */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-border pb-8">
-        <div className="space-y-3 text-left">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-700 capitalize tracking-widest">
-              <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
-              <Clock size={10} /> {new Date().toLocaleDateString()}
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 border-b border-border pb-2">
+        <div className="space-y-1 text-left">
+
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Academic <span className="text-primary">Structure</span>
           </h2>
@@ -141,11 +134,11 @@ export default function AcademicStructurePage() {
         {/* Institution Context: Top Right */}
         {isSuperAdmin && (
           <div className="flex flex-col gap-1.5 text-right">
-            <div className="flex items-center justify-end gap-2 text-[10px] font-black text-muted-foreground/60 capitalize tracking-widest">
+            <div className="flex items-center justify-end gap-2 text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
               <Building2 size={12} className="text-primary" /> Institution Context
             </div>
             <Select value={selectedInstitutionId} onValueChange={(val) => { setSelectedInstitutionId(val); setSelectedCollege(null); }}>
-              <SelectTrigger className="w-full md:w-64 h-10 rounded-none bg-muted/20 border-border text-xs font-bold focus:ring-primary/20">
+              <SelectTrigger className="w-full md:w-64 h-9 rounded-none bg-card border-border text-xs font-bold focus:ring-primary/20">
                 <SelectValue placeholder="Select Institution" />
               </SelectTrigger>
               <SelectContent className="rounded-none border-border shadow-2xl">
@@ -179,9 +172,9 @@ export default function AcademicStructurePage() {
           <div className="bg-card border border-border p-1 shadow-sm">
             <Table>
               <TableHeader className="bg-muted/10">
-                <TableRow className="hover:bg-transparent border-border">
-                  <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">College</TableHead>
-                  <TableHead className="text-right pr-4 text-[10px] font-black capitalize tracking-widest py-3">Actions</TableHead>
+                <TableRow className="hover:bg-transparent border-border border-b-2">
+                  <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-4 border-r border-border/50">College</TableHead>
+                  <TableHead className="text-right pr-4 text-[13px] font-bold text-muted-foreground py-2">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -203,18 +196,18 @@ export default function AcademicStructurePage() {
                       )}
                       onClick={() => setSelectedCollege(college)}
                     >
-                      <TableCell className="py-3 px-4">
+                      <TableCell className="py-1.5 px-4">
                         <div className="flex flex-col">
                           <span className={cn(
-                            "font-bold text-xs tracking-tight",
-                            selectedCollege?.id === college.id ? "text-primary" : "text-foreground"
+                            "font-medium text-base tracking-tight",
+                            selectedCollege?.id === college.id ? "text-primary font-bold" : "text-foreground"
                           )}>
                             {college.name}
                           </span>
-                          <code className="text-[9px] font-bold text-muted-foreground/40 font-mono">{college.code}</code>
+                          <code className="text-xs font-normal text-muted-foreground/40 font-mono">{college.code}</code>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right pr-4 py-3">
+                      <TableCell className="text-right pr-4 py-1.5">
                         <div className="flex items-center justify-end gap-1">
                           <Button 
                             variant="ghost" 
@@ -275,10 +268,10 @@ export default function AcademicStructurePage() {
               <Table>
                 <TableHeader className="bg-muted/10">
                   <TableRow className="hover:bg-transparent border-border border-b-2">
-                    <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">Department</TableHead>
-                    <TableHead className="text-[10px] font-black capitalize tracking-widest py-3 px-4">Code</TableHead>
-                    <TableHead className="text-center text-[10px] font-black capitalize tracking-widest py-3 px-4">Status</TableHead>
-                    <TableHead className="text-right pr-4 text-[10px] font-black capitalize tracking-widest py-3">Actions</TableHead>
+                    <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-4 border-r border-border/50">Department</TableHead>
+                    <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-4 border-r border-border/50">Code</TableHead>
+                    <TableHead className="text-center text-[13px] font-bold text-muted-foreground py-2 px-4 border-r border-border/50">Status</TableHead>
+                    <TableHead className="text-right pr-4 text-[13px] font-bold text-muted-foreground py-2">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -293,18 +286,18 @@ export default function AcademicStructurePage() {
                   ) : (
                     departments.map((dept) => (
                       <TableRow key={dept.id} className="group border-border hover:bg-primary/[0.02] border-b last:border-0 transition-colors">
-                        <TableCell className="py-3 px-4">
-                          <span className="font-bold text-xs tracking-tight">{dept.name}</span>
+                        <TableCell className="py-1.5 px-4">
+                          <span className="font-medium text-base tracking-tight">{dept.name}</span>
                         </TableCell>
-                        <TableCell className="py-3 px-4">
-                          <code className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
+                        <TableCell className="py-1.5 px-4">
+                          <code className="text-xs font-bold text-primary bg-primary/5 px-2 py-0.5 border border-primary/10 font-mono">
                             {dept.code}
                           </code>
                         </TableCell>
-                        <TableCell className="text-center py-3 px-4">
+                        <TableCell className="text-center py-1.5 px-4">
                           <div 
                             className={cn(
-                              "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold cursor-pointer transition-all",
+                              "inline-flex items-center gap-1.5 px-2.5 py-0.5 border text-[11px] font-semibold tracking-widest cursor-pointer transition-all",
                               dept.isActive ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" : "bg-amber-500/10 text-amber-700 border-amber-500/20"
                             )}
                             onClick={() => toggleStatusMutation.mutate({ type: "department", item: dept })}
@@ -313,7 +306,7 @@ export default function AcademicStructurePage() {
                             {dept.isActive ? "Active" : "Inactive"}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right pr-4 py-3">
+                        <TableCell className="text-right pr-4 py-1.5">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                             <Button variant="ghost" size="icon" onClick={() => { setEditingItem(dept); setIsDeptModalOpen(true); }} className="h-7 w-7 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
                               <Pencil size={12} />

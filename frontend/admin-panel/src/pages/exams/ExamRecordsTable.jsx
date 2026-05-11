@@ -109,12 +109,12 @@ export default function ExamRecordsTable() {
     <div className="space-y-4">
       
       {/* 1. Action Bar */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-muted/20 border-b border-border p-4 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-muted/20 border-b border-border p-1.5 relative overflow-hidden">
         <div className="relative w-full md:max-w-md group">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
           <Input
             placeholder="Search by student name or ID..."
-            className="h-10 pl-10 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold"
+            className="h-9 pl-10 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -123,13 +123,13 @@ export default function ExamRecordsTable() {
         <div className="flex gap-2 w-full md:w-auto relative z-10">
           <Button
             variant="outline"
-            className="flex-1 md:flex-none rounded-none h-10 px-6 font-bold text-xs border-border hover:bg-muted/50 transition-all"
+            className="flex-1 md:flex-none rounded-none h-9 px-6 font-bold text-xs border-border hover:bg-muted/50 transition-all"
             onClick={() => setIsBulkOpen(true)}
           >
             <UploadCloud size={14} /> Bulk upload
           </Button>
           <Button
-            className="flex-1 md:flex-none rounded-none h-10 px-6 font-bold text-xs shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
+            className="flex-1 md:flex-none rounded-none h-9 px-6 font-bold text-xs shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
             onClick={openAddModal}
           >
             <Plus size={14} /> Add result
@@ -142,12 +142,12 @@ export default function ExamRecordsTable() {
         <Table>
           <TableHeader className="bg-muted/10">
             <TableRow className="hover:bg-transparent border-border border-b-2">
-              <TableHead className="w-[200px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Student name</TableHead>
-              <TableHead className="w-[220px] text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Exam level</TableHead>
-              <TableHead className="text-center text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50 w-[100px]">Year</TableHead>
-              <TableHead className="text-center text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50 w-[120px]">Result</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground py-4 px-6 border-r border-border/50">Scores</TableHead>
-              <TableHead className="text-right pr-8 text-xs font-bold text-muted-foreground py-4">Actions</TableHead>
+              <TableHead className="w-[200px] text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Student name</TableHead>
+              <TableHead className="w-[220px] text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Exam level</TableHead>
+              <TableHead className="text-center text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50 w-[100px]">Year</TableHead>
+              <TableHead className="text-center text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50 w-[120px]">Result</TableHead>
+              <TableHead className="text-[13px] font-bold text-muted-foreground py-2 px-6 border-r border-border/50">Scores</TableHead>
+              <TableHead className="text-right pr-8 text-[13px] font-bold text-muted-foreground py-2">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -168,35 +168,35 @@ export default function ExamRecordsTable() {
                   key={exam.id} 
                   className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
                 >
-                  <TableCell className="py-2 pl-6">
+                  <TableCell className="py-1.5 pl-6">
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
+                      <span className="font-medium text-base tracking-tight text-foreground group-hover:text-primary transition-colors">
                         {exam.studentFirstName} {exam.studentLastName}
                       </span>
-                      <code className="text-[10px] font-bold text-muted-foreground font-mono">
+                      <code className="text-xs font-normal text-muted-foreground font-mono">
                         {exam.studentNationalId}
                       </code>
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-xs tracking-tight text-foreground">
+                      <span className="font-medium text-base tracking-tight text-foreground">
                         {exam.examLevelName}
                       </span>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <code className="text-[8px] font-bold text-primary capitalize font-mono">{exam.examLevelCode}</code>
-                        <span className="text-[9px] text-muted-foreground font-bold border-l border-border pl-2">
+                        <code className="text-[10px] font-medium text-primary capitalize font-mono">{exam.examLevelCode}</code>
+                        <span className="text-xs text-muted-foreground font-medium border-l border-border pl-2 opacity-70">
                           {exam.institutionName}
                         </span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center py-2 px-6">
-                    <span className="text-xs font-bold font-mono text-muted-foreground">{exam.year}</span>
+                  <TableCell className="text-center py-1.5 px-6">
+                    <span className="text-xs font-medium font-mono text-muted-foreground">{exam.year}</span>
                   </TableCell>
-                  <TableCell className="text-center py-2 px-6">
+                  <TableCell className="text-center py-1.5 px-6">
                     <div className={cn(
-                      "inline-flex items-center gap-1.5 px-2 py-0.5 border text-[9px] font-bold",
+                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 border text-[11px] font-semibold tracking-widest",
                       exam.resultStatus === 'PASS' 
                         ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" 
                         : "bg-destructive/10 text-destructive border-destructive/20"
@@ -205,29 +205,29 @@ export default function ExamRecordsTable() {
                       {exam.resultStatus}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
                       {exam.totalScore && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Total</span>
-                          <span className="text-[10px] font-bold text-foreground">{exam.totalScore}</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">Total</span>
+                          <span className="text-xs font-bold text-foreground">{exam.totalScore}</span>
                         </div>
                       )}
                       {exam.averageScore && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Avg</span>
-                          <span className="text-[10px] font-bold text-foreground">{exam.averageScore}</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">Avg</span>
+                          <span className="text-xs font-bold text-foreground">{exam.averageScore}</span>
                         </div>
                       )}
                       {exam.percentile && (
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-bold text-muted-foreground capitalize tracking-widest">Perc</span>
-                          <span className="text-[10px] font-bold text-foreground">{exam.percentile}%</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">Perc</span>
+                          <span className="text-xs font-bold text-foreground">{exam.percentile}%</span>
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right pr-8 py-2">
+                  <TableCell className="text-right pr-8 py-1.5">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <Button
                         variant="ghost"
@@ -255,7 +255,7 @@ export default function ExamRecordsTable() {
       </div>
 
       {/* 3. Pagination */}
-      <div className="p-4 border-t border-border bg-muted/5">
+      <div className="p-1 border-t border-border bg-muted/5">
         <Pagination 
           page={page} 
           totalPages={totalPages} 

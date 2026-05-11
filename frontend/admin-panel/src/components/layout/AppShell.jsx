@@ -23,7 +23,7 @@ export default function AppShell() {
       
       <div className="relative z-10 flex flex-1 flex-col min-w-0 h-full overflow-hidden">
         <Topbar onMenuToggle={toggleMobileMenu} />
-        <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-10 no-scrollbar">
+        <main className="flex-1 overflow-y-auto px-4 py-3 sm:px-6 lg:px-8 lg:py-6 no-scrollbar">
           <div className="mx-auto w-full max-w-[1440px]">
             <Outlet />
           </div>

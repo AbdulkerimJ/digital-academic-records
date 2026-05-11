@@ -118,53 +118,53 @@ export default function CorrectionDetailPage() {
   const StatusIcon = request?.status ? STATUS_ICONS[request.status] : Clock
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       {/* Back Button + Header */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-2xl border border-border/60"
+          className="h-10 w-10 rounded-none border border-border/60"
           onClick={() => navigate("/corrections")}
         >
           <ArrowLeft size={18} />
         </Button>
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-3xl font-black tracking-tight text-primary/90">Correction Review Board</h2>
-            <Badge className="rounded-xl font-black text-[9px] capitalize px-2 py-0.5 bg-primary/5 text-primary border-primary/20">
+            <h2 className="text-2xl font-black tracking-tight text-primary/90">Correction Review Board</h2>
+            <div className="px-2 py-0.5 bg-primary/5 text-primary border border-primary/20 text-[10px] font-bold uppercase tracking-widest">
               {request?.recordType} Record
-            </Badge>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground font-medium mt-0.5">
             Request ID: <span className="font-mono font-black">{id}</span>
           </p>
         </div>
         {request && (
-          <Badge className={`ml-auto rounded-full font-black text-[10px] capitalize px-4 py-1 flex items-center gap-1.5 border-none ${STATUS_CLASSES[request.status] || "bg-muted"}`}>
+          <div className={`ml-auto px-4 py-1.5 flex items-center gap-2 text-[11px] font-semibold tracking-widest border border-transparent shadow-sm ${STATUS_CLASSES[request.status] || "bg-muted text-muted-foreground"}`}>
             <StatusIcon size={12} />
             {request.status}
-          </Badge>
+          </div>
         )}
       </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <Skeleton className="h-40 rounded-3xl" />
-            <Skeleton className="h-32 rounded-3xl" />
-            <Skeleton className="h-48 rounded-3xl" />
+            <Skeleton className="h-40 rounded-none" />
+            <Skeleton className="h-32 rounded-none" />
+            <Skeleton className="h-48 rounded-none" />
           </div>
           <div className="space-y-4">
-            <Skeleton className="h-32 rounded-3xl" />
-            <Skeleton className="h-32 rounded-3xl" />
+            <Skeleton className="h-32 rounded-none" />
+            <Skeleton className="h-32 rounded-none" />
           </div>
         </div>
       ) : isError ? (
-        <Card className="p-12 flex flex-col items-center gap-4 text-center border-destructive/20 bg-destructive/5 rounded-3xl">
+        <Card className="p-12 flex flex-col items-center gap-4 text-center border-destructive/20 bg-destructive/5 rounded-none">
           <AlertCircle size={48} className="text-destructive" />
           <p className="font-black text-destructive">Failed to load correction request.</p>
-          <Button variant="outline" onClick={() => navigate("/corrections")}>Back to Board</Button>
+          <Button variant="outline" className="rounded-none" onClick={() => navigate("/corrections")}>Back to Board</Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -172,17 +172,17 @@ export default function CorrectionDetailPage() {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Student's Request */}
-            <Card className="p-6 rounded-3xl border-border/60 shadow-sm space-y-4">
+            <Card className="p-6 rounded-none border-border shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/10 rounded-xl text-amber-600">
+                <div className="p-2 bg-amber-500/10 text-amber-600">
                   <MessageSquare size={18} />
                 </div>
-                <h3 className="text-xs font-black capitalize tracking-widest text-foreground">Student's Request Statement</h3>
+                <h3 className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Student's Request Statement</h3>
               </div>
-              <blockquote className="p-5 border border-amber-500/20 bg-amber-500/5 rounded-2xl italic text-sm font-medium leading-relaxed text-amber-900">
+              <blockquote className="p-5 border border-amber-500/20 bg-amber-500/5 rounded-none italic text-base font-medium leading-relaxed text-amber-900">
                 "{request.requestText}"
               </blockquote>
-              <p className="text-[10px] font-bold text-muted-foreground/50 flex items-center gap-1.5">
+              <p className="text-[10px] font-bold text-muted-foreground/50 flex items-center gap-1.5 uppercase tracking-widest">
                 <History size={12} /> Submitted on {new Date(request.createdAt).toLocaleDateString()} at {new Date(request.createdAt).toLocaleTimeString()}
               </p>
             </Card>
@@ -191,15 +191,15 @@ export default function CorrectionDetailPage() {
 
             {/* Review History (non-pending) */}
             {request.status !== 'PENDING' && (
-              <Card className="p-6 rounded-3xl border-dashed border-border/60 bg-muted/20 shadow-sm space-y-3">
+              <Card className="p-6 rounded-none border-dashed border-border bg-muted/20 shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={18} className="text-primary/40" />
                   <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Administrative Decision</span>
                 </div>
                 <p className="text-sm font-bold">Reviewed on {new Date(request.reviewedAt).toLocaleDateString()}</p>
                 {request.rejectionReason && (
-                  <div className="text-xs font-medium text-destructive bg-destructive/5 p-4 rounded-2xl">
-                    <span className="font-black capitalize text-[9px] block mb-1">Reason for Rejection:</span>
+                  <div className="text-xs font-medium text-destructive bg-destructive/5 p-4 border border-destructive/10">
+                    <span className="font-black capitalize text-[9px] block mb-1 tracking-widest">Reason for Rejection:</span>
                     {request.rejectionReason}
                   </div>
                 )}
@@ -208,18 +208,18 @@ export default function CorrectionDetailPage() {
 
             {/* Rejection Text Input */}
             {isRejecting && (
-              <Card className="p-6 rounded-3xl border-destructive/20 shadow-sm space-y-4 animate-in slide-in-from-top duration-300">
+              <Card className="p-6 rounded-none border border-destructive/20 shadow-sm space-y-4 animate-in slide-in-from-top duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-destructive/10 rounded-xl text-destructive">
+                  <div className="p-2 bg-destructive/10 text-destructive">
                     <AlertCircle size={18} />
                   </div>
-                  <h3 className="text-xs font-black capitalize tracking-widest text-destructive">Rejection Reason</h3>
+                  <h3 className="text-[10px] font-black capitalize tracking-widest text-destructive">Rejection Reason</h3>
                 </div>
                 <Textarea
                   placeholder="Provide a detailed explanation for the student..."
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="min-h-[100px] rounded-2xl border-destructive/20 focus-visible:ring-destructive/20 font-medium"
+                  className="min-h-[100px] rounded-none border border-border focus-visible:ring-destructive/20 font-medium text-sm"
                 />
               </Card>
             )}
@@ -231,13 +231,13 @@ export default function CorrectionDetailPage() {
                   <>
                     <Button
                       variant="outline"
-                      className="flex-1 h-14 rounded-2xl font-black text-base border-muted/60 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 transition-all"
+                      className="flex-1 h-14 rounded-none font-black text-xs uppercase tracking-widest border-border hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 transition-all"
                       onClick={() => setIsRejecting(true)}
                     >
                       <XCircle className="mr-2" size={18} /> Reject Request
                     </Button>
                     <Button
-                      className="flex-[2] h-14 rounded-2xl font-black text-base shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                      className="flex-[2] h-14 rounded-none font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 transition-all"
                       onClick={handleReviewAndFix}
                       disabled={isFetchingRecord}
                     >
@@ -249,14 +249,14 @@ export default function CorrectionDetailPage() {
                   <>
                     <Button
                       variant="ghost"
-                      className="flex-1 h-14 rounded-2xl font-black text-base"
+                      className="flex-1 h-14 rounded-none font-black text-xs uppercase tracking-widest"
                       onClick={() => { setIsRejecting(false); setRejectionReason("") }}
                     >
                       Cancel
                     </Button>
                     <Button
                       variant="destructive"
-                      className="flex-[2] h-14 rounded-2xl font-black text-base shadow-xl shadow-destructive/20 hover:scale-[1.02] transition-all"
+                      className="flex-[2] h-14 rounded-none font-black text-xs uppercase tracking-widest shadow-xl shadow-destructive/20 hover:brightness-110 transition-all"
                       onClick={() => rejectMutation.mutate(rejectionReason)}
                       disabled={!rejectionReason || rejectMutation.isPending}
                     >
@@ -271,39 +271,39 @@ export default function CorrectionDetailPage() {
           {/* Right: Sidebar Info */}
           <div className="space-y-4">
             {/* Student Identity */}
-            <Card className="p-6 border-border/60 bg-muted/5 rounded-3xl shadow-sm">
+            <Card className="p-6 border-border bg-muted/5 rounded-none shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                <div className="p-2 bg-primary/10 text-primary">
                   <User size={18} />
                 </div>
                 <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Student Identity</span>
               </div>
-              <p className="font-black text-lg tracking-tight">{request.studentFirstName} {request.studentLastName}</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 capitalize mt-1 font-mono">{request.studentNationalId || "N/A"}</p>
+              <p className="font-black text-lg tracking-tight leading-none uppercase">{request.studentFirstName} {request.studentLastName}</p>
+              <p className="text-[11px] font-bold text-muted-foreground/60 mt-2 font-mono uppercase tracking-widest border-t border-border/50 pt-2">{request.studentNationalId || "N/A"}</p>
             </Card>
 
             {/* Institution */}
-            <Card className="p-6 border-border/60 bg-muted/5 rounded-3xl shadow-sm">
+            <Card className="p-6 border-border bg-muted/5 rounded-none shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
+                <div className="p-2 bg-indigo-500/10 text-indigo-600">
                   <Building2 size={18} />
                 </div>
                 <span className="text-[10px] font-black capitalize tracking-widest text-muted-foreground">Institution</span>
               </div>
-              <p className="font-black text-lg tracking-tight leading-tight">{request.institutionName || "N/A"}</p>
-              <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mt-1">{request.institutionId?.slice(0, 8)}</p>
+              <p className="font-bold text-base tracking-tight leading-tight">{request.institutionName || "N/A"}</p>
+              <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mt-1 uppercase tracking-tighter">{request.institutionId?.slice(0, 8)}</p>
             </Card>
 
             {/* System Reference */}
-            <Card className="p-6 border-dashed border-border/60 bg-transparent rounded-3xl">
+            <Card className="p-6 border-dashed border-border bg-transparent rounded-none">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
+                <div className="p-1.5 bg-muted text-muted-foreground">
                   <FileText size={14} />
                 </div>
                 <span className="text-[9px] font-black capitalize tracking-widest text-muted-foreground/60">System Reference</span>
               </div>
               <div className="space-y-1">
-                <p className="text-[9px] font-bold text-muted-foreground/40 capitalize">Record ID</p>
+                <p className="text-[9px] font-bold text-muted-foreground/40 capitalize tracking-widest">Record ID</p>
                 <p className="font-mono text-[9px] font-bold text-muted-foreground/50 break-all leading-tight">{request.recordId}</p>
               </div>
             </Card>

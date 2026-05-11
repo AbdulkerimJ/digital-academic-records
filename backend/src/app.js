@@ -24,9 +24,7 @@ const app = express();
 
 app.set("trust proxy", 1); // Enable proxy trust so req.ip has the real client IP
 
-// Apply rate limiting to all /api routes
-app.use("/api", globalLimiter);
-
+// 1. CORS MUST be at the top to handle preflight requests for all subsequent middlewares
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -38,6 +36,10 @@ app.use(cors({
   ],
   credentials: true
 }));
+
+// Apply rate limiting to all /api routes
+app.use("/api", globalLimiter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

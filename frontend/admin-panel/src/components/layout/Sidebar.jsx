@@ -13,7 +13,6 @@ import {
   History,
   Shield,
   Activity,
-  User,
   ChevronRight,
   X
 } from "lucide-react";
@@ -111,75 +110,67 @@ export default function Sidebar({ isOpen, onClose }) {
         <X size={20} />
       </button>
 
-      <div className="p-8 space-y-8">
+      <div className="p-6">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-primary rounded-none flex items-center justify-center shadow-lg shadow-primary/10 group-hover:scale-105 transition-transform">
              <Shield size={22} className="text-white" />
           </div>
           <div className="flex flex-col text-left">
-            <h1 className="text-xl font-black tracking-tighter leading-none text-foreground">
+            <h1 className="text-2xl font-black tracking-tighter leading-none text-foreground">
               NAR
             </h1>
-            <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">National academic registry</span>
+            <span className="text-[12px] font-black text-primary capitalize tracking-[0.2em]">National academic registry</span>
           </div>
         </Link>
+      </div>
 
-        <div className="p-4 border border-border bg-muted/20 rounded-none space-y-3 relative overflow-hidden group">
-           <div className="absolute top-0 right-0 p-2 opacity-[0.05] group-hover:text-primary transition-colors">
-              <User size={40} />
-           </div>
-           <div className="space-y-1 relative z-10 text-left">
-              <p className="text-[9px] font-black text-muted-foreground capitalize tracking-widest">Logged in as</p>
-              <p className="text-xs font-black capitalize text-foreground truncate">
-                {user?.firstName} {user?.lastName}
-              </p>
-           </div>
-           <div className="flex items-center gap-2 relative z-10">
-              <div className="px-2 py-0.5 border border-primary/20 text-[8px] font-black text-primary capitalize tracking-widest bg-primary/5">
-                {user?.roleName}
-              </div>
-           </div>
-        </div>
+      {/* Professional Separator */}
+      <div className="px-6 mb-6">
+        <div className="h-px w-full bg-gradient-to-r from-border via-border/50 to-transparent" />
       </div>
 
       <nav className="flex-1 px-4 overflow-y-auto no-scrollbar pb-10">
-        <div className="mb-4 px-4 flex items-center justify-between">
-           <span className="text-[9px] font-black capitalize tracking-[0.3em] text-muted-foreground/60">Main Menu</span>
-           <Activity size={10} className="text-primary/40" />
+        <div className="mb-4 px-4 flex items-center justify-between opacity-40">
+           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Admin Protocol</span>
+           <div className="h-px flex-1 bg-border ml-4" />
         </div>
         
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           {filteredNavItems.map((item, index) => (
-            <NavLink
-              key={item.href}
-              to={item.href}
-              end={item.end}
-              className={({ isActive }) =>
-                cn(
-                  "group flex items-center gap-3 px-4 py-3 text-[11px] font-black capitalize tracking-widest transition-all duration-200 border-l-2 text-left",
-                  isActive
-                    ? "bg-primary/5 text-primary border-primary"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={cn(
-                    "w-5 font-mono text-[9px] transition-colors",
-                    isActive ? "text-primary/40" : "text-muted-foreground/30"
-                  )}>
-                    {(index + 1).toString().padStart(2, '0')}
-                  </span>
-                  <item.icon size={16} className={cn(
-                    "shrink-0 transition-all",
-                    isActive ? "scale-110" : "group-hover:scale-110"
-                  )} />
-                  <span className="flex-1 truncate">{item.title}</span>
-                  {isActive && <ChevronRight size={12} className="text-primary/30" />}
-                </>
+            <div key={item.href}>
+              <NavLink
+                to={item.href}
+                end={item.end}
+                className={({ isActive }) =>
+                  cn(
+                    "group relative flex items-center gap-4 px-4 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-none overflow-hidden",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={16} className={cn(
+                      "shrink-0 transition-transform duration-300",
+                      isActive ? "scale-110" : "group-hover:scale-110 opacity-50 group-hover:opacity-100"
+                    )} />
+                    
+                    <span className="flex-1 truncate">{item.title}</span>
+                    
+                    {isActive && <ChevronRight size={14} className="opacity-40" />}
+                  </>
+                )}
+              </NavLink>
+              
+              {/* Thin Line Separator between all items */}
+              {index < filteredNavItems.length - 1 && (
+                <div className="px-4 my-0.5">
+                  <div className="h-px w-full bg-border/20" />
+                </div>
               )}
-            </NavLink>
+            </div>
           ))}
         </div>
       </nav>

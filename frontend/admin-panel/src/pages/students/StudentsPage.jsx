@@ -15,7 +15,7 @@ import {
 } from "../../components/ui/dialog"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
-import { UserPlus, ShieldCheck, Search, UploadCloud, Activity, Clock } from "lucide-react"
+import { UserPlus, ShieldCheck, Search, UploadCloud, Activity } from "lucide-react"
 import { toast } from "sonner"
 import { useSearchParams } from "react-router-dom"
 import { cn } from "../../lib/utils"
@@ -57,19 +57,12 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-4 pb-6">
       
       {/* 1. Header (Keep Uppercase) */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
-        <div className="space-y-3 text-left">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 capitalize tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-              <Activity size={10} className="animate-pulse" /> SYSTEM ONLINE
-            </div>
-            <div className="text-[9px] font-bold text-muted-foreground capitalize tracking-widest flex items-center gap-1">
-              <Clock size={10} /> {new Date().toLocaleDateString()}
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 border-b border-border pb-2">
+        <div className="space-y-1 text-left">
+
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground capitalize leading-none">
             Student <span className="text-primary">Registry</span>
           </h2>

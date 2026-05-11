@@ -58,7 +58,7 @@ export default function InstitutionTable({
         className={cn("cursor-pointer transition-colors hover:text-primary group border-r border-border/50 last:border-0", className)}
         onClick={() => onSort(field)}
       >
-        <div className="flex items-center justify-between py-4 px-6 text-[10px] font-black tracking-widest text-muted-foreground group-hover:text-primary">
+        <div className="flex items-center justify-between py-2 px-6 text-[13px] font-bold tracking-widest text-muted-foreground group-hover:text-primary">
           {label}
           {isSorted ? (
             sortDir === "ASC" ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />
@@ -79,8 +79,8 @@ export default function InstitutionTable({
               <SortHeader field="name" label="Institution" className="w-[400px]" />
               <SortHeader field="code" label="Institution code" className="w-[200px]" />
               <SortHeader field="type" label="Category" className="w-[200px]" />
-              <TableHead className="text-[10px] font-black tracking-widest text-muted-foreground py-4 px-6 border-r border-border/50 w-[150px]">Status</TableHead>
-              <TableHead className="text-right pr-10 py-4 text-[10px] font-black tracking-widest text-muted-foreground">Actions</TableHead>
+              <TableHead className="text-[13px] font-bold tracking-widest text-muted-foreground py-2 px-6 border-r border-border/50 w-[150px]">Status</TableHead>
+              <TableHead className="text-right pr-10 py-2 text-[13px] font-bold tracking-widest text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -113,42 +113,42 @@ export default function InstitutionTable({
                   key={inst.id} 
                   className="group border-border hover:bg-primary/[0.02] transition-colors cursor-pointer border-b last:border-0"
                 >
-                  <TableCell className="py-3 px-6">
+                  <TableCell className="py-1.5 px-6">
                     <div className="flex items-center gap-5">
-                      <div className="h-10 w-10 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-xs shrink-0 font-mono group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/30 transition-all">
-                        <Building2 size={16} />
+                      <div className="h-7 w-7 bg-muted/20 border border-border flex items-center justify-center text-muted-foreground font-black text-[9px] shrink-0 font-mono group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/30 transition-all">
+                        <Building2 size={14} />
                       </div>
                       <div className="flex flex-col text-left min-w-0">
-                        <span className="font-black text-xs tracking-tighter text-foreground group-hover:text-primary transition-colors truncate">
+                        <span className="font-medium text-base tracking-tight text-foreground group-hover:text-primary transition-colors truncate">
                           {inst.name}
                         </span>
-                        <code className="text-[9px] font-bold text-muted-foreground/40 mt-0.5 tracking-tighter">Verified record</code>
+                        <code className="text-xs font-normal text-muted-foreground/40 mt-0.5 tracking-tight">Verified record</code>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="py-3 px-6">
                     <div className="flex items-center gap-2">
                        <Fingerprint size={12} className="text-primary opacity-30" />
-                       <code className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
+                        <code className="text-xs font-medium text-primary bg-primary/5 px-2 py-1 border border-primary/10 font-mono">
                          {inst.code}
                        </code>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3 px-6 text-[10px] font-bold text-muted-foreground/70 tracking-widest">
+                  <TableCell className="py-1.5 px-6 text-xs font-medium text-muted-foreground/70 tracking-widest">
                     {inst.typeName || inst.type}
                   </TableCell>
-                  <TableCell className="py-3 px-6">
+                  <TableCell className="py-1.5 px-6">
                     {inst.isActive ? (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-700 tracking-widest">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-700 tracking-widest">
                         <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Active
                       </div>
                     ) : (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-700 tracking-widest">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-[11px] font-semibold text-amber-700 tracking-widest">
                          Disabled
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="text-right pr-10 py-3">
+                  <TableCell className="text-right pr-10 py-1.5">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <Button 
                         variant="ghost" 
@@ -194,7 +194,7 @@ export default function InstitutionTable({
         </Table>
       </div>
       
-      <div className="px-6 py-4 border-t border-border bg-muted/5 rounded-none">
+      <div className="px-6 py-1 border-t border-border bg-muted/5 rounded-none">
         <Pagination 
           page={currentPage} 
           totalPages={totalPages} 
