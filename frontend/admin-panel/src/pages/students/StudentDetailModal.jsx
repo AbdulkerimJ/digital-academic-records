@@ -219,7 +219,7 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                          <div className="flex flex-col items-end gap-1 transition-all">
                              <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-bold text-emerald-700 capitalize tracking-widest">Verified</div>
                           </div>
                         </div>

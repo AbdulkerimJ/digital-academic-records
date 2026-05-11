@@ -107,7 +107,7 @@ async function seed() {
     institution_id
   )
   VALUES ($1, $2, $3, $4, TRUE, $5, NULL)
-  ON CONFLICT (email) DO UPDATE
+  ON CONFLICT (email) WHERE is_deleted = false DO UPDATE
   SET
     password_hash = EXCLUDED.password_hash,
     role_id = EXCLUDED.role_id,

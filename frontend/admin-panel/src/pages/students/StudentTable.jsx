@@ -177,7 +177,7 @@ export default function StudentTable({ onSelectStudent }) {
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-10 py-1.5">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="flex items-center justify-end gap-1 transition-all">
                       <Button 
                         variant="ghost" 
                         size="icon" 

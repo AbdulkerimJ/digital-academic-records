@@ -121,7 +121,7 @@ export default function ExamLevelsTable() {
                     </div>
                   </TableCell>
                   <TableCell className="py-1.5 text-right pr-6">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(level)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(level)}>
                       <Edit2 size={14} />
                     </Button>
                   </TableCell>

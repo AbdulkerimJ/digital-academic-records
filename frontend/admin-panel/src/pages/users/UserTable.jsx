@@ -200,7 +200,7 @@ export default function UserTable({
                   </TableCell>
                   <TableCell className="py-1.5 px-6">{getStatusBadge(user.status)}</TableCell>
                   <TableCell className="text-right pr-8">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="flex items-center justify-end gap-1 transition-all">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all">
