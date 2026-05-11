@@ -32,7 +32,7 @@ export default function RequestsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <Spinner size="lg" className="text-primary" />
-        <p className="text-[10px] font-mono text-muted-foreground capitalize tracking-[0.3em]">Querying Request Ledger...</p>
+        <p className="text-[10px] font-mono text-muted-foreground capitalize tracking-[0.3em]">Loading requests...</p>
       </div>
     )
   }
@@ -61,37 +61,37 @@ export default function RequestsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
+             <div className="w-10 h-10 bg-primary rounded-none flex items-center justify-center">
                 <ClipboardList size={22} className="text-primary-foreground" />
              </div>
              <div className="flex flex-col">
-                <h2 className="text-xl font-black tracking-tighter leading-none capitalize">Protocol Corrections</h2>
-                <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Record Correction Module</span>
+                <h2 className="text-xl font-black tracking-tighter leading-none capitalize">Correction Requests</h2>
+                <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Track your requests</span>
              </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-muted/30 rounded text-[9px] font-black capitalize tracking-widest">
-            <Activity size={12} className="text-primary" /> Tracking {requests.length} active cases
+          <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-muted/30 rounded-none text-[9px] font-black capitalize tracking-widest">
+            <Activity size={12} className="text-primary" /> {requests.length} active cases
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
-              Audit <br/>
-              <span className="text-muted-foreground">dispute ledger</span>
+              Your <br/>
+              <span className="text-muted-foreground">Requests</span>
             </h1>
             <p className="text-[11px] font-mono text-muted-foreground capitalize tracking-widest leading-relaxed border-l-2 border-primary pl-6">
-              Official module for reporting discrepancies in national academic records. 
+              Report errors or missing information in your academic records. 
             </p>
           </div>
           
           <div className="grid grid-cols-2 gap-2 w-full md:w-auto">
-             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-[9px] font-mono text-muted-foreground capitalize tracking-widest mb-1">TOTAL_CASES</p>
+             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center rounded-none">
+                <p className="text-[9px] font-mono text-muted-foreground capitalize tracking-widest mb-1">Total</p>
                 <p className="text-3xl font-black font-mono tracking-tighter">{requests.length.toString().padStart(2, '0')}</p>
              </div>
-             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-[9px] font-mono text-amber-500 capitalize tracking-widest mb-1">PENDING</p>
+             <div className="bg-card border border-border p-6 flex flex-col items-center justify-center text-center rounded-none">
+                <p className="text-[9px] font-mono text-amber-500 capitalize tracking-widest mb-1">Pending</p>
                 <p className="text-3xl font-black font-mono tracking-tighter">{requests.filter(r => r.status === 'PENDING').length.toString().padStart(2, '0')}</p>
              </div>
           </div>
@@ -101,24 +101,24 @@ export default function RequestsPage() {
       {/* 2. Requests Feed */}
       <div className="space-y-6">
         {requests.length === 0 ? (
-          <div className="bg-muted/10 border border-border border-dashed rounded p-20 text-center flex flex-col items-center">
+          <div className="bg-muted/10 border border-border border-dashed rounded-none p-20 text-center flex flex-col items-center">
             <Shield size={48} className="text-muted-foreground/20 mb-6" />
-            <h3 className="text-xl font-black capitalize tracking-tight">No Disputes Logged</h3>
-            <p className="text-xs font-mono text-muted-foreground mt-2 capitalize tracking-widest">All academic indices are currently synchronized with the national ledger.</p>
+            <h3 className="text-xl font-black capitalize tracking-tight">No Requests</h3>
+            <p className="text-xs font-mono text-muted-foreground mt-2 capitalize tracking-widest">You haven't submitted any correction requests yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {requests.map((req) => (
-              <div key={req.id} className="bg-card border border-border rounded overflow-hidden flex flex-col md:flex-row group">
+              <div key={req.id} className="bg-card border border-border rounded-none overflow-hidden flex flex-col md:flex-row group">
                 
                 {/* Audit Content */}
                 <div className="flex-1 p-8 space-y-8">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`px-2 py-1 border text-[9px] font-black capitalize tracking-widest rounded ${getStatusStyle(req.status)}`}>
+                      <div className={`px-2 py-1 border text-[9px] font-black capitalize tracking-widest rounded-none ${getStatusStyle(req.status)}`}>
                         {req.status}
                       </div>
-                      <div className="flex items-center gap-2 px-2 py-1 border border-border bg-muted/50 text-[9px] font-mono text-muted-foreground capitalize tracking-widest rounded">
+                      <div className="flex items-center gap-2 px-2 py-1 border border-border bg-muted/50 text-[9px] font-mono text-muted-foreground capitalize tracking-widest rounded-none">
                         {req.recordType === 'DEGREE' ? <GraduationCap size={10}/> : <BookOpen size={10}/>} {req.recordType}
                       </div>
                     </div>
@@ -138,7 +138,7 @@ export default function RequestsPage() {
 
                   {/* Feedback Modules */}
                   {req.status === 'REJECTED' && req.rejectionReason && (
-                    <div className="bg-destructive/5 border border-destructive/20 p-6 rounded relative overflow-hidden">
+                    <div className="bg-destructive/5 border border-destructive/20 p-6 rounded-none relative overflow-hidden">
                       <div className="flex items-center gap-2 text-destructive text-[10px] font-black capitalize tracking-widest mb-3">
                         <XCircle size={14} /> Registrar Feedback
                       </div>
@@ -149,12 +149,12 @@ export default function RequestsPage() {
                   )}
 
                   {req.status === 'APPROVED' && (
-                    <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded relative overflow-hidden">
+                    <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-none relative overflow-hidden">
                       <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-black capitalize tracking-widest mb-3">
-                        <CheckCircle2 size={14} /> Registry Updated
+                        <CheckCircle2 size={14} /> Records Updated
                       </div>
                       <p className="text-sm font-medium text-foreground leading-relaxed capitalize tracking-tight">
-                        The institution has verified your dispute and successfully synchronized the academic ledger.
+                        The institution has verified your request and updated the records.
                       </p>
                     </div>
                   )}
@@ -164,14 +164,14 @@ export default function RequestsPage() {
                 <div className="md:w-80 shrink-0 bg-muted/30 border-l border-border p-8 flex flex-col justify-between gap-10">
                   <div className="space-y-8">
                     <div className="space-y-4">
-                      <p className="text-[9px] font-mono text-muted-foreground capitalize tracking-widest">Timeline Protocol</p>
+                      <p className="text-[9px] font-mono text-muted-foreground capitalize tracking-widest">Status Timeline</p>
                       <div className="space-y-4 relative">
                         <div className="absolute left-[5px] top-2 bottom-2 w-px bg-border/50" />
                         
                         <div className="flex items-start gap-4 relative z-10">
                           <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1" />
                           <div className="flex flex-col">
-                            <span className="text-[10px] font-black capitalize tracking-tight">Case Initialized</span>
+                            <span className="text-[10px] font-black capitalize tracking-tight">Request Submitted</span>
                             <span className="text-[9px] font-mono text-muted-foreground">{format(new Date(req.createdAt), 'yyyy-MM-dd HH:mm')}</span>
                           </div>
                         </div>
@@ -202,19 +202,19 @@ export default function RequestsPage() {
                       <button 
                         onClick={() => handleCancel(req.id)}
                         disabled={cancelMutation.isPending}
-                        className="w-full h-12 border border-destructive/30 text-destructive text-[10px] font-black capitalize tracking-widest hover:bg-destructive hover:text-destructive-foreground transition-all flex items-center justify-center gap-2"
+                        className="w-full h-12 border border-destructive/30 text-destructive text-[10px] font-black capitalize tracking-widest hover:bg-destructive hover:text-destructive-foreground transition-all flex items-center justify-center gap-2 rounded-none"
                       >
                         {cancelMutation.isPending && cancelMutation.variables === req.id ? (
                           <Spinner size="sm" />
                         ) : (
                           <>
-                            <Trash2 size={14} /> Withdraw Protocol
+                            <Trash2 size={14} /> Cancel Request
                           </>
                         )}
                       </button>
                     )}
-                    <div className="p-3 bg-muted border border-border text-[8px] font-mono text-center text-muted-foreground capitalize tracking-widest leading-relaxed">
-                      This case is managed by the National Records Authority.
+                    <div className="p-3 bg-muted border border-border text-[8px] font-mono text-center text-muted-foreground capitalize tracking-widest leading-relaxed rounded-none">
+                      This request is being reviewed by the institution.
                     </div>
                   </div>
                 </div>
