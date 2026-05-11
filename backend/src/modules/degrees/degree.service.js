@@ -269,7 +269,7 @@ export const createDegreeService = async ({ user, data = {}, req }) => {
   }
   degreeTitleId = degreeTitle.id;
 
-  if (degreeTitle.degreeLevelId !== degreeLevelId) {
+  if (degreeTitle.degreeLevelId != degreeLevelId) {
     throw new AppError("Degree title does not belong to the specified degree level.", 400);
   }
 
@@ -539,7 +539,7 @@ export const updateDegreeService = async ({
   // Validate title belongs to level (check whenever either changes)
   if (degreeLevelId !== undefined || degreeTitleId !== undefined) {
     const title = await findDegreeTitleById(effectiveDegreeTitleId);
-    if (title && title.degreeLevelId !== effectiveDegreeLevelId) {
+    if (title && title.degreeLevelId != effectiveDegreeLevelId) {
       throw new AppError(
         "Degree title does not belong to the specified degree level.",
         400,
@@ -572,7 +572,7 @@ export const updateDegreeService = async ({
   // Validate department belongs to college (check whenever either changes)
   if (collegeId !== undefined || departmentId !== undefined) {
     const department = await findDepartmentById(effectiveDepartmentId);
-    if (department && department.collegeId !== effectiveCollegeId) {
+    if (department && department.collegeId != effectiveCollegeId) {
       throw new AppError(
         "Department does not belong to the specified college.",
         400,
