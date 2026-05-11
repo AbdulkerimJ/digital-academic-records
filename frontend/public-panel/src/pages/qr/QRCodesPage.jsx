@@ -12,12 +12,15 @@ import QRCode from 'qrcode'
 import { toast } from 'sonner'
 import Spinner from '../../components/ui/Spinner'
 import Modal from '../../components/ui/Modal'
+import ConfirmDeleteModal from '../../components/ui/ConfirmDeleteModal'
 
 export default function QRCodesPage() {
   const { data, isLoading, refetch } = useQuery({ queryKey: ['my-qrs'], queryFn: getMyQrTokens })
   
-  const [generating, setGenerating] = useState(false)
+   const [generating, setGenerating] = useState(false)
+  const [revoking, setRevoking] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   
   const [previewData, setPreviewData] = useState(null)
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -64,18 +67,24 @@ export default function QRCodesPage() {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to revoke this access token?')) {
-      setDeletingId(id)
-      try {
-        await deleteQrToken(id)
-        toast.success('Access token revoked.')
-        refetch()
-      } catch (err) {
-        toast.error(err.message)
-      } finally {
-        setDeletingId(null)
-      }
+  const confirmDelete = (id) => {
+    setDeletingId(id)
+    setDeleteConfirmOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!deletingId) return
+    setRevoking(true)
+    try {
+      await deleteQrToken(deletingId)
+      toast.success('Access token revoked.')
+      refetch()
+      setDeleteConfirmOpen(false)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setRevoking(false)
+      setDeletingId(null)
     }
   }
 
@@ -140,7 +149,7 @@ export default function QRCodesPage() {
           <button 
             onClick={handleGenerate}
             disabled={generating}
-            className="w-full md:w-auto h-16 px-10 bg-primary text-primary-foreground font-black text-[10px] capitalize tracking-[0.3em] shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-4 group"
+            className="w-full md:w-auto h-16 px-10 bg-primary text-primary-foreground font-black text-[10px] capitalize tracking-[0.3em] shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-4 group rounded-none"
           >
             {generating ? (
               <Spinner size="sm" />
@@ -169,7 +178,7 @@ export default function QRCodesPage() {
               const localUrl = `${window.location.origin}/verify/${token.token}`
               
               return (
-                <div key={token.id} className="bg-card border border-border rounded overflow-hidden flex flex-col md:flex-row group">
+                <div key={token.id} className="bg-card border border-border rounded-none overflow-hidden flex flex-col md:flex-row group">
                   
                   {/* QR Visual */}
                   <div className="shrink-0 bg-muted/30 p-8 flex flex-col items-center justify-center gap-6 border-b md:border-b-0 md:border-r border-border">
@@ -182,7 +191,7 @@ export default function QRCodesPage() {
                     )}
                     <button
                       onClick={() => downloadImage(qrImages[token.id], `qr_${token.token.substring(0,8)}.png`)}
-                      className="w-full h-10 border border-border text-[9px] font-black capitalize tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2"
+                      className="w-full h-10 border border-border text-[9px] font-black capitalize tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2 rounded-none"
                     >
                       <Download size={12} /> Download PNG
                     </button>
@@ -201,13 +210,13 @@ export default function QRCodesPage() {
                           Token: {token.token.substring(0, 12).toUpperCase()}...
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDelete(token.id)}
-                        disabled={deletingId === token.id}
-                        className="h-10 w-10 border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 flex items-center justify-center transition-all"
+                       <button
+                        onClick={() => confirmDelete(token.id)}
+                        disabled={deletingId === token.id && deleteConfirmOpen}
+                        className="h-10 w-10 border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 flex items-center justify-center transition-all rounded-none"
                         title="Revoke Token"
                       >
-                        {deletingId === token.id ? <Spinner size="sm" /> : <Trash2 size={16} />}
+                        <Trash2 size={16} />
                       </button>
                     </div>
 
@@ -227,7 +236,7 @@ export default function QRCodesPage() {
                     <div className="flex items-center gap-3 pt-4 border-t border-border">
                       <button 
                         onClick={() => copyUrl(localUrl)}
-                        className="h-10 px-6 border border-border bg-muted/20 text-[9px] font-black capitalize tracking-widest hover:bg-muted transition-all flex items-center gap-2"
+                        className="h-10 px-6 border border-border bg-muted/20 text-[9px] font-black capitalize tracking-widest hover:bg-muted transition-all flex items-center gap-2 rounded-none"
                       >
                         <Copy size={14} /> Copy Link
                       </button>
@@ -235,7 +244,7 @@ export default function QRCodesPage() {
                         href={localUrl} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="h-10 px-4 border border-border text-muted-foreground hover:text-primary transition-all flex items-center justify-center"
+                        className="h-10 px-4 border border-border text-muted-foreground hover:text-primary transition-all flex items-center justify-center rounded-none"
                         title="Open Link"
                       >
                         <ExternalLink size={14} />
@@ -329,7 +338,15 @@ export default function QRCodesPage() {
              </button>
           </div>
         </div>
-      </Modal>
+       </Modal>
+
+      {/* CONFIRM DELETE MODAL */}
+      <ConfirmDeleteModal
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDelete}
+        isLoading={revoking}
+      />
     </div>
   )
 }
