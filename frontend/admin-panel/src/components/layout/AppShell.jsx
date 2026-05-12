@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import SupportModal from "../ui/SupportModal";
 
 export default function AppShell() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -19,7 +21,11 @@ export default function AppShell() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,rgba(var(--primary),0.03),transparent)] pointer-events-none z-0" />
 
       {/* Sidebar - Desktop & Mobile Drawer */}
-      <Sidebar isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
+      <Sidebar 
+        isOpen={isMobileMenuOpen} 
+        onClose={closeMobileMenu} 
+        onSupportOpen={() => setIsSupportOpen(true)}
+      />
       
       <div className="relative z-10 flex flex-1 flex-col min-w-0 h-full overflow-hidden">
         <Topbar onMenuToggle={toggleMobileMenu} />
@@ -29,6 +35,9 @@ export default function AppShell() {
           </div>
         </main>
       </div>
+
+      {/* Support Modal (Global context ensures centering) */}
+      <SupportModal open={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
       {/* Mobile Backdrop */}
       {isMobileMenuOpen && (

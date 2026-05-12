@@ -12,6 +12,8 @@ import CorrectionDetailPage from "../pages/corrections/CorrectionDetailPage"
 import ProfilePage from "../pages/profile/ProfilePage"
 import AcademicStructurePage from "../pages/structure/AcademicStructurePage"
 import AuditLogsPage from "../pages/audit/AuditLogsPage"
+import SupportManagementPage from "../pages/support/SupportManagementPage"
+import SupportDetailPage from "../pages/support/SupportDetailPage"
 import GlobalErrorPage from "../pages/error/GlobalErrorPage"
 import AppShell from "../components/layout/AppShell"
 import { useAuth } from "../context/AuthContext"
@@ -133,6 +135,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={["SUPER_ADMIN", "REGISTRAR"]}>
             <AuditLogsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "support",
+        element: (
+          <ProtectedRoute roles={["SUPER_ADMIN"]}>
+            <SupportManagementPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "support/:id",
+        element: (
+          <ProtectedRoute roles={["SUPER_ADMIN"]}>
+            <SupportDetailPage />
           </ProtectedRoute>
         ),
       },

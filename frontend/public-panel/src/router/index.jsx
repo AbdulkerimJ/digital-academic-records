@@ -7,6 +7,7 @@ import QRCodesPage from '../pages/qr/QRCodesPage'
 import RequestsPage from '../pages/requests/RequestsPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import RecordDetailPage from '../pages/records/RecordDetailPage'
+import SupportPage from '../pages/support/SupportPage'
 import Spinner from '../components/ui/Spinner'
 
 import LandingPage from '../pages/landing/LandingPage'
@@ -94,6 +95,10 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProfilePage />,
+      },
+      {
+        path: 'support',
+        element: <SupportPage />,
       }
     ],
   },

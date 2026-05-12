@@ -402,6 +402,21 @@ async function migrate() {
       );
     `);
 
+    // ===================== SUPPORT SYSTEM =====================
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS support_request (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        email TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'RESOLVED')),
+        response TEXT,
+        responded_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     console.log("Migration completed successfully!");
 
   } catch (err) {

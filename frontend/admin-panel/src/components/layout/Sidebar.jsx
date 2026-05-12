@@ -14,6 +14,7 @@ import {
   Shield,
   Activity,
   ChevronRight,
+  LifeBuoy,
   X
 } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -77,9 +78,22 @@ const navItems = [
     icon: History,
     roles: ["SUPER_ADMIN", "REGISTRAR"],
   },
+  {
+    title: "Support Queue",
+    href: "/support",
+    icon: LifeBuoy,
+    roles: ["SUPER_ADMIN"],
+  },
+  {
+    title: "Technical Support",
+    href: "#support",
+    icon: LifeBuoy,
+    roles: ["REGISTRAR"],
+    isModal: true
+  },
 ];
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose, onSupportOpen }) {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -136,45 +150,65 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
         
         <div className="space-y-1">
-          {filteredNavItems.map((item, index) => (
-            <div key={item.href}>
-              <NavLink
-                to={item.href}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    "group relative flex items-center gap-4 px-4 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-none overflow-hidden",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <item.icon size={16} className={cn(
-                      "shrink-0 transition-transform duration-300",
-                      isActive ? "scale-110" : "group-hover:scale-110 opacity-50 group-hover:opacity-100"
-                    )} />
-                    
-                    <span className="flex-1 truncate">{item.title}</span>
-                    
-                    {isActive && <ChevronRight size={14} className="opacity-40" />}
-                  </>
-                )}
-              </NavLink>
-              
-              {/* Thin Line Separator between all items */}
-              {index < filteredNavItems.length - 1 && (
-                <div className="px-4 my-0.5">
-                  <div className="h-px w-full bg-border/20" />
+          {filteredNavItems.map((item, index) => {
+            if (item.isModal) {
+              return (
+                <div key={item.title}>
+                  <button
+                    onClick={() => onSupportOpen()}
+                    className="w-full group relative flex items-center gap-4 px-4 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-none overflow-hidden text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <item.icon size={16} className="shrink-0 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-transform" />
+                    <span className="flex-1 text-left truncate">{item.title}</span>
+                  </button>
+                  {index < filteredNavItems.length - 1 && (
+                    <div className="px-4 my-0.5">
+                      <div className="h-px w-full bg-border/20" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+              );
+            }
+
+            return (
+              <div key={item.href}>
+                <NavLink
+                  to={item.href}
+                  end={item.end}
+                  className={({ isActive }) =>
+                    cn(
+                      "group relative flex items-center gap-4 px-4 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-none overflow-hidden",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <item.icon size={16} className={cn(
+                        "shrink-0 transition-transform duration-300",
+                        isActive ? "scale-110" : "group-hover:scale-110 opacity-50 group-hover:opacity-100"
+                      )} />
+                      
+                      <span className="flex-1 truncate">{item.title}</span>
+                      
+                      {isActive && <ChevronRight size={14} className="opacity-40" />}
+                    </>
+                  )}
+                </NavLink>
+                
+                {/* Thin Line Separator between all items */}
+                {index < filteredNavItems.length - 1 && (
+                  <div className="px-4 my-0.5">
+                    <div className="h-px w-full bg-border/20" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </nav>
-
     </aside>
   );
 }

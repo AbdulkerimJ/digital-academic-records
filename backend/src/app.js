@@ -17,6 +17,7 @@ import correctionRequestRoutes from "./modules/correction-requests/correction-re
 import qrRoutes from "./modules/qr/qr.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import auditRoutes from "./modules/audit/audit.routes.js";
+import supportRequestRoutes from "./modules/support-requests/support-request.routes.js";
 import { globalLimiter } from "./common/middlewares/rateLimiter.js";
 
 
@@ -63,6 +64,7 @@ app.use("/api/correction-requests", correctionRequestRoutes);
 app.use("/api/qr", qrRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/audit-logs", auditRoutes);
+app.use("/api/support-requests", supportRequestRoutes);
 
 
 // unmatched routes

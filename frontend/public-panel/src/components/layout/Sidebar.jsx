@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Shield,
   Activity,
+  LifeBuoy,
   X
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -19,6 +20,7 @@ const navItems = [
   { to: '/dashboard/records',    label: 'Academic Records', icon: FileText },
   { to: '/dashboard/qr-codes',   label: 'QR Tokens',   icon: QrCode },
   { to: '/dashboard/requests',   label: 'Requests',    icon: ClipboardList },
+  { to: '/dashboard/support',    label: 'Support Center', icon: LifeBuoy },
 ]
 
 const bottomItems = [
