@@ -1,7 +1,8 @@
 import {
   createSupportRequestService,
   getAllSupportRequestsService,
-  respondToSupportRequestService
+  respondToSupportRequestService,
+  deleteSupportRequestService
 } from "./support-request.service.js";
 import catchAsync from "../../common/utils/catchAsync.js";
 
@@ -30,5 +31,14 @@ export const respondToRequest = catchAsync(async (req, res) => {
   res.status(200).json({
     status: "success",
     data: { request }
+  });
+});
+
+export const deleteRequest = catchAsync(async (req, res) => {
+  await deleteSupportRequestService(req.params.id, req.user, req);
+
+  res.status(204).json({
+    status: "success",
+    data: null
   });
 });

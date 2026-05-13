@@ -19,7 +19,8 @@ async function dropTables() {
         departments,
         colleges,
         institution,
-        roles
+        roles,
+        support_request
       CASCADE;
     `);
 

@@ -12,15 +12,18 @@ import {
   Clock,
   ShieldCheck,
   User,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import ConfirmDeleteModal from '../../components/common/ConfirmDeleteModal';
 
 const SupportDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [responseMessage, setResponseMessage] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Fetch ticket detail
   const { data: ticket, isLoading, error } = useQuery({
@@ -53,17 +56,37 @@ const SupportDetailPage = () => {
     respondMutation.mutate({ id, response: responseMessage });
   };
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/api/support-requests/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['all-support-requests']);
+      setIsDeleteModalOpen(false);
+      toast.success('Request moved to archive');
+      navigate('/support');
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to delete inquiry');
+    }
+  });
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+  };
+
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
       <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Retrieving Inquiry Details...</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Retrieving Request Details...</p>
     </div>
   );
 
   if (error || !ticket) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
       <AlertCircle size={48} className="text-destructive" />
-      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Inquiry not found</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Request not found</p>
       <Link to="/support" className="text-primary text-xs font-bold underline uppercase tracking-widest">Back to Queue</Link>
     </div>
   );
@@ -79,6 +102,15 @@ const SupportDetailPage = () => {
           <ChevronLeft size={16} /> Back
         </button>
         <div className="flex items-center gap-3">
+           <button 
+             onClick={handleDelete}
+             disabled={deleteMutation.isPending}
+             className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-destructive/60 hover:text-destructive transition-colors disabled:opacity-50"
+             title="Soft Delete Request"
+           >
+              {deleteMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Delete
+           </button>
            <span className={`text-[10px] font-black px-2 py-0.5 uppercase tracking-widest ${ticket.status === 'PENDING' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'}`}>
               {ticket.status}
            </span>
@@ -86,7 +118,7 @@ const SupportDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Inquiry Content */}
+        {/* Left Column: Request Content */}
         <div className="lg:col-span-9 space-y-6">
            <div className="space-y-1">
 
@@ -174,6 +206,16 @@ const SupportDetailPage = () => {
            </div>
         </div>
       </div>
+
+      <ConfirmDeleteModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => deleteMutation.mutate(id)}
+        isDeleting={deleteMutation.isPending}
+        title="Archive Support Request"
+        itemName={ticket?.subject}
+        description="This will move the support request to the archive. It will no longer appear in the active queue."
+      />
     </div>
   );
 };

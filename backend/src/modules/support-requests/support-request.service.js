@@ -2,7 +2,8 @@ import {
   createSupportRequestRecord,
   findSupportRequests,
   findSupportRequestById,
-  updateSupportResponseRecord
+  updateSupportResponseRecord,
+  softDeleteSupportRequestRecord
 } from "./support-request.repository.js";
 import AppError from "../../common/utils/appError.js";
 import { logActionService } from "../audit/audit.service.js";
@@ -18,8 +19,6 @@ export const createSupportRequestService = async (data, req) => {
     subject: data.subject,
     message: data.message
   });
-
-
 
   return request;
 };
@@ -67,4 +66,24 @@ export const respondToSupportRequestService = async (id, { response }, user, req
   });
 
   return updatedRequest;
+};
+
+export const deleteSupportRequestService = async (id, user, req) => {
+  const request = await findSupportRequestById(id);
+  if (!request) {
+    throw new AppError("Support request not found", 404);
+  }
+
+  const deletedRequest = await softDeleteSupportRequestRecord(id);
+
+  await logActionService({
+    user,
+    action: "DELETE_SUPPORT_REQUEST",
+    entityType: "SUPPORT_REQUEST",
+    entityId: id,
+    oldValues: request,
+    req
+  });
+
+  return deletedRequest;
 };

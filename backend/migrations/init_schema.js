@@ -412,6 +412,8 @@ async function migrate() {
         status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'RESOLVED')),
         response TEXT,
         responded_at TIMESTAMP,
+        is_deleted BOOLEAN DEFAULT false,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );

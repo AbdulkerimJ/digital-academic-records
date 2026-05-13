@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
+import { toast } from 'sonner';
 import { 
   LifeBuoy, 
   Search, 
@@ -11,14 +12,19 @@ import {
   CheckCircle2,
   Clock,
   LayoutGrid,
-  List
+  List,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import ConfirmDeleteModal from '../../components/common/ConfirmDeleteModal';
 
 const SupportManagementPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('PENDING');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState(null);
 
   // Fetch all support requests
   const { data: requests, isLoading } = useQuery({
@@ -28,6 +34,27 @@ const SupportManagementPage = () => {
       return res.data.data.requests;
     }
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/api/support-requests/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['all-support-requests']);
+      toast.success('Request archived');
+      setIsDeleteModalOpen(false);
+      setTicketToDelete(null);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to delete');
+    }
+  });
+
+  const handleDelete = (e, ticket) => {
+    e.stopPropagation();
+    setTicketToDelete(ticket);
+    setIsDeleteModalOpen(true);
+  };
 
   const filteredRequests = requests?.filter(t => {
     const matchesSearch = t.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -161,7 +188,16 @@ const SupportManagementPage = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <ChevronRight size={16} className="text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-1 transition-all inline-block" />
+                    <div className="flex items-center justify-end gap-3">
+                       <button 
+                         onClick={(e) => handleDelete(e, ticket)}
+                         className="p-2 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5 transition-all rounded-none"
+                         title="Delete Request"
+                       >
+                          <Trash2 size={14} />
+                       </button>
+                       <ChevronRight size={16} className="text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -169,6 +205,16 @@ const SupportManagementPage = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmDeleteModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => deleteMutation.mutate(ticketToDelete?.id)}
+        isDeleting={deleteMutation.isPending}
+        title="Archive Support Request"
+        itemName={ticketToDelete?.subject}
+        description="This will move the support request to the archive. It will no longer appear in the active queue."
+      />
     </div>
   );
 };
