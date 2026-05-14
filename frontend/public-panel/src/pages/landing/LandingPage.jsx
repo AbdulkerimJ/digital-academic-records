@@ -264,7 +264,7 @@ export default function LandingPage() {
             ) : (
               <div className="space-y-8">
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">
-                  Access your verified academic credentials using the <span className="font-bold text-slate-950 dark:text-white">National Identification protocol</span>.
+                  Access your verified academic credentials using your <span className="font-bold text-slate-950 dark:text-white">FAN Number</span>.
                 </p>
 
                 {step === 'id' ? (
@@ -275,7 +275,10 @@ export default function LandingPage() {
                       </div>
                       <input
                         type="text"
-                        placeholder="National ID Number"
+                        name="faydaId"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="FAN Number"
                         className="w-full h-16 bg-white dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/10 rounded-2xl pl-16 pr-6 text-sm font-semibold focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 transition-all outline-none"
                         value={faydaId}
                         onChange={(e) => setFaydaId(e.target.value)}
@@ -292,6 +295,8 @@ export default function LandingPage() {
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification code</label>
                        <input
                         type="text"
+                        name="otp"
+                        autoComplete="one-time-code"
                         placeholder="000000"
                         className="w-full h-20 bg-white dark:bg-[#0a0a0a]/50 border border-slate-200 dark:border-white/10 rounded-2xl text-center text-4xl font-black tracking-[0.4em] focus:ring-4 focus:ring-blue-500/5 outline-none"
                         value={otp}

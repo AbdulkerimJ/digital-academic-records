@@ -66,7 +66,7 @@ export const clearStudentAuthCookie = (res) => {
 
 
 export const createAndSendStudentToken = (student, res) => {
-  const { id, nationalId, firstName, lastName, tokenVersion = 0 } = student;
+  const { id, nationalId, tokenVersion = 0 } = student;
   const accessToken = signStudentAccessToken({ id, nationalId, tokenVersion });
   const refreshToken = signStudentRefreshToken({ id, nationalId, tokenVersion });
 
@@ -79,10 +79,7 @@ export const createAndSendStudentToken = (student, res) => {
     data: {
       accessToken,
       user: {
-        id,
-        firstName,
-        lastName,
-        nationalId,
+        ...student
       },
     },
   });

@@ -87,7 +87,17 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <div className="space-y-3">
                   <Label htmlFor="email" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Email address</Label>
-                  <Input id="email" type="email" placeholder="admin@institution.edu" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-16 rounded-none bg-muted/10 border-border pl-6 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary font-semibold text-sm tracking-tight" />
+                  <Input 
+                    id="email" 
+                    name="email"
+                    type="email" 
+                    autoComplete="email"
+                    placeholder="admin@institution.edu" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    required 
+                    className="h-16 rounded-none bg-muted/10 border-border pl-6 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary font-semibold text-sm tracking-tight" 
+                  />
                 </div>
                 
                 <div className="space-y-3">
@@ -98,7 +108,9 @@ export default function LoginPage() {
                   <div className="relative">
                     <Input 
                       id="password" 
+                      name="password"
                       type={showPassword ? "text" : "password"} 
+                      autoComplete="current-password"
                       value={password} 
                       onChange={(e) => setPassword(e.target.value)} 
                       required 

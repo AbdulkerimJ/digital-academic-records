@@ -18,11 +18,7 @@ export const protectStudent = catchAsync(async (req, res, next) => {
   const currentStudent = await getStudentAuthContextService(decoded);
 
   req.user = {
-    id: currentStudent.id,
-    firstName: currentStudent.firstName,
-    lastName: currentStudent.lastName,
-    nationalId: currentStudent.nationalId,
-    tokenVersion: currentStudent.tokenVersion,
+    ...currentStudent
   };
 
   next();

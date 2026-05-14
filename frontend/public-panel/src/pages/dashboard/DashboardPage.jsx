@@ -40,20 +40,6 @@ export default function DashboardPage() {
       
       {/* 1. Header Protocol Section */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-none flex items-center justify-center">
-                 <Cpu size={22} className="text-primary-foreground" />
-              </div>
-              <div className="flex flex-col">
-                 <h2 className="text-xl font-black tracking-tighter leading-none capitalize">Student Hub</h2>
-                 <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Academic Profile</span>
-              </div>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black capitalize tracking-widest rounded-none">
-            <ShieldCheck size={12} /> Identity Verified
-          </div>
-        </div>
 
         <div className="space-y-2">
           <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
@@ -144,43 +130,8 @@ export default function DashboardPage() {
 
       {/* 3. Action Protocol & Feed Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Protocol Management Section */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="flex items-center gap-4">
-             <Shield size={18} className="text-primary" />
-             <h3 className="text-xl font-black tracking-tight">Quick Actions</h3>
-          </div>
-          
-          <div className="space-y-3">
-            <Link to="/dashboard/records" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all rounded-none">
-              <div className="flex items-center gap-4">
-                <FileText size={18} className="text-primary" />
-                <span className="text-[10px] font-black capitalize tracking-widest">Academic Records</span>
-              </div>
-              <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-            </Link>
-
-            <Link to="/dashboard/qr-codes" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all rounded-none">
-              <div className="flex items-center gap-4">
-                <QrCode size={18} className="text-primary" />
-                <span className="text-[10px] font-black capitalize tracking-widest">QR Access Tokens</span>
-              </div>
-              <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-            </Link>
-
-            <Link to="/dashboard/requests" className="w-full h-16 border border-border bg-card flex items-center justify-between px-6 group hover:border-primary hover:bg-primary/5 transition-all rounded-none">
-              <div className="flex items-center gap-4">
-                <ClipboardList size={18} className="text-primary" />
-                <span className="text-[10px] font-black capitalize tracking-widest">Correction Requests</span>
-              </div>
-              <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-            </Link>
-          </div>
-        </div>
-
         {/* Live Registry Feed Section */}
-        <div className="lg:col-span-8 bg-card border border-border rounded-none p-0 overflow-hidden">
+        <div className="lg:col-span-12 bg-card border border-border rounded-none p-0 overflow-hidden">
           <div className="p-8 border-b border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-4">
                <Database size={18} className="text-primary" />

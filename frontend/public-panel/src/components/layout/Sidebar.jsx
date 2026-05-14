@@ -19,13 +19,11 @@ const navItems = [
   { to: '/dashboard',           label: 'Dashboard',  icon: LayoutDashboard, end: true },
   { to: '/dashboard/records',    label: 'Academic Records', icon: FileText },
   { to: '/dashboard/qr-codes',   label: 'QR Tokens',   icon: QrCode },
-  { to: '/dashboard/requests',   label: 'Requests',    icon: ClipboardList },
+  { to: '/dashboard/requests',   label: 'Correction Requests',    icon: ClipboardList },
   { to: '/dashboard/support',    label: 'Support Center', icon: LifeBuoy },
 ]
 
-const bottomItems = [
-  { to: '/dashboard/profile',    label: 'Identity Profile', icon: User },
-]
+const bottomItems = []
 
 function getInitials(s) {
   if (!s) return 'ID'
@@ -128,11 +126,6 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
         
-        {/* System Version */}
-        <div className="flex items-center justify-between px-2 pt-2 opacity-30">
-           <span className="text-[9px] font-mono capitalize tracking-widest">Node: v2.4.0</span>
-           <Activity size={12} />
-        </div>
       </div>
     </aside>
   )

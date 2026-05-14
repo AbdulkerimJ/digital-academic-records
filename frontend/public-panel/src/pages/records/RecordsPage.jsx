@@ -89,13 +89,6 @@ export default function RecordsPage() {
 
         <div className="flex flex-col md:flex-row gap-8 items-end justify-between border-b border-border pb-6">
           <div className="space-y-2 max-w-2xl">
-            <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
-              Official <br/>
-              <span className="text-muted-foreground">Records</span>
-            </h1>
-            <p className="text-[11px] font-mono text-muted-foreground capitalize tracking-widest leading-relaxed border-l-2 border-primary pl-6">
-              Primary repository for all verified degrees, qualifications, and national assessment results. 
-            </p>
           </div>
 
           {/* Technical Tab Switcher (State derived from URL) */}

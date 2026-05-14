@@ -66,7 +66,7 @@ export default function RequestsPage() {
              </div>
              <div className="flex flex-col">
                 <h2 className="text-xl font-black tracking-tighter leading-none capitalize">Correction Requests</h2>
-                <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Track your requests</span>
+                <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Report errors or missing information in your academic records.</span>
              </div>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-muted/30 rounded-none text-[9px] font-black capitalize tracking-widest">
@@ -76,13 +76,6 @@ export default function RequestsPage() {
 
         <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
           <div className="space-y-2 max-w-2xl">
-            <h1 className="text-2xl md:text-4xl font-black tracking-tighter leading-[0.85] text-foreground">
-              Your <br/>
-              <span className="text-muted-foreground">Requests</span>
-            </h1>
-            <p className="text-[11px] font-mono text-muted-foreground capitalize tracking-widest leading-relaxed border-l-2 border-primary pl-6">
-              Report errors or missing information in your academic records. 
-            </p>
           </div>
           
           <div className="grid grid-cols-2 gap-2 w-full md:w-auto">

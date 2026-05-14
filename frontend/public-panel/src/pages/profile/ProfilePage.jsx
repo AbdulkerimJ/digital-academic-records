@@ -28,22 +28,6 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8 pb-10 max-w-6xl mx-auto">
       
-      {/* 1. Identity Header */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
-                <User size={22} className="text-primary-foreground" />
-             </div>
-             <div className="flex flex-col">
-                <h2 className="text-xl font-black tracking-tighter leading-none capitalize">Identity Registry</h2>
-                <span className="text-[8px] font-bold text-primary capitalize tracking-[0.4em] mt-1">Official Student Profile</span>
-             </div>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black capitalize tracking-widest rounded">
-            <ShieldCheck size={12} /> Identity Verified
-          </div>
-        </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-center justify-between border-b border-border pb-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-10 opacity-[0.02] pointer-events-none">
@@ -78,13 +62,12 @@ export default function ProfilePage() {
             Sign Out
           </button>
         </div>
-      </div>
 
       {/* 2. Identity Information Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Profile Data */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-3 space-y-8">
           <div className="bg-card border border-border rounded overflow-hidden">
             <div className="bg-muted/30 px-8 py-4 border-b border-border flex justify-between items-center">
               <span className="text-[10px] font-mono text-primary font-black capitalize tracking-[0.2em]">National Identity Metadata</span>
@@ -123,55 +106,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="bg-emerald-500/5 border border-emerald-500/20 p-8 rounded flex items-start gap-6">
-             <div className="w-14 h-14 bg-emerald-500 text-white rounded flex items-center justify-center shrink-0">
-                <ShieldCheck size={28} />
-             </div>
-             <div className="space-y-1.5">
-                <h4 className="text-lg font-black capitalize tracking-tight text-emerald-900 dark:text-emerald-400">Data Integrity Confirmed</h4>
-                <p className="text-xs font-medium text-emerald-800/70 dark:text-emerald-500/70 leading-relaxed capitalize tracking-tight">
-                  Your identity is cryptographically linked to the national registry. Any updates to your personal metadata must be performed at an authorized National ID (Fayda) enrollment center.
-                </p>
-             </div>
-          </div>
-        </div>
-
-        {/* System Summary Sidebar */}
-        <div className="space-y-6">
-           <div className="bg-card border border-border rounded overflow-hidden">
-              <div className="bg-muted/30 px-6 py-3 border-b border-border">
-                <span className="text-[9px] font-black capitalize tracking-widest text-muted-foreground">Registry Status</span>
-              </div>
-              <div className="p-6 space-y-6">
-                 <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-muted-foreground capitalize">Sync Status</span>
-                    <span className="text-emerald-500 font-black capitalize">Active</span>
-                 </div>
-                 <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-muted-foreground capitalize">Auth Provider</span>
-                    <span className="text-foreground font-black capitalize">Fayda ID</span>
-                 </div>
-                 <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-muted-foreground capitalize">Identity Lock</span>
-                    <span className="text-foreground font-black capitalize">Enabled</span>
-                 </div>
-                 <div className="pt-4 border-t border-border/50">
-                    <p className="text-[9px] text-muted-foreground capitalize leading-relaxed font-mono">
-                       Your data is protected by the National Digital Privacy Act.
-                    </p>
-                 </div>
-              </div>
-           </div>
-
-           <div className="bg-muted/20 border border-border rounded p-6 space-y-4">
-              <div className="flex items-center gap-2 text-primary">
-                 <Database size={14} />
-                 <span className="text-[9px] font-black capitalize tracking-widest">Storage Registry</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground font-mono capitalize tracking-widest leading-relaxed">
-                 All records are immutable once verified by the issuing institution.
-              </p>
-           </div>
         </div>
 
       </div>
