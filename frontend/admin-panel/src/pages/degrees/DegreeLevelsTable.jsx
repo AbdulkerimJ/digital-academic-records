@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { listDegreeLevels, createDegreeLevel, updateDegreeLevel } from "../../api/degrees.api"
+import { listDegreeLevels, createDegreeLevel, updateDegreeLevel, deleteDegreeLevel } from "../../api/degrees.api"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
@@ -15,13 +15,16 @@ import {
   DialogFooter,
   DialogDescription
 } from "../../components/ui/dialog"
-import { Plus, Edit2, CheckCircle2, XCircle, ArrowUpDown } from "lucide-react"
+import { Plus, Edit2, CheckCircle2, XCircle, ArrowUpDown, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 
 export default function DegreeLevelsTable() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingLevel, setEditingLevel] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [levelToDelete, setLevelToDelete] = useState(null)
   
   const [formData, setFormData] = useState({
     code: "",
@@ -46,6 +49,19 @@ export default function DegreeLevelsTable() {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || "Failed to save degree level")
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteDegreeLevel(id),
+    onSuccess: (res) => {
+      toast.success(res.message || "Degree level deleted successfully")
+      queryClient.invalidateQueries({ queryKey: ["degree-levels"] })
+      setIsDeleteModalOpen(false)
+      setLevelToDelete(null)
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to delete degree level")
     }
   })
 
@@ -76,6 +92,17 @@ export default function DegreeLevelsTable() {
       ...formData,
       rank: parseInt(formData.rank, 10)
     })
+  }
+
+  const handleDeleteClick = (level) => {
+    setLevelToDelete(level)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (levelToDelete) {
+      deleteMutation.mutate(levelToDelete.id)
+    }
   }
 
   return (
@@ -128,9 +155,14 @@ export default function DegreeLevelsTable() {
                     </div>
                   </TableCell>
                   <TableCell className="py-1.5 text-right pr-6">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(level)}>
-                      <Edit2 size={14} />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(level)}>
+                        <Edit2 size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all border border-transparent hover:border-destructive/20" onClick={() => handleDeleteClick(level)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -221,6 +253,18 @@ export default function DegreeLevelsTable() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {isDeleteModalOpen && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
+          itemName={levelToDelete?.name}
+          title="Delete Degree Level"
+          description="Are you sure you want to delete this degree level? This action will be logged and can be undone later if needed."
+        />
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { listDegreeTitles, createDegreeTitle, updateDegreeTitle, listDegreeLevels } from "../../api/degrees.api"
+import { listDegreeTitles, createDegreeTitle, updateDegreeTitle, listDegreeLevels, deleteDegreeTitle } from "../../api/degrees.api"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
@@ -22,14 +22,17 @@ import {
   DialogFooter,
   DialogDescription
 } from "../../components/ui/dialog"
-import { Plus, Edit2, CheckCircle2, Search, Filter } from "lucide-react"
+import { Plus, Edit2, CheckCircle2, Search, Filter, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal"
 import useDebounce from "../../hooks/useDebounce"
 
 export default function DegreeTitlesTable() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTitle, setEditingTitle] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [titleToDelete, setTitleToDelete] = useState(null)
   
   const [searchTerm, setSearchTerm] = useState("")
   const [levelFilter, setLevelFilter] = useState("all")
@@ -71,6 +74,19 @@ export default function DegreeTitlesTable() {
     }
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteDegreeTitle(id),
+    onSuccess: (res) => {
+      toast.success(res.message || "Degree title deleted successfully")
+      queryClient.invalidateQueries({ queryKey: ["degree-titles"] })
+      setIsDeleteModalOpen(false)
+      setTitleToDelete(null)
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to delete degree title")
+    }
+  })
+
   const openModal = (title = null) => {
     if (title) {
       setEditingTitle(title)
@@ -98,6 +114,17 @@ export default function DegreeTitlesTable() {
       ...formData,
       degreeLevelId: parseInt(formData.degreeLevelId, 10)
     })
+  }
+
+  const handleDeleteClick = (title) => {
+    setTitleToDelete(title)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (titleToDelete) {
+      deleteMutation.mutate(titleToDelete.id)
+    }
   }
 
   return (
@@ -181,9 +208,14 @@ export default function DegreeTitlesTable() {
                     </div>
                   </TableCell>
                   <TableCell className="py-1.5 text-right pr-6">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(t)}>
-                      <Edit2 size={14} />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-transparent hover:border-primary/20" onClick={() => openModal(t)}>
+                        <Edit2 size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all border border-transparent hover:border-destructive/20" onClick={() => handleDeleteClick(t)}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -274,6 +306,18 @@ export default function DegreeTitlesTable() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {isDeleteModalOpen && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isDeleting={deleteMutation.isPending}
+          itemName={titleToDelete?.title}
+          title="Delete Degree Title"
+          description="Are you sure you want to delete this degree title? This action will be logged and can be undone later if needed."
+        />
+      )}
     </div>
   )
 }

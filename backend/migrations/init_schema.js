@@ -119,6 +119,8 @@ async function migrate() {
         name TEXT NOT NULL,
         rank INT UNIQUE NOT NULL,
         is_active BOOLEAN DEFAULT TRUE,
+        is_deleted BOOLEAN DEFAULT FALSE,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -131,6 +133,8 @@ async function migrate() {
         code TEXT UNIQUE NOT NULL,
         title TEXT NOT NULL,
         is_active BOOLEAN DEFAULT TRUE,
+        is_deleted BOOLEAN DEFAULT FALSE,
+        deleted_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (degree_level_id)

@@ -4,10 +4,12 @@ import {
   getDegreeLevelById,
   createDegreeLevel,
   updateDegreeLevel,
+  deleteDegreeLevel,
   listDegreeTitles,
   getDegreeTitleById,
   createDegreeTitle,
   updateDegreeTitle,
+  deleteDegreeTitle,
   createDegree,
   listDegrees,
   getDegreeById,
@@ -27,12 +29,14 @@ router.get("/levels", listDegreeLevels);
 router.get("/levels/:degreeLevelId", getDegreeLevelById);
 router.post("/levels", restrictTo("SUPER_ADMIN"), createDegreeLevel);
 router.patch("/levels/:degreeLevelId", restrictTo("SUPER_ADMIN"), updateDegreeLevel);
+router.delete("/levels/:degreeLevelId", restrictTo("SUPER_ADMIN"), deleteDegreeLevel);
 
 // Degree title lookups
 router.get("/titles", listDegreeTitles);
 router.get("/titles/:degreeTitleId", getDegreeTitleById);
 router.post("/titles", restrictTo("SUPER_ADMIN"), createDegreeTitle);
 router.patch("/titles/:degreeTitleId", restrictTo("SUPER_ADMIN"), updateDegreeTitle);
+router.delete("/titles/:degreeTitleId", restrictTo("SUPER_ADMIN"), deleteDegreeTitle);
 
 
 // Degree record CRUD

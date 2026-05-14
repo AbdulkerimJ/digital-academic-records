@@ -6,7 +6,7 @@ async function dropTables() {
 
     await pool.query(`
       DROP TABLE IF EXISTS
-        audit_log,
+        audit_logs,
         correction_request,
         app_user,
         degrees,
@@ -19,7 +19,9 @@ async function dropTables() {
         departments,
         colleges,
         institution,
+        institution_types,
         roles,
+        qr_tokens,
         support_request
       CASCADE;
     `);

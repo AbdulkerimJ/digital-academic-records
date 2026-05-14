@@ -9,7 +9,7 @@ export const findDegreeLevelById = async (id) => {
             is_active AS "isActive",
             created_at AS "createdAt"
      FROM degree_levels
-     WHERE id = $1
+     WHERE id = $1 AND is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -26,6 +26,7 @@ export const findDegreeLevels = async () => {
             is_active AS "isActive",
             created_at AS "createdAt"
      FROM degree_levels
+     WHERE is_deleted = false
      ORDER BY rank ASC`,
   );
 
@@ -60,9 +61,21 @@ export const findDegreeLevelByCode = async (code) => {
   const result = await pool.query(
     `SELECT id, code, name, rank, is_active AS "isActive"
      FROM degree_levels
-     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1))
+     WHERE UPPER(TRIM(code)) = UPPER(TRIM($1)) AND is_deleted = false
      LIMIT 1`,
     [code],
+  );
+  return result.rows[0] || null;
+};
+
+export const deleteDegreeLevelById = async (id) => {
+  const result = await pool.query(
+    `UPDATE degree_levels 
+     SET is_deleted = true, 
+         deleted_at = CURRENT_TIMESTAMP 
+     WHERE id = $1 
+     RETURNING id`,
+    [id],
   );
   return result.rows[0] || null;
 };

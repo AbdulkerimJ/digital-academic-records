@@ -15,6 +15,7 @@ import {
   findDegreeTitlesByLevelId,
   createDegreeTitleRecord,
   updateDegreeTitleById,
+  deleteDegreeTitleById,
 } from "./degree-title.repository.js";
 
 import {
@@ -23,6 +24,7 @@ import {
   findDegreeLevelByCode,
   createDegreeLevelRecord,
   updateDegreeLevelById,
+  deleteDegreeLevelById,
 } from "./degree-level.repository.js";
 import { findCollegeById, findCollegeByCode } from "../institutions/college.repository.js";
 import { findDepartmentById, findDepartmentByCode } from "../institutions/department.repository.js";
@@ -97,6 +99,30 @@ export const updateDegreeLevelService = async ({ user, id, data, req }) => {
   });
 
   return updated;
+};
+
+export const deleteDegreeLevelService = async ({ user, id, req }) => {
+  if (user.roleName !== "SUPER_ADMIN") {
+    throw new AppError("Only super admins can delete degree levels.", 403);
+  }
+
+  const level = await findDegreeLevelById(id);
+  if (!level) {
+    throw new AppError("Degree level not found.", 404);
+  }
+
+  const deleted = await deleteDegreeLevelById(id);
+
+  await logActionService({
+    user,
+    action: "DELETE_DEGREE_LEVEL",
+    entityType: "DEGREE_LEVEL",
+    entityId: id,
+    oldValues: level,
+    req,
+  });
+
+  return deleted;
 };
 
 // ===================== DEGREE TITLE LOOKUPS =====================
@@ -179,6 +205,30 @@ export const updateDegreeTitleService = async ({ user, id, data, req }) => {
   });
 
   return updated;
+};
+
+export const deleteDegreeTitleService = async ({ user, id, req }) => {
+  if (user.roleName !== "SUPER_ADMIN") {
+    throw new AppError("Only super admins can delete degree titles.", 403);
+  }
+
+  const title = await findDegreeTitleById(id);
+  if (!title) {
+    throw new AppError("Degree title not found.", 404);
+  }
+
+  const deleted = await deleteDegreeTitleById(id);
+
+  await logActionService({
+    user,
+    action: "DELETE_DEGREE_TITLE",
+    entityType: "DEGREE_TITLE",
+    entityId: id,
+    oldValues: title,
+    req,
+  });
+
+  return deleted;
 };
 
 // ===================== DEGREE RECORD CRUD =====================

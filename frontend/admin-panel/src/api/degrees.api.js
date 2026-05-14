@@ -17,6 +17,11 @@ export const updateDegreeLevel = async (id, data) => {
   return response.data
 }
 
+export const deleteDegreeLevel = async (id) => {
+  const response = await api.delete(`/api/degrees/levels/${id}`)
+  return response.data
+}
+
 // Degree Titles
 export const listDegreeTitles = async (params) => {
   const response = await api.get("/api/degrees/titles", { params })
@@ -30,6 +35,11 @@ export const createDegreeTitle = async (data) => {
 
 export const updateDegreeTitle = async (id, data) => {
   const response = await api.patch(`/api/degrees/titles/${id}`, data)
+  return response.data
+}
+
+export const deleteDegreeTitle = async (id) => {
+  const response = await api.delete(`/api/degrees/titles/${id}`)
   return response.data
 }
 

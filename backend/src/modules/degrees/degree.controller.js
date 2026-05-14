@@ -6,10 +6,12 @@ import {
   getDegreeLevelByIdService,
   createDegreeLevelService,
   updateDegreeLevelService,
+  deleteDegreeLevelService,
   listDegreeTitlesService,
   getDegreeTitleByIdService,
   createDegreeTitleService,
   updateDegreeTitleService,
+  deleteDegreeTitleService,
   createDegreeService,
   listDegreesService,
   getDegreeByIdService,
@@ -56,6 +58,16 @@ export const updateDegreeLevel = catchAsync(async (req, res) => {
   });
   return sendSuccess(res, "Degree level updated successfully", { degreeLevel });
 });
+ 
+export const deleteDegreeLevel = catchAsync(async (req, res) => {
+  const { degreeLevelId } = req.params;
+  await deleteDegreeLevelService({
+    user: req.user,
+    id: degreeLevelId,
+    req,
+  });
+  return sendSuccess(res, "Degree level deleted successfully");
+});
 
 
 
@@ -98,6 +110,16 @@ export const updateDegreeTitle = catchAsync(async (req, res) => {
     req,
   });
   return sendSuccess(res, "Degree title updated successfully", { degreeTitle });
+});
+
+export const deleteDegreeTitle = catchAsync(async (req, res) => {
+  const { degreeTitleId } = req.params;
+  await deleteDegreeTitleService({
+    user: req.user,
+    id: degreeTitleId,
+    req,
+  });
+  return sendSuccess(res, "Degree title deleted successfully");
 });
 
 

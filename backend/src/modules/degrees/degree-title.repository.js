@@ -11,7 +11,7 @@ export const findDegreeTitleById = async (id) => {
             dt.created_at AS "createdAt"
      FROM degree_titles dt
      JOIN degree_levels dl ON dt.degree_level_id = dl.id
-     WHERE dt.id = $1
+     WHERE dt.id = $1 AND dt.is_deleted = false
      LIMIT 1`,
     [id],
   );
@@ -30,7 +30,7 @@ export const findDegreeTitlesByLevelId = async (degreeLevelId) => {
             dt.created_at AS "createdAt"
      FROM degree_titles dt
      JOIN degree_levels dl ON dt.degree_level_id = dl.id
-     WHERE dt.degree_level_id = $1
+     WHERE dt.degree_level_id = $1 AND dt.is_deleted = false
      ORDER BY dt.code ASC`,
     [degreeLevelId],
   );
@@ -49,6 +49,7 @@ export const findDegreeTitles = async () => {
             dt.created_at AS "createdAt"
      FROM degree_titles dt
      JOIN degree_levels dl ON dt.degree_level_id = dl.id
+     WHERE dt.is_deleted = false
      ORDER BY dt.code ASC`,
   );
 
@@ -78,6 +79,7 @@ export const updateDegreeTitleById = async ({ id, degreeLevelId = null, code = n
   );
   return result.rows[0] || null;
 };
+
 export const findDegreeTitleByCode = async (code) => {
   const result = await pool.query(
     `SELECT dt.id, 
@@ -88,9 +90,21 @@ export const findDegreeTitleByCode = async (code) => {
             dt.is_active AS "isActive"
      FROM degree_titles dt
      JOIN degree_levels dl ON dt.degree_level_id = dl.id
-     WHERE UPPER(TRIM(dt.code)) = UPPER(TRIM($1))
+     WHERE UPPER(TRIM(dt.code)) = UPPER(TRIM($1)) AND dt.is_deleted = false
      LIMIT 1`,
     [code],
+  );
+  return result.rows[0] || null;
+};
+
+export const deleteDegreeTitleById = async (id) => {
+  const result = await pool.query(
+    `UPDATE degree_titles 
+     SET is_deleted = true, 
+         deleted_at = CURRENT_TIMESTAMP 
+     WHERE id = $1 
+     RETURNING id`,
+    [id],
   );
   return result.rows[0] || null;
 };
