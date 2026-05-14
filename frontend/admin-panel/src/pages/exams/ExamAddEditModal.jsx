@@ -57,6 +57,19 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null, onSucce
     }
   }, [isOpen, exam])
 
+  // Auto-set status for EXIT exams
+  useEffect(() => {
+    if (formData.examLevelCode === "EXIT" && formData.totalScore !== "") {
+      const score = parseFloat(formData.totalScore)
+      if (!isNaN(score)) {
+        setFormData((prev) => ({
+          ...prev,
+          resultStatus: score >= 50 ? "PASS" : "FAIL",
+        }))
+      }
+    }
+  }, [formData.examLevelCode, formData.totalScore])
+
   const { data: levelsData, isLoading: isLoadingLevels } = useQuery({
     queryKey: ["exam-levels-list"],
     queryFn: () => listExamLevels(),

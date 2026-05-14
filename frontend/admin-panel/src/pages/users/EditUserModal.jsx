@@ -60,7 +60,7 @@ export default function EditUserModal({ isOpen, onClose, user }) {
     queryFn: () => listInstitutions()
   })
 
-  const roles = rolesData?.data?.roles || []
+  const roles = (rolesData?.data?.roles || []).filter(r => r.roleName !== "SUPER_ADMIN")
   const institutions = institutionsData?.data?.institutions || []
 
   // Check if selected role is REGISTRAR to make institution mandatory
@@ -81,8 +81,8 @@ export default function EditUserModal({ isOpen, onClose, user }) {
   })
 
   const onSubmit = (data) => {
-    if (isRegistrar && (!data.institutionId || data.institutionId === "null")) {
-      toast.error("Registrars must be assigned to an institution")
+    if (!data.institutionId || data.institutionId === "null") {
+      toast.error("Users must be assigned to an institution")
       return
     }
 
@@ -91,7 +91,7 @@ export default function EditUserModal({ isOpen, onClose, user }) {
       lastName: data.lastName,
       email: data.email,
       roleId: parseInt(data.roleId, 10),
-      institutionId: data.institutionId === "null" ? null : data.institutionId
+      institutionId: data.institutionId
     }
 
     editMutation.mutate({ userId: user.id, data: payload })
@@ -177,30 +177,27 @@ export default function EditUserModal({ isOpen, onClose, user }) {
             {errors.roleId && <p className="text-xs text-destructive">{errors.roleId.message}</p>}
           </div>
 
-          {(isRegistrar || selectedRole?.roleName === "SUPER_ADMIN") && (
-            <div className="space-y-2">
-              <Label htmlFor="edit-institution">Institution {isRegistrar && <span className="text-destructive">*</span>}</Label>
-              <Select 
-                value={watch("institutionId") || "null"} 
-                onValueChange={(value) => setValue("institutionId", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an institution" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="null">None (Global Admin)</SelectItem>
-                  {institutions.map((inst) => (
-                    <SelectItem key={inst.id} value={inst.id.toString()}>
-                      {inst.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[10px] text-muted-foreground">
-                Super Admins can be global (None) or restricted to an institution.
-              </p>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="edit-institution">Institution <span className="text-destructive">*</span></Label>
+            <Select 
+              value={watch("institutionId") || ""} 
+              onValueChange={(value) => setValue("institutionId", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an institution" />
+              </SelectTrigger>
+              <SelectContent>
+                {institutions.map((inst) => (
+                  <SelectItem key={inst.id} value={inst.id.toString()}>
+                    {inst.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground">
+              Users must be assigned to an institution.
+            </p>
+          </div>
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>

@@ -51,7 +51,7 @@ export default function UserInviteModal({ isOpen, onClose }) {
     queryFn: () => listInstitutions()
   })
 
-  const roles = rolesData?.data?.roles || []
+  const roles = (rolesData?.data?.roles || []).filter(r => r.roleName !== "SUPER_ADMIN")
   const institutions = institutionsData?.data?.institutions || []
 
   // Check if selected role is REGISTRAR to make institution mandatory
@@ -164,7 +164,6 @@ export default function UserInviteModal({ isOpen, onClose }) {
                 <SelectValue placeholder="Select an institution" />
               </SelectTrigger>
               <SelectContent className="rounded-xl shadow-xl">
-                <SelectItem value="null" className="font-medium">None (Global Admin)</SelectItem>
                 {institutions.map((inst) => (
                   <SelectItem key={inst.id} value={inst.id.toString()}>
                     {inst.name}
@@ -173,9 +172,7 @@ export default function UserInviteModal({ isOpen, onClose }) {
               </SelectContent>
             </Select>
             <p className="text-[10px] text-muted-foreground ml-1">
-              {isRegistrar 
-                ? "Registrars must be assigned to an institution." 
-                : "Super Admins can be global or restricted to an institution."}
+              Users must be assigned to an institution.
             </p>
           </div>
 
