@@ -7,7 +7,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card"
-import { Building2, Shield, Save, KeyRound, Activity, Fingerprint, Lock } from "lucide-react"
+import { Building2, Shield, Save, KeyRound, Activity, Fingerprint, Lock, Eye, EyeOff } from "lucide-react"
 import { cn } from "../../lib/utils"
 
 export default function ProfilePage() {
@@ -27,6 +27,10 @@ export default function ProfilePage() {
     newPassword: "",
     confirmPassword: ""
   })
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const updateProfileMutation = useMutation({
     mutationFn: updateMe,
@@ -194,42 +198,69 @@ export default function ProfilePage() {
             <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-8">
               <div className="space-y-3">
                 <Label htmlFor="currentPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Current password</Label>
-                <Input 
-                  id="currentPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                  className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
-                  required
-                />
+                <div className="relative">
+                  <Input 
+                    id="currentPassword"
+                    type={showCurrentPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <Label htmlFor="newPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">New password</Label>
-                  <Input 
-                    id="newPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
-                    required
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold pr-12"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="confirmPassword" className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60 ml-1">Confirm password</Label>
-                  <Input 
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                    className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold"
-                    required
-                  />
+                  <div className="relative">
+                    <Input 
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      className="h-12 rounded-none bg-muted/10 border-border focus-visible:ring-primary/20 font-bold pr-12"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </form>
