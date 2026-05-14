@@ -95,7 +95,7 @@ export default function StudentTable({ onSelectStudent }) {
         <div className="relative w-full md:max-w-lg group">
           <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
           <Input 
-            placeholder="Search students by name or ID..." 
+            placeholder="Search students by name or FAN..." 
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="h-9 pl-12 rounded-none bg-card border-border focus-visible:ring-primary/20 text-xs font-bold tracking-tight placeholder:text-muted-foreground/30"
@@ -116,7 +116,8 @@ export default function StudentTable({ onSelectStudent }) {
           <TableHeader className="bg-muted/10">
             <TableRow className="hover:bg-transparent border-border border-b-2">
               <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[350px]">Student name</TableHead>
-              <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[200px]">ID number</TableHead>
+              <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[120px]">Gender</TableHead>
+              <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[200px]">FAN number</TableHead>
               <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[200px]">Date of birth</TableHead>
               <TableHead className="py-2 px-8 text-[13px] font-bold tracking-widest text-muted-foreground border-r border-border/50 w-[150px] text-center">Status</TableHead>
               <TableHead className="text-right pr-10 py-2 text-[13px] font-bold tracking-widest text-muted-foreground">Actions</TableHead>
@@ -124,10 +125,10 @@ export default function StudentTable({ onSelectStudent }) {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableBodySkeleton rows={limit} columns={5} />
+              <TableBodySkeleton rows={limit} columns={6} />
             ) : students.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-96 text-center border-none">
+                <TableCell colSpan={6} className="h-96 text-center border-none">
                   <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
                     <div className="w-16 h-16 bg-muted/30 flex items-center justify-center mb-6 border border-border">
                       <Fingerprint size={32} className="text-muted-foreground/30" />
@@ -157,6 +158,9 @@ export default function StudentTable({ onSelectStudent }) {
                       </div>
                     </div>
                   </TableCell>
+                  <TableCell className="py-3 px-8 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                    {student.gender || "—"}
+                  </TableCell>
                   <TableCell className="py-3 px-8">
                     <div className="flex items-center gap-2">
                       <Fingerprint size={12} className="text-primary opacity-30" />
@@ -178,13 +182,6 @@ export default function StudentTable({ onSelectStudent }) {
                   </TableCell>
                   <TableCell className="text-right pr-10 py-1.5">
                     <div className="flex items-center justify-end gap-1 transition-all">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 rounded-none text-muted-foreground hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all"
-                      >
-                        <Eye size={14} />
-                      </Button>
                       <Button 
                         variant="ghost" 
                         size="icon" 

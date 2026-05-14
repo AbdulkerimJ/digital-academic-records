@@ -119,14 +119,14 @@ export default function StudentsPage() {
             <DialogHeader className="text-left">
               <DialogTitle className="text-3xl font-black tracking-tighter capitalize leading-none">Student verification</DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground leading-relaxed mt-2">
-                Enter the student's National ID to verify their identity and register them in the system.
+                Enter the student's FAN number to verify their identity and register them in the system.
               </DialogDescription>
             </DialogHeader>
           </div>
 
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <Label htmlFor="faydaId" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground/60">National ID</Label>
+              <Label htmlFor="faydaId" className="text-[10px] font-bold capitalize tracking-widest text-muted-foreground/60">FAN number</Label>
               <div className="relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
                 <Input 

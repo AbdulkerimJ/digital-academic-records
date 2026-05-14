@@ -20,7 +20,8 @@ import {
   AlertCircle,
   Fingerprint,
   Activity,
-  History
+  History,
+  User
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 
@@ -86,13 +87,17 @@ export default function StudentDetailModal({ studentId, isOpen, onClose }) {
                        <div className="flex items-center gap-1.5">
                           <Calendar size={12} className="text-primary/40" /> {student?.dateOfBirth && new Date(student.dateOfBirth).toLocaleDateString()}
                        </div>
+                       <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                       <div className="flex items-center gap-1.5">
+                          <User size={12} className="text-primary/40" /> {student?.gender || "—"}
+                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 border-t border-border/50 pt-4">
                      <div className="flex items-center gap-2">
                         <span className="text-[9px] font-bold text-muted-foreground capitalize tracking-tighter">System id:</span>
-                        <code className="text-[10px] font-bold text-primary/60 font-mono capitalize tracking-widest">{student?.id?.slice(0, 8)}...</code>
+                        <code className="text-[10px] font-bold text-primary/60 font-mono capitalize tracking-widest">{student?.id}</code>
                      </div>
                   </div>
                 </>
