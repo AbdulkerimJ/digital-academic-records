@@ -111,7 +111,7 @@ async function migrate() {
       );
     `);
 
-    // ===================== DEGREE TYPES =====================
+    // ===================== DEGREE LEVELS =====================
     await pool.query(`
       CREATE TABLE IF NOT EXISTS degree_levels (
         id SERIAL PRIMARY KEY,
