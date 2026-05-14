@@ -160,25 +160,67 @@ export const findStudents = async ({
 
 
 export const deleteStudentById = async (id) => {
-  const result = await pool.query(
-    `UPDATE student 
-     SET is_deleted = true, 
-         deleted_at = CURRENT_TIMESTAMP 
-     WHERE id = $1 
-     RETURNING id`,
-    [id],
-  );
-  return result.rows[0] || null;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 1. Delete student (SOFT DELETE)
+    const studentRes = await client.query(
+      `UPDATE student 
+       SET is_deleted = true, 
+           deleted_at = CURRENT_TIMESTAMP 
+       WHERE id = $1 
+       RETURNING id`,
+      [id],
+    );
+
+    if (studentRes.rowCount > 0) {
+      // 2. Cascade to exams (HARD DELETE)
+      await client.query(
+        `DELETE FROM exams WHERE student_id = $1`,
+        [id],
+      );
+
+      // 3. Cascade to degrees (HARD DELETE)
+      await client.query(
+        `DELETE FROM degrees WHERE student_id = $1`,
+        [id],
+      );
+    }
+
+    await client.query("COMMIT");
+    return studentRes.rows[0] || null;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 };
 
 export const restoreStudentById = async (id) => {
-  const result = await pool.query(
-    `UPDATE student 
-     SET is_deleted = false, 
-         deleted_at = NULL 
-     WHERE id = $1 
-     RETURNING id, national_id AS "nationalId"`,
-    [id],
-  );
-  return result.rows[0] || null;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 1. Restore student
+    const studentRes = await client.query(
+      `UPDATE student 
+       SET is_deleted = false, 
+           deleted_at = NULL 
+       WHERE id = $1 
+       RETURNING id, national_id AS "nationalId"`,
+      [id],
+    );
+
+    // Note: Exams and Degrees cannot be restored because they were hard-deleted
+
+    await client.query("COMMIT");
+    return studentRes.rows[0] || null;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 };

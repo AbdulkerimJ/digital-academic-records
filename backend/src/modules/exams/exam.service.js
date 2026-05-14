@@ -202,6 +202,11 @@ export const createExamRecordService = async ({ user, data = {}, req }) => {
     throw new AppError("Result status must be PASS or FAIL.", 400);
   }
 
+  // 5. Exit Exam Specific Validation
+  if (examLevel.code === "EXIT" && parsedTotalScore > 100) {
+    throw new AppError("Exit exam total score cannot exceed 100.", 400);
+  }
+
   const created = await createExamRecordRecord({
     studentId,
     examLevelId,
@@ -443,6 +448,12 @@ export const updateExamRecordService = async ({
     !["PASS", "FAIL"].includes(normalizedResultStatus)
   ) {
     throw new AppError("Result status must be PASS or FAIL.", 400);
+  }
+
+  // Score validation for EXIT exams
+  const finalTotalScore = parsedTotalScore !== null ? parsedTotalScore : currentRecord.totalScore;
+  if (currentRecord.examLevelCode === "EXIT" && finalTotalScore > 100) {
+    throw new AppError("Exit exam total score cannot exceed 100.", 400);
   }
 
   await updateExamRecordById({

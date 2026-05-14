@@ -305,7 +305,7 @@ export const updateExamRecordById = async ({
 };
 
 export const deleteExamRecordById = async (id, institutionId = null) => {
-  let sql = `UPDATE exams SET is_deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = $1`;
+  let sql = `DELETE FROM exams WHERE id = $1`;
   const params = [id];
 
   // enforce institution scope if provided
@@ -317,5 +317,5 @@ export const deleteExamRecordById = async (id, institutionId = null) => {
   sql += ` RETURNING id`;
 
   const result = await pool.query(sql, params);
-  return result.rows[0]; // undefined if not found / not allowed
+  return result.rows[0]; 
 };

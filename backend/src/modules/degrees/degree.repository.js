@@ -256,7 +256,7 @@ export const updateDegreeById = async ({
 };
 
 export const deleteDegreeById = async (id, institutionId = null) => {
-  let sql = `UPDATE degrees SET is_deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = $1`;
+  let sql = `DELETE FROM degrees WHERE id = $1`;
   const params = [id];
 
   // enforce institution scope if provided
@@ -268,5 +268,5 @@ export const deleteDegreeById = async (id, institutionId = null) => {
   sql += ` RETURNING id`;
 
   const result = await pool.query(sql, params);
-  return result.rows[0]; // undefined if not found / not allowed
+  return result.rows[0]; 
 };

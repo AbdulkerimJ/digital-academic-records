@@ -93,6 +93,11 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null, onSucce
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    if (formData.examLevelCode === "EXIT" && formData.totalScore && parseFloat(formData.totalScore) > 100) {
+      toast.error("Exit exam total score cannot exceed 100.")
+      return
+    }
     const payload = {
       ...formData,
       year: formData.year ? parseInt(formData.year, 10) : null,
@@ -239,7 +244,12 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null, onSucce
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className={cn(
+              "grid gap-6",
+              (formData.examLevelCode === "EXIT" || formData.examLevelCode === "GRADE_12") 
+                ? "grid-cols-1" 
+                : "grid-cols-3"
+            )}>
               <div className="space-y-3">
                 <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Total score</Label>
                 <Input
@@ -252,30 +262,35 @@ export default function ExamAddEditModal({ isOpen, onClose, exam = null, onSucce
                   className="h-12 rounded-none bg-muted/10 border-border px-4 focus-visible:ring-primary/20 font-mono text-sm font-bold"
                 />
               </div>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Average</Label>
-                <Input
-                  name="averageScore"
-                  type="number"
-                  step="any"
-                  value={formData.averageScore}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  className="h-12 rounded-none bg-muted/10 border-border px-4 focus-visible:ring-primary/20 font-mono text-sm font-bold"
-                />
-              </div>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Percentile</Label>
-                <Input
-                  name="percentile"
-                  type="number"
-                  step="any"
-                  value={formData.percentile}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  className="h-12 rounded-none bg-muted/10 border-border px-4 focus-visible:ring-primary/20 font-mono text-sm font-bold"
-                />
-              </div>
+
+              {formData.examLevelCode !== "EXIT" && formData.examLevelCode !== "GRADE_12" && (
+                <>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Average</Label>
+                    <Input
+                      name="averageScore"
+                      type="number"
+                      step="any"
+                      value={formData.averageScore}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      className="h-12 rounded-none bg-muted/10 border-border px-4 focus-visible:ring-primary/20 font-mono text-sm font-bold"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black capitalize tracking-widest text-muted-foreground/60">Percentile</Label>
+                    <Input
+                      name="percentile"
+                      type="number"
+                      step="any"
+                      value={formData.percentile}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      className="h-12 rounded-none bg-muted/10 border-border px-4 focus-visible:ring-primary/20 font-mono text-sm font-bold"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
