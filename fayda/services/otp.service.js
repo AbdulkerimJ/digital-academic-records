@@ -28,6 +28,8 @@ export const generateOtp = async (faydaId) => {
     [faydaId, otp, expiresAt],
   );
 
+  // AfroMessage SMS sending commented out (in case service is unavailable)
+  /*
   try {
     const message = `Your Digital Academic Records verification code is: ${otp}. Valid for ${otpExpiryMinutes} minutes.`;
     await sendSMS({ to: `${phoneNumber}`, message });
@@ -40,6 +42,9 @@ export const generateOtp = async (faydaId) => {
       throw error;
     }
   }
+  */
+
+  console.log(`🔑 [DEV/MOCK] OTP for Fayda ID ${faydaId} (+251${phoneNumber}): ${otp}`);
 
   return otp;
 };
